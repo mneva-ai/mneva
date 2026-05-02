@@ -1,0 +1,33 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "mneva"
+version = "0.0.1"
+description = "Persistent agent context substrate. Coming soon."
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.9"
+authors = [{ name = "Nick Chen", email = "mingxuanus@gmail.com" }]
+keywords = ["ai", "agents", "context", "memory", "llm", "cross-tool"]
+classifiers = [
+    "Development Status :: 1 - Planning",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Topic :: Software Development :: Libraries",
+]
+
+[project.urls]
+Homepage = "https://mneva.org"
+Repository = "https://github.com/mneva-ai/mneva"
+Issues = "https://github.com/mneva-ai/mneva/issues"
+
+[project.scripts]
+mneva = "mneva:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/mneva"]
