@@ -142,10 +142,32 @@ def config() -> None:
     raise click.ClickException("not implemented yet")
 
 
+def _port_in_use(port: int) -> bool:
+    import socket as _socket
+
+    with _socket.socket(_socket.AF_INET, _socket.SOCK_STREAM) as s:
+        return s.connect_ex(("127.0.0.1", port)) == 0
+
+
 @app.command()
-def serve() -> None:
-    """Stub. Real impl in M4."""
-    raise click.ClickException("not implemented yet")
+@click.option("--port", default=7432, type=int)
+@click.option("--host", default="127.0.0.1")
+def serve(port: int, host: str) -> None:
+    """Start the localhost API."""
+    home = ensure_home()
+    if not (home / "config.json").exists():
+        raise click.ClickException("run `mneva init` first")
+    if _port_in_use(port):
+        raise click.ClickException(
+            f"port {port} is already in use -- choose a different --port or stop the other process"
+        )
+    import uvicorn
+
+    from mneva.api import create_app
+    from mneva.config import load_config
+
+    config = load_config(home)
+    uvicorn.run(create_app(home=home, config=config), host=host, port=port, log_level="info")
 
 
 if __name__ == "__main__":

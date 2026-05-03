@@ -118,3 +118,27 @@ def test_forget_requires_confirm_flag(tmp_mneva_home: Path) -> None:
     result = runner.invoke(app, ["forget", record_id, "--confirm"])
     assert result.exit_code == 0
     assert (tmp_mneva_home / "store" / f"{record_id}.md").exists() is False
+
+
+def test_serve_port_collision_returns_friendly_error(tmp_mneva_home: Path) -> None:
+    import socket
+
+    runner = CliRunner()
+    runner.invoke(app, ["init"])
+    sock = socket.socket()
+    sock.bind(("127.0.0.1", 0))
+    sock.listen(1)
+    busy_port = sock.getsockname()[1]
+    try:
+        result = runner.invoke(app, ["serve", "--port", str(busy_port)])
+        assert result.exit_code != 0
+        assert f"port {busy_port} is already in use" in result.output.lower()
+    finally:
+        sock.close()
+
+
+def test_serve_requires_init(tmp_mneva_home: Path) -> None:
+    runner = CliRunner()
+    result = runner.invoke(app, ["serve"])
+    assert result.exit_code != 0
+    assert "run `mneva init` first" in result.output
