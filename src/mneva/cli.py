@@ -4,6 +4,23 @@ import click
 
 from mneva import __version__
 
+BOOTSTRAP_TEMPLATE = """\
+# Mneva Bootstrap
+
+Keep this file under 350 lines. It is the L1 entrance — rules + scope index, not content.
+
+## Active scopes
+-
+
+## Rules
+- Append-mode by default. Edit-mode requires --edit.
+- One concern per file. No god files.
+- transient context is not searched outside the active scope.
+
+## Recent decisions
+-
+"""
+
 
 @click.group(context_settings={"help_option_names": ["-h", "--help"]})
 @click.version_option(__version__, prog_name="mneva")
@@ -13,8 +30,24 @@ def app() -> None:
 
 @app.command()
 def init() -> None:
-    """Initialize ~/.mneva/ (data root, token, bootstrap)."""
-    raise click.ClickException("not implemented yet")
+    """Initialize ~/.mneva/ (data root, token, bootstrap). Idempotent on token."""
+    from mneva.config import Config, generate_token, load_config, save_config
+    from mneva.paths import ensure_home
+
+    home = ensure_home()
+    config_path = home / "config.json"
+    if config_path.exists():
+        cfg = load_config(home)
+    else:
+        cfg = Config(token=generate_token())
+        save_config(cfg, home)
+
+    bootstrap = home / "bootstrap.md"
+    if not bootstrap.exists():
+        bootstrap.write_text(BOOTSTRAP_TEMPLATE, encoding="utf-8")
+
+    click.echo(f"Mneva initialized at {home}")
+    click.echo(f"Token (save this — shown only on init): {cfg.token}")
 
 
 @app.command()

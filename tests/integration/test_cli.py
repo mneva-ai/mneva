@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import json
+from pathlib import Path
+
 from click.testing import CliRunner
 
 from mneva.cli import app
@@ -18,3 +21,27 @@ def test_help_lists_core_commands() -> None:
     assert result.exit_code == 0
     for cmd in ("init", "capture", "search", "status", "forget", "config", "serve"):
         assert cmd in result.output
+
+
+def test_init_creates_home_token_and_bootstrap(tmp_mneva_home: Path) -> None:
+    runner = CliRunner()
+    result = runner.invoke(app, ["init"])
+    assert result.exit_code == 0, result.output
+    assert (tmp_mneva_home / "config.json").exists()
+    cfg = json.loads((tmp_mneva_home / "config.json").read_text())
+    assert len(cfg["token"]) == 32
+    assert cfg["port"] == 7432
+    assert (tmp_mneva_home / "bootstrap.md").exists()
+    assert "Mneva Bootstrap" in (tmp_mneva_home / "bootstrap.md").read_text()
+    assert "Token (save this — shown only on init)" in result.output
+    assert cfg["token"] in result.output
+
+
+def test_init_is_idempotent_but_does_not_overwrite_token(tmp_mneva_home: Path) -> None:
+    runner = CliRunner()
+    runner.invoke(app, ["init"])
+    cfg_before = json.loads((tmp_mneva_home / "config.json").read_text())
+    result = runner.invoke(app, ["init"])
+    assert result.exit_code == 0
+    cfg_after = json.loads((tmp_mneva_home / "config.json").read_text())
+    assert cfg_before["token"] == cfg_after["token"]
