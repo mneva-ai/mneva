@@ -72,3 +72,26 @@ def test_capture_reads_stdin_when_body_is_dash(tmp_mneva_home: Path) -> None:
     assert result.exit_code == 0, result.output
     files = list((tmp_mneva_home / "store").glob("*.md"))
     assert "from stdin" in files[0].read_text()
+
+
+def test_search_returns_captured_record(tmp_mneva_home: Path) -> None:
+    runner = CliRunner()
+    runner.invoke(app, ["init"])
+    runner.invoke(
+        app,
+        ["capture", "--scope", "s", "--lifespan", "permanent", "the brown fox jumps"],
+    )
+    result = runner.invoke(app, ["search", "brown fox"])
+    assert result.exit_code == 0
+    assert "brown fox" in result.output
+
+
+def test_search_scope_filter(tmp_mneva_home: Path) -> None:
+    runner = CliRunner()
+    runner.invoke(app, ["init"])
+    runner.invoke(app, ["capture", "--scope", "x", "--lifespan", "permanent", "alpha"])
+    runner.invoke(app, ["capture", "--scope", "y", "--lifespan", "permanent", "alpha"])
+    result = runner.invoke(app, ["search", "alpha", "--scope", "x"])
+    assert result.exit_code == 0
+    assert result.output.count("scope: x") == 1
+    assert "scope: y" not in result.output

@@ -98,9 +98,18 @@ def capture(
 @click.argument("query")
 @click.option("--scope", default=None)
 @click.option("--lifespan", type=click.Choice(["transient", "permanent"]), default=None)
-def search(query: str, scope: str | None, lifespan: str | None) -> None:
-    """Search the index."""
-    raise click.ClickException("not implemented yet")
+@click.option("-k", "top_k", default=10, type=int)
+def search(query: str, scope: str | None, lifespan: str | None, top_k: int) -> None:
+    """Search the index. Scope filter narrows; lifespan filter is exact-match."""
+    home = ensure_home()
+    idx = Indexer(home / "mneva.sqlite")
+    hits = idx.search(query, scope=scope, lifespan=lifespan, k=top_k)
+    if not hits:
+        click.echo("(no matches)")
+        return
+    for r in hits:
+        click.echo(f"--- {r.id} (scope: {r.scope}, lifespan: {r.lifespan}, tool: {r.tool}) ---")
+        click.echo(r.body)
 
 
 @app.command()
