@@ -30,3 +30,36 @@ def test_status_accepts_correct_token(client: TestClient) -> None:
     body = r.json()
     assert body["mode"] in {"sqlite-vec", "bm25"}
     assert body["count"] == 0
+
+
+def _h(token: str = "t" * 32) -> dict[str, str]:
+    return {"X-MNEVA-Token": token}
+
+
+def test_capture_creates_record(client: TestClient, tmp_mneva_home: Path) -> None:
+    r = client.post(
+        "/capture",
+        json={
+            "scope": "ticket-1",
+            "tool": "cursor",
+            "lifespan": "permanent",
+            "body": "hello api",
+        },
+        headers=_h(),
+    )
+    assert r.status_code == 200, r.text
+    rid = r.json()["id"]
+    assert (tmp_mneva_home / "store" / f"{rid}.md").exists()
+
+
+def test_forget_deletes_record(client: TestClient, tmp_mneva_home: Path) -> None:
+    r = client.post(
+        "/capture",
+        json={"scope": "s", "tool": "cli", "lifespan": "transient", "body": "bye"},
+        headers=_h(),
+    )
+    rid = r.json()["id"]
+    r2 = client.post("/forget", json={"id": rid}, headers=_h())
+    assert r2.status_code == 200
+    assert r2.json() == {"forgot": rid}
+    assert not (tmp_mneva_home / "store" / f"{rid}.md").exists()
