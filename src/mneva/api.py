@@ -4,14 +4,14 @@ import hashlib
 import time
 from pathlib import Path
 
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
 from mneva.config import Config
 from mneva.indexer import Indexer
 from mneva.paths import ensure_home
-from mneva.store import Record, forget_record, write_record
+from mneva.store import Record, forget_record, iter_records, write_record
 
 
 class CaptureBody(BaseModel):
@@ -79,5 +79,42 @@ def create_app(home: Path | None = None, config: Config | None = None) -> FastAP
         if not existed:
             raise HTTPException(status_code=404, detail=f"no such record: {req.id}")
         return {"forgot": req.id}
+
+    @app.get("/search")
+    def search(
+        q: str = Query(...),
+        scope: str | None = Query(None),
+        lifespan: str | None = Query(None),
+        k: int = Query(10),
+    ) -> dict[str, list[dict[str, str]]]:
+        idx = Indexer(resolved_home / "mneva.sqlite")
+        hits = idx.search(q, scope=scope, lifespan=lifespan, k=k)
+        return {
+            "hits": [
+                {"id": r.id, "scope": r.scope, "tool": r.tool, "body": r.body}
+                for r in hits
+            ]
+        }
+
+    @app.get("/replay")
+    def replay(
+        tool: str = Query(...),
+        scope: str | None = Query(None),
+        lifespan: str | None = Query("permanent"),
+        k: int = Query(20),
+    ) -> dict[str, str]:
+        # Minimal v0 renderer. Plan 3 (M7) wires per-tool template overrides.
+        hits = [
+            r
+            for r in iter_records(home=resolved_home)
+            if (scope is None or r.scope == scope)
+            and (lifespan is None or r.lifespan == lifespan)
+        ][:k]
+        lines = [f"# Mneva replay (target tool: {tool})", ""]
+        for r in hits:
+            lines.append(f"## scope: {r.scope}  |  tool: {r.tool}  |  id: {r.id}")
+            lines.append(r.body)
+            lines.append("")
+        return {"context": "\n".join(lines)}
 
     return app

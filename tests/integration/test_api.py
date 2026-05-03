@@ -63,3 +63,37 @@ def test_forget_deletes_record(client: TestClient, tmp_mneva_home: Path) -> None
     assert r2.status_code == 200
     assert r2.json() == {"forgot": rid}
     assert not (tmp_mneva_home / "store" / f"{rid}.md").exists()
+
+
+def test_search_returns_hits(client: TestClient) -> None:
+    client.post(
+        "/capture",
+        json={"scope": "s", "tool": "cli", "lifespan": "permanent", "body": "alpha bravo"},
+        headers=_h(),
+    )
+    r = client.get("/search", params={"q": "alpha"}, headers=_h())
+    assert r.status_code == 200
+    hits = r.json()["hits"]
+    assert any("alpha bravo" in h["body"] for h in hits)
+
+
+def test_replay_returns_context_block_for_tool(client: TestClient) -> None:
+    client.post(
+        "/capture",
+        json={
+            "scope": "ticket-9",
+            "tool": "cursor",
+            "lifespan": "permanent",
+            "body": "decision: use BM25 fallback first",
+        },
+        headers=_h(),
+    )
+    r = client.get(
+        "/replay",
+        params={"tool": "claude-code", "scope": "ticket-9"},
+        headers=_h(),
+    )
+    assert r.status_code == 200
+    block = r.json()["context"]
+    assert "decision: use BM25 fallback first" in block
+    assert "scope: ticket-9" in block
