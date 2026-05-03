@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
+
 from mneva.indexer import Indexer
 from mneva.paths import ensure_home
 from mneva.store import Record, write_record
@@ -69,3 +71,18 @@ def test_status_reports_mode_and_count(tmp_mneva_home: Path) -> None:
     s = idx.status()
     assert s["mode"] in {"sqlite-vec", "bm25"}
     assert s["count"] == 2
+
+
+def test_force_bm25_when_sqlite_vec_disabled(
+    tmp_mneva_home: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from mneva import indexer as idx_mod
+
+    monkeypatch.setattr(idx_mod, "try_load_sqlite_vec", lambda _conn: False)
+    home = ensure_home()
+    idx = idx_mod.Indexer(home / "mneva.sqlite")
+    assert idx.mode == "bm25"
+    rec = _record("r1", "the quick brown fox")
+    idx.add(rec)
+    write_record(rec, home=home)
+    assert {r.id for r in idx.search("fox")} == {"r1"}
