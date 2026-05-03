@@ -45,3 +45,30 @@ def test_init_is_idempotent_but_does_not_overwrite_token(tmp_mneva_home: Path) -
     assert result.exit_code == 0
     cfg_after = json.loads((tmp_mneva_home / "config.json").read_text())
     assert cfg_before["token"] == cfg_after["token"]
+
+
+def test_capture_writes_record_from_argument(tmp_mneva_home: Path) -> None:
+    runner = CliRunner()
+    runner.invoke(app, ["init"])
+    result = runner.invoke(
+        app,
+        ["capture", "--scope", "ticket-7", "--tool", "claude-code", "Hello world"],
+    )
+    assert result.exit_code == 0, result.output
+    files = list((tmp_mneva_home / "store").glob("*.md"))
+    assert len(files) == 1
+    body = files[0].read_text()
+    assert "Hello world" in body
+    assert "scope: ticket-7" in body
+    assert "tool: claude-code" in body
+
+
+def test_capture_reads_stdin_when_body_is_dash(tmp_mneva_home: Path) -> None:
+    runner = CliRunner()
+    runner.invoke(app, ["init"])
+    result = runner.invoke(
+        app, ["capture", "--scope", "s", "-"], input="from stdin\n"
+    )
+    assert result.exit_code == 0, result.output
+    files = list((tmp_mneva_home / "store").glob("*.md"))
+    assert "from stdin" in files[0].read_text()

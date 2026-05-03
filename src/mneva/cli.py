@@ -1,8 +1,20 @@
 from __future__ import annotations
 
+import hashlib
+import sys
+import time
+
 import click
 
 from mneva import __version__
+from mneva.indexer import Indexer
+from mneva.paths import ensure_home
+from mneva.store import Record, write_record
+
+
+def _new_id(scope: str, body: str) -> str:
+    raw = f"{scope}|{time.time_ns()}|{body[:64]}".encode()
+    return hashlib.sha256(raw).hexdigest()[:16]
 
 BOOTSTRAP_TEMPLATE = """\
 # Mneva Bootstrap
@@ -54,10 +66,32 @@ def init() -> None:
 @click.option("--scope", required=True)
 @click.option("--tool", default="cli")
 @click.option("--lifespan", type=click.Choice(["transient", "permanent"]), default="transient")
+@click.option("--source", default=None, help="Optional source URL/ref.")
 @click.argument("body", required=False)
-def capture(scope: str, tool: str, lifespan: str, body: str | None) -> None:
-    """Capture a record from a positional body or stdin."""
-    raise click.ClickException("not implemented yet")
+def capture(
+    scope: str,
+    tool: str,
+    lifespan: str,
+    source: str | None,
+    body: str | None,
+) -> None:
+    """Capture a record. BODY may be a positional string, '-' for stdin, or omitted."""
+    if body is None or body == "-":
+        body = sys.stdin.read()
+    if not body.strip():
+        raise click.ClickException("body is empty")
+    home = ensure_home()
+    record = Record(
+        id=_new_id(scope, body),
+        scope=scope,
+        lifespan=lifespan,
+        tool=tool,
+        body=body,
+        source=source,
+    )
+    write_record(record, home=home)
+    Indexer(home / "mneva.sqlite").add(record)
+    click.echo(record.id)
 
 
 @app.command()
