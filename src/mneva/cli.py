@@ -9,7 +9,7 @@ import click
 from mneva import __version__
 from mneva.indexer import Indexer
 from mneva.paths import ensure_home
-from mneva.store import Record, write_record
+from mneva.store import Record, forget_record, write_record
 
 
 def _new_id(scope: str, body: str) -> str:
@@ -114,16 +114,26 @@ def search(query: str, scope: str | None, lifespan: str | None, top_k: int) -> N
 
 @app.command()
 def status() -> None:
-    """Report token, indexed counts, vec/bm25 mode."""
-    raise click.ClickException("not implemented yet")
+    """Report indexed count and active mode (sqlite-vec or bm25)."""
+    home = ensure_home()
+    idx = Indexer(home / "mneva.sqlite")
+    s = idx.status()
+    click.echo(f"home: {home}")
+    click.echo(f"mode: {s['mode']}")
+    click.echo(f"count: {s['count']}")
 
 
 @app.command()
 @click.argument("record_id")
-@click.option("--confirm", is_flag=True, required=True)
+@click.option("--confirm", is_flag=True, required=True, help="Required for safety.")
 def forget(record_id: str, confirm: bool) -> None:
-    """Delete a record by id (requires --confirm)."""
-    raise click.ClickException("not implemented yet")
+    """Delete a record by id. --confirm required."""
+    home = ensure_home()
+    existed = forget_record(record_id, home=home)
+    Indexer(home / "mneva.sqlite").remove(record_id)
+    if not existed:
+        raise click.ClickException(f"no such record: {record_id}")
+    click.echo(f"forgot: {record_id}")
 
 
 @app.command()

@@ -95,3 +95,26 @@ def test_search_scope_filter(tmp_mneva_home: Path) -> None:
     assert result.exit_code == 0
     assert result.output.count("scope: x") == 1
     assert "scope: y" not in result.output
+
+
+def test_status_reports_mode_and_count(tmp_mneva_home: Path) -> None:
+    runner = CliRunner()
+    runner.invoke(app, ["init"])
+    runner.invoke(app, ["capture", "--scope", "s", "alpha"])
+    runner.invoke(app, ["capture", "--scope", "s", "beta"])
+    result = runner.invoke(app, ["status"])
+    assert result.exit_code == 0
+    assert "mode:" in result.output.lower()
+    assert "count: 2" in result.output
+
+
+def test_forget_requires_confirm_flag(tmp_mneva_home: Path) -> None:
+    runner = CliRunner()
+    runner.invoke(app, ["init"])
+    out = runner.invoke(app, ["capture", "--scope", "s", "to-be-deleted"]).output.strip()
+    record_id = out.splitlines()[-1]
+    result = runner.invoke(app, ["forget", record_id])
+    assert result.exit_code != 0
+    result = runner.invoke(app, ["forget", record_id, "--confirm"])
+    assert result.exit_code == 0
+    assert (tmp_mneva_home / "store" / f"{record_id}.md").exists() is False
