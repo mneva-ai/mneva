@@ -74,6 +74,20 @@ def test_capture_reads_stdin_when_body_is_dash(tmp_mneva_home: Path) -> None:
     assert "from stdin" in files[0].read_text()
 
 
+def test_capture_errors_when_body_omitted(tmp_mneva_home: Path) -> None:
+    """Regression: omitting body must error, never silently read stdin.
+
+    Earlier behavior fell through to sys.stdin.read() when body was None,
+    which hung indefinitely against non-closing harness pipes.
+    """
+    runner = CliRunner()
+    runner.invoke(app, ["init"])
+    result = runner.invoke(app, ["capture", "--scope", "s"])
+    assert result.exit_code != 0
+    assert "body required" in result.output
+    assert "'-' for stdin" in result.output
+
+
 def test_search_returns_captured_record(tmp_mneva_home: Path) -> None:
     runner = CliRunner()
     runner.invoke(app, ["init"])

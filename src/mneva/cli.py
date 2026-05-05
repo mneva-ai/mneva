@@ -75,9 +75,13 @@ def capture(
     source: str | None,
     body: str | None,
 ) -> None:
-    """Capture a record. BODY may be a positional string, '-' for stdin, or omitted."""
-    if body is None or body == "-":
+    """Capture a record. BODY may be a positional string or '-' for stdin."""
+    if body == "-":
         body = sys.stdin.read()
+    elif body is None:
+        raise click.ClickException(
+            "body required: pass as positional argument or '-' for stdin"
+        )
     if not body.strip():
         raise click.ClickException("body is empty")
     home = ensure_home()
