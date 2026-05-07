@@ -4,6 +4,7 @@ All LLM calls go through the Provider Protocol; this module is provider-agnostic
 """
 from __future__ import annotations
 
+from collections.abc import Callable
 from pathlib import Path
 
 from mneva.providers import Provider
@@ -54,3 +55,27 @@ def stage1(provider: Provider, dumped: str, *, max_tokens: int = 8000) -> str:
 def stage2(provider: Provider, shortlist: str, *, max_tokens: int = 8000) -> str:
     """Stage 2: critical pass over the user-selected shortlist."""
     return provider.complete(STAGE2_PROMPT + shortlist, max_tokens=max_tokens)
+
+
+def synthesize_2stage(
+    provider: Provider,
+    *,
+    scope: str,
+    home: Path,
+    shortlist_input: Callable[[str], str],
+    output: Callable[[str], None],
+) -> None:
+    """Run dump → stage1 → user-cut → stage2.
+
+    `shortlist_input` is called with stage1 output and returns the shortlist text.
+    `output` is called twice: once with stage1 output, once with stage2 output.
+    Injecting both makes the orchestrator testable without click.
+    """
+    dumped = dump_records(scope=scope, home=home)
+    if not dumped.strip():
+        raise ValueError(f"no records found in scope {scope!r}")
+    s1 = stage1(provider, dumped)
+    output(s1)
+    shortlist = shortlist_input(s1)
+    s2 = stage2(provider, shortlist)
+    output(s2)

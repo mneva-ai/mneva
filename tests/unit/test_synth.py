@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
+
 from mneva.store import Record, write_record
 
 
@@ -74,3 +76,50 @@ def test_stage2_sends_shortlist_with_critical_pass_prompt() -> None:
     assert STAGE2_PROMPT in sent_prompt
     assert shortlist in sent_prompt
     assert sent_max == 2048
+
+
+def test_synthesize_2stage_full_loop(tmp_mneva_home: Path) -> None:
+    from mneva.synth import synthesize_2stage
+
+    _seed(tmp_mneva_home)
+    provider = FakeProvider()
+    responses = iter(["IDEAS_1_TO_100", "CRITICAL_PASS_OUTPUT"])
+
+    def fake_complete(prompt: str, *, max_tokens: int) -> str:
+        return next(responses)
+
+    provider.complete = fake_complete  # type: ignore[method-assign]
+
+    captured_outputs: list[str] = []
+    shortlist_input_calls: list[str] = []
+
+    def shortlist_input(stage1_output: str) -> str:
+        shortlist_input_calls.append(stage1_output)
+        return "1. keep idea seven\n2. keep idea forty-two"
+
+    synthesize_2stage(
+        provider,
+        scope="x",
+        home=tmp_mneva_home,
+        shortlist_input=shortlist_input,
+        output=captured_outputs.append,
+    )
+
+    assert shortlist_input_calls == ["IDEAS_1_TO_100"]
+    assert captured_outputs == ["IDEAS_1_TO_100", "CRITICAL_PASS_OUTPUT"]
+
+
+def test_synthesize_2stage_empty_scope_aborts(tmp_mneva_home: Path) -> None:
+    from mneva.synth import synthesize_2stage
+
+    provider = FakeProvider()
+    outputs: list[str] = []
+
+    with pytest.raises(ValueError, match="no records"):
+        synthesize_2stage(
+            provider,
+            scope="empty-scope",
+            home=tmp_mneva_home,
+            shortlist_input=lambda _s: "ignored",
+            output=outputs.append,
+        )
