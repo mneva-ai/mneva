@@ -123,3 +123,37 @@ def test_synthesize_2stage_empty_scope_aborts(tmp_mneva_home: Path) -> None:
             shortlist_input=lambda _s: "ignored",
             output=outputs.append,
         )
+
+
+def test_digest_to_bootstrap_with_scope(tmp_mneva_home: Path) -> None:
+    from mneva.synth import DIGEST_PROMPT, digest_to_bootstrap
+
+    _seed(tmp_mneva_home)
+    provider = FakeProvider()
+    provider.next_response = "DIGEST_OUTPUT"
+
+    out = digest_to_bootstrap(provider, scope="x", home=tmp_mneva_home, max_tokens=512)
+
+    assert out == "DIGEST_OUTPUT"
+    sent_prompt, sent_max = provider.calls[0]
+    assert "scope 'x'" in sent_prompt or "'x'" in sent_prompt
+    assert "alpha body" in sent_prompt
+    assert "gamma body" not in sent_prompt
+    assert sent_max == 512
+    # Sanity: prompt template was used
+    assert DIGEST_PROMPT.split("\n")[0][:30] in sent_prompt
+
+
+def test_digest_to_bootstrap_all_scopes(tmp_mneva_home: Path) -> None:
+    from mneva.synth import digest_to_bootstrap
+
+    _seed(tmp_mneva_home)
+    provider = FakeProvider()
+    provider.next_response = "ALL_DIGEST"
+
+    out = digest_to_bootstrap(provider, scope=None, home=tmp_mneva_home)
+
+    assert out == "ALL_DIGEST"
+    sent_prompt, _ = provider.calls[0]
+    assert "alpha body" in sent_prompt
+    assert "gamma body" in sent_prompt

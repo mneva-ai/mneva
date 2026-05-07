@@ -57,6 +57,30 @@ def stage2(provider: Provider, shortlist: str, *, max_tokens: int = 8000) -> str
     return provider.complete(STAGE2_PROMPT + shortlist, max_tokens=max_tokens)
 
 
+def digest_to_bootstrap(
+    provider: Provider,
+    *,
+    scope: str | None,
+    home: Path,
+    max_tokens: int = 4000,
+) -> str:
+    """Summarize in-scope (or all) records into an L1 bootstrap-shaped digest."""
+    blocks: list[str] = []
+    for r in iter_records(home=home):
+        if scope is not None and r.scope != scope:
+            continue
+        blocks.append(
+            f"--- record {r.id} (scope={r.scope}, tool={r.tool}) ---\n{r.body}"
+        )
+    if not blocks:
+        target = scope if scope is not None else "<all scopes>"
+        raise ValueError(f"no records found for digest target {target!r}")
+    dumped = "\n\n".join(blocks)
+    label = scope if scope is not None else "all scopes"
+    prompt = DIGEST_PROMPT.format(scope=label) + dumped
+    return provider.complete(prompt, max_tokens=max_tokens)
+
+
 def synthesize_2stage(
     provider: Provider,
     *,
