@@ -49,3 +49,8 @@ def dump_records(*, scope: str, home: Path) -> str:
 def stage1(provider: Provider, dumped: str, *, max_tokens: int = 8000) -> str:
     """Stage 1: produce ~100 ideas from the full in-scope dump."""
     return provider.complete(STAGE1_PROMPT + dumped, max_tokens=max_tokens)
+
+
+def stage2(provider: Provider, shortlist: str, *, max_tokens: int = 8000) -> str:
+    """Stage 2: critical pass over the user-selected shortlist."""
+    return provider.complete(STAGE2_PROMPT + shortlist, max_tokens=max_tokens)

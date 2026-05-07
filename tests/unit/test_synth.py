@@ -58,3 +58,19 @@ def test_stage1_calls_provider_with_dumped_context(tmp_mneva_home: Path) -> None
     assert STAGE1_PROMPT in sent_prompt
     assert "alpha body" in sent_prompt
     assert sent_max == 4096
+
+
+def test_stage2_sends_shortlist_with_critical_pass_prompt() -> None:
+    from mneva.synth import STAGE2_PROMPT, stage2
+
+    provider = FakeProvider()
+    provider.next_response = "criticism here"
+    shortlist = "1. ship in 7 days\n2. only 4 backends"
+
+    out = stage2(provider, shortlist, max_tokens=2048)
+
+    assert out == "criticism here"
+    sent_prompt, sent_max = provider.calls[0]
+    assert STAGE2_PROMPT in sent_prompt
+    assert shortlist in sent_prompt
+    assert sent_max == 2048
