@@ -7,9 +7,12 @@ import time
 import click
 
 from mneva import __version__
+from mneva.config import load_config
 from mneva.indexer import Indexer
 from mneva.paths import ensure_home
+from mneva.providers import get_provider
 from mneva.store import Record, forget_record, write_record
+from mneva.synth import digest_to_bootstrap, synthesize_2stage
 
 
 def _new_id(scope: str, body: str) -> str:
@@ -172,6 +175,83 @@ def serve(port: int, host: str) -> None:
 
     config = load_config(home)
     uvicorn.run(create_app(home=home, config=config), host=host, port=port, log_level="info")
+
+
+@app.command()
+@click.option("--scope", required=True, help="record scope to synthesize over")
+@click.option(
+    "--backend",
+    default=None,
+    help="anthropic | openai | google | openrouter (defaults to config.synthesize_default_backend)",
+)
+def synthesize(scope: str, backend: str | None) -> None:
+    """Two-stage synthesize: dump -> 100 ideas -> user-cut -> critical pass."""
+    home = ensure_home()
+    if not (home / "config.json").exists():
+        raise click.ClickException("run `mneva init` first")
+    cfg = load_config(home)
+    chosen = backend or cfg.synthesize_default_backend
+    try:
+        provider = get_provider(chosen)
+    except ValueError as e:
+        raise click.ClickException(str(e)) from e
+
+    def shortlist_input(stage1_output: str) -> str:
+        click.echo("\n--- paste shortlist (one item per line, end with '.' on its own line) ---")
+        lines: list[str] = []
+        while True:
+            line = click.get_text_stream("stdin").readline()
+            if not line or line.strip() == ".":
+                break
+            lines.append(line.rstrip("\n"))
+        return "\n".join(lines)
+
+    try:
+        synthesize_2stage(
+            provider,
+            scope=scope,
+            home=home,
+            shortlist_input=shortlist_input,
+            output=click.echo,
+        )
+    except ValueError as e:
+        raise click.ClickException(str(e)) from e
+
+
+@app.command()
+@click.option("--scope", default=None, help="restrict digest to one scope (default: all)")
+@click.option(
+    "--backend",
+    default=None,
+    help="anthropic | openai | google | openrouter (defaults to config.synthesize_default_backend)",
+)
+@click.option(
+    "--write-bootstrap",
+    is_flag=True,
+    default=False,
+    help="write the digest to ~/.mneva/bootstrap.md instead of stdout",
+)
+def digest(scope: str | None, backend: str | None, write_bootstrap: bool) -> None:
+    """Manual L1 bootstrap consolidation (auto-trigger deferred to v0.1)."""
+    home = ensure_home()
+    if not (home / "config.json").exists():
+        raise click.ClickException("run `mneva init` first")
+    cfg = load_config(home)
+    chosen = backend or cfg.synthesize_default_backend
+    try:
+        provider = get_provider(chosen)
+    except ValueError as e:
+        raise click.ClickException(str(e)) from e
+    try:
+        text = digest_to_bootstrap(provider, scope=scope, home=home)
+    except ValueError as e:
+        raise click.ClickException(str(e)) from e
+    if write_bootstrap:
+        target = home / "bootstrap.md"
+        target.write_text(text, encoding="utf-8")
+        click.echo(f"wrote {target}")
+    else:
+        click.echo(text)
 
 
 if __name__ == "__main__":
