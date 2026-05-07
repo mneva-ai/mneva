@@ -1,6 +1,8 @@
 from __future__ import annotations
 
-from mneva.providers import Provider
+import pytest
+
+from mneva.providers import Provider, get_provider
 from mneva.providers.base import MissingAPIKeyError, ProviderError
 
 
@@ -20,3 +22,8 @@ def test_missing_api_key_error_is_provider_error() -> None:
     assert "ANTHROPIC_API_KEY" in str(err)
     assert err.provider == "anthropic"
     assert err.env_var == "ANTHROPIC_API_KEY"
+
+
+def test_get_provider_unknown_name_raises_value_error() -> None:
+    with pytest.raises(ValueError, match="unknown backend"):
+        get_provider("not-a-real-backend")
