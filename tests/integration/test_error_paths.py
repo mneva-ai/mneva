@@ -35,6 +35,7 @@ def test_serve_port_collision(tmp_mneva_home: Path) -> None:
 
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.bind(("127.0.0.1", 0))
+        s.listen(1)  # mneva's _port_in_use uses connect_ex; a bound-but-not-listening socket would refuse and look free
         port = s.getsockname()[1]
 
         result = run_cli("serve", f"--port={port}")
