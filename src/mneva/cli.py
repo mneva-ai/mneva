@@ -149,6 +149,22 @@ def config() -> None:
     raise click.ClickException("not implemented yet")
 
 
+@app.command()
+@click.option(
+    "--tool",
+    required=True,
+    type=click.Choice(["claude-code", "cursor", "codex"]),
+    help="Target tool identifier.",
+)
+@click.option("--scope", default=None, help="Scope filter (default: all permanent records).")
+def replay(tool: str, scope: str | None) -> None:
+    """Print the context replay block for the given tool and optional scope."""
+    from mneva.replay import render_replay
+
+    result = render_replay(tool=tool, scope=scope)
+    click.echo(result)
+
+
 def _port_in_use(port: int) -> bool:
     import socket as _socket
 
