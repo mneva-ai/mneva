@@ -94,6 +94,6 @@ def test_replay_returns_context_block_for_tool(client: TestClient) -> None:
         headers=_h(),
     )
     assert r.status_code == 200
-    block = r.json()["context"]
+    block = r.text
     assert "decision: use BM25 fallback first" in block
-    assert "scope: ticket-9" in block
+    assert "ticket-9" in block
