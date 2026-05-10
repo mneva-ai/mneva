@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "mneva"
-version = "0.1.0a1"
+version = "0.1.0"
 description = "Persistent agent context substrate. Local-first CLI."
 readme = "README.md"
 license = { file = "LICENSE" }
