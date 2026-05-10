@@ -12,7 +12,7 @@ def test_version_flag_prints_version() -> None:
     runner = CliRunner()
     result = runner.invoke(app, ["--version"])
     assert result.exit_code == 0
-    assert "0.1.0a1" in result.output
+    assert "0.1.0" in result.output
 
 
 def test_help_lists_core_commands() -> None:

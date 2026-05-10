@@ -5,13 +5,13 @@ import time
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, Query, Request
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, PlainTextResponse
 from pydantic import BaseModel
 
 from mneva.config import Config
 from mneva.indexer import Indexer
 from mneva.paths import ensure_home
-from mneva.store import Record, forget_record, iter_records, write_record
+from mneva.store import Record, forget_record, write_record
 
 
 class CaptureBody(BaseModel):
@@ -39,7 +39,7 @@ def create_app(home: Path | None = None, config: Config | None = None) -> FastAP
 
         config = load_config(home)
 
-    app = FastAPI(title="Mneva", version="0.1.0a1")
+    app = FastAPI(title="Mneva", version="0.1.0")
     expected_token = config.token
     resolved_home: Path = home
 
@@ -96,25 +96,18 @@ def create_app(home: Path | None = None, config: Config | None = None) -> FastAP
             ]
         }
 
-    @app.get("/replay")
+    @app.get("/replay", response_class=PlainTextResponse)
     def replay(
         tool: str = Query(...),
         scope: str | None = Query(None),
-        lifespan: str | None = Query("permanent"),
-        k: int = Query(20),
-    ) -> dict[str, str]:
-        # Minimal v0 renderer. Plan 3 (M7) wires per-tool template overrides.
-        hits = [
-            r
-            for r in iter_records(home=resolved_home)
-            if (scope is None or r.scope == scope)
-            and (lifespan is None or r.lifespan == lifespan)
-        ][:k]
-        lines = [f"# Mneva replay (target tool: {tool})", ""]
-        for r in hits:
-            lines.append(f"## scope: {r.scope}  |  tool: {r.tool}  |  id: {r.id}")
-            lines.append(r.body)
-            lines.append("")
-        return {"context": "\n".join(lines)}
+    ) -> str:
+        from mneva.replay import VALID_TOOLS, render_replay
+
+        if tool not in VALID_TOOLS:
+            raise HTTPException(
+                status_code=400,
+                detail=f"unsupported tool: {tool!r}  (valid: {', '.join(sorted(VALID_TOOLS))})",
+            )
+        return render_replay(tool=tool, scope=scope, home=resolved_home)
 
     return app

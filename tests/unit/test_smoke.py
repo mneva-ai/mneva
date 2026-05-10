@@ -2,13 +2,13 @@ import mneva
 
 
 def test_version_string() -> None:
-    assert mneva.__version__ == "0.1.0a1"
+    assert mneva.__version__ == "0.1.0"
 
 
 def test_main_prints_banner(capsys) -> None:
     mneva.main()
     out = capsys.readouterr().out
-    assert "Mneva v0.1.0a1" in out
+    assert "Mneva v0.1.0" in out
     assert "https://mneva.org" in out
     assert "https://github.com/mneva-ai/mneva" in out
 

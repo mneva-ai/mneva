@@ -26,3 +26,11 @@ jobs:
         run: python -m mypy
       - name: Test
         run: python -m pytest --cov=mneva --cov-report=term-missing --cov-fail-under=80
+      - name: Build wheel
+        run: python -m build
+      - name: Install wheel
+        shell: bash
+        run: pip install --force-reinstall --no-deps dist/*.whl
+      - name: Smoke (mneva --version)
+        shell: bash
+        run: mneva --version
