@@ -14,6 +14,13 @@ from mneva.providers import get_provider
 from mneva.store import Record, forget_record, write_record
 from mneva.synth import digest_to_bootstrap, synthesize_2stage
 
+# Force UTF-8 stdout on Windows; default cp1252 crashes on LLM Unicode output.
+if sys.platform == "win32":
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    if hasattr(sys.stderr, "reconfigure"):
+        sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+
 
 def _new_id(scope: str, body: str) -> str:
     raw = f"{scope}|{time.time_ns()}|{body[:64]}".encode()
