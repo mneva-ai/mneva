@@ -28,6 +28,15 @@ jobs:
         run: python -m pytest --cov=mneva --cov-report=term-missing --cov-fail-under=80
       - name: Build wheel
         run: python -m build
+      - name: Check wheel has no duplicate entries
+        shell: bash
+        run: |
+          DUPS=$(python -m zipfile -l dist/*.whl | awk '{print $1}' | sort | uniq -d)
+          if [ -n "$DUPS" ]; then
+            echo "ERROR: Duplicate entries in wheel:"
+            echo "$DUPS"
+            exit 1
+          fi
       - name: Install wheel
         shell: bash
         run: pip install --force-reinstall --no-deps dist/*.whl
