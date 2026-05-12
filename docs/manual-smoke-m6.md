@@ -10,7 +10,7 @@ It is not part of CI. Run it manually before tagging the M6 boundary release.
 ## Prerequisites
 
 - `mneva init` already executed; `~/.mneva/` populated.
-- At least 5 captured records under a single scope, e.g. `mneva capture --scope smoke-m6 --tool claude --body "..."`.
+- At least 5 captured records under a single scope, e.g. `mneva capture --scope smoke-m6 --tool claude "..."` (BODY is a positional argument).
 - API keys exported in your shell:
   - `ANTHROPIC_API_KEY`
   - `OPENAI_API_KEY`
