@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### Changed
+- docs: rewrite `README.md` from v0.0.1 placeholder to alpha-ready content
+  (install, quick start, tool-wiring, commands, BYOK matrix). Repo-visible
+  immediately; PyPI page updates on next release.
+
 ## [0.1.0] - 2026-05-10
 
 ### Added
