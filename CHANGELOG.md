@@ -2,6 +2,39 @@
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-05-17
+
+### Added
+- **Obsidian vault read-write integration**. Every capture can mirror into your
+  Obsidian vault as a normal markdown note; round-trip edits flow back via
+  `mneva sync-vault`.
+  - New module `mneva.vault` with `detect_vault`, `write_to_vault`,
+    `sync_from_vault`, `VaultError`. A directory only qualifies as a vault if
+    it contains a `.obsidian/` subdirectory, so `mneva config set-vault`
+    refuses arbitrary paths.
+  - Records land at `<vault>/mneva/<scope>/<record_id>.md` with YAML
+    frontmatter (`mneva_id`, `scope`, `lifespan`, `tool`, `source`).
+  - New CLI subcommands:
+    - `mneva config set-vault <path>` — validates `.obsidian/` + persists.
+    - `mneva config get-vault` — prints current path.
+    - `mneva config unset-vault` — clears the configured path.
+    - `mneva sync-vault` — imports vault notes carrying `mneva_id` back into
+      `~/.mneva/store/` (notes without `mneva_id` are skipped, so your
+      hand-written Obsidian notes are never touched).
+  - `mneva capture` now also writes to the vault when configured. Vault
+    write failures (missing `.obsidian/`, permissions, iCloud lock) log a
+    warning to stderr but do not fail the capture.
+- `Config.vault_path: str | None = None` field; defaults to None so existing
+  v0.1.1 configs load unchanged.
+- 10 new tests: `tests/unit/test_vault.py` (8 cases for the vault module),
+  `tests/integration/test_cli_vault.py` (7 cases for the CLI flow).
+
+### Notes
+- Targets the geliming-shaped "Obsidian-centric mid-user" ICP from interview
+  #002. Closes one of the two scope gaps surfaced in CEO review
+  (`mneva-v0.1-ceo-review-2026-05-16.md`).
+- v0.1.3 (`mneva distill`) is queued next.
+
 ## [0.1.1] - 2026-05-17
 
 ### Fixed

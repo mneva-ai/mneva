@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 import sys
+from dataclasses import replace
+from pathlib import Path
 
 import click
 
 from mneva import __version__
-from mneva.config import ConfigError, load_config
+from mneva.config import ConfigError, load_config, save_config
 from mneva.indexer import Indexer
 from mneva.paths import ensure_home
 from mneva.providers import ProviderError, get_provider
@@ -104,7 +106,33 @@ def capture(
             f"record id collision (very rare). Retry the command. ({e})"
         ) from e
     Indexer(home / "mneva.sqlite").add(record)
+    _mirror_to_vault_if_configured(record, home)
     click.echo(record.id)
+
+
+def _mirror_to_vault_if_configured(record: Record, home: Path) -> None:
+    """Best-effort vault mirror for `capture`. Never raises.
+
+    If the user has not run `mneva init` or has not set a vault, this is
+    a no-op. If the vault is configured but the write fails (missing
+    `.obsidian/`, permissions, iCloud lock), we print a warning to stderr
+    and continue. Capture must never fail because of vault.
+    """
+    if not (home / "config.json").exists():
+        return
+    try:
+        cfg = load_config(home)
+    except ConfigError:
+        return
+    if not cfg.vault_path:
+        return
+    from mneva.vault import VaultError, write_to_vault
+
+    try:
+        target = write_to_vault(record, Path(cfg.vault_path))
+        click.echo(f"  -> vault: {target}", err=True)
+    except (VaultError, OSError) as exc:
+        click.echo(f"  warning: vault write failed: {exc}", err=True)
 
 
 @app.command()
@@ -149,10 +177,89 @@ def forget(record_id: str, confirm: bool) -> None:
     click.echo(f"forgot: {record_id}")
 
 
-@app.command()
+@app.group()
 def config() -> None:
-    """Stub. Real subcommands wired later."""
-    raise click.ClickException("not implemented yet")
+    """Configure mneva settings (vault path, defaults, ...)."""
+
+
+@config.command("set-vault")
+@click.argument(
+    "vault_path",
+    type=click.Path(exists=True, file_okay=False, dir_okay=True, path_type=Path),
+)
+def config_set_vault(vault_path: Path) -> None:
+    """Set the Obsidian vault path. mneva will mirror captures to this vault."""
+    from mneva.vault import detect_vault
+
+    home = ensure_home()
+    try:
+        cfg = load_config(home)
+    except ConfigError as e:
+        raise click.ClickException(str(e)) from e
+    resolved = vault_path.expanduser().resolve()
+    if not detect_vault(resolved):
+        raise click.ClickException(
+            f"{resolved} is not an Obsidian vault (missing .obsidian/ directory)"
+        )
+    save_config(replace(cfg, vault_path=str(resolved)), home)
+    click.echo(f"vault set: {resolved}")
+
+
+@config.command("get-vault")
+def config_get_vault() -> None:
+    """Print the configured Obsidian vault path."""
+    home = ensure_home()
+    try:
+        cfg = load_config(home)
+    except ConfigError as e:
+        raise click.ClickException(str(e)) from e
+    if cfg.vault_path:
+        click.echo(cfg.vault_path)
+    else:
+        click.echo("(no vault configured; run `mneva config set-vault <path>`)")
+
+
+@config.command("unset-vault")
+def config_unset_vault() -> None:
+    """Clear the configured vault path (captures stop mirroring)."""
+    home = ensure_home()
+    try:
+        cfg = load_config(home)
+    except ConfigError as e:
+        raise click.ClickException(str(e)) from e
+    save_config(replace(cfg, vault_path=None), home)
+    click.echo("vault unset")
+
+
+@app.command("sync-vault")
+def sync_vault_cmd() -> None:
+    """Import notes from the configured vault back into the local store.
+
+    Only notes with `mneva_id` in their frontmatter are imported, so your
+    hand-written Obsidian notes are never touched.
+    """
+    from mneva.vault import VaultError, sync_from_vault
+
+    home = ensure_home()
+    try:
+        cfg = load_config(home)
+    except ConfigError as e:
+        raise click.ClickException(str(e)) from e
+    if not cfg.vault_path:
+        raise click.ClickException(
+            "no vault configured; run `mneva config set-vault <path>` first"
+        )
+    try:
+        result = sync_from_vault(Path(cfg.vault_path), home)
+    except VaultError as e:
+        raise click.ClickException(str(e)) from e
+    # Re-index everything we just imported
+    from mneva.store import iter_records
+
+    idx = Indexer(home / "mneva.sqlite")
+    for record in iter_records(home=home):
+        idx.add(record)
+    click.echo(f"imported: {result.imported}, skipped: {result.skipped}")
 
 
 @app.command()
