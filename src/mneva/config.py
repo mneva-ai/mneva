@@ -19,6 +19,7 @@ class Config:
     embedding_provider: str = "openai"
     embedding_model: str = "text-embedding-3-small"
     synthesize_default_backend: str = "anthropic"
+    vault_path: str | None = None  # absolute path to an Obsidian vault
 
 
 def generate_token() -> str:
