@@ -83,3 +83,35 @@ def test_openrouter_provider_missing_key(monkeypatch: pytest.MonkeyPatch) -> Non
     with pytest.raises(MissingAPIKeyError) as exc:
         OpenRouterProvider()
     assert exc.value.env_var == "OPENROUTER_API_KEY"
+
+
+def test_openrouter_provider_raises_provider_error_on_none_content(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Regression: SDK returning content=None (free-tier refusal) must raise."""
+    from mneva.providers.base import ProviderError
+
+    class StubCompletions:
+        def create(self, **kwargs: object) -> SimpleNamespace:
+            return SimpleNamespace(
+                choices=[
+                    SimpleNamespace(
+                        message=SimpleNamespace(content=None),
+                        finish_reason="content_filter",
+                    )
+                ]
+            )
+
+    class StubOpenAI:
+        def __init__(self, **kw: object) -> None:
+            self.chat = SimpleNamespace(completions=StubCompletions())
+
+    monkeypatch.setenv("OPENROUTER_API_KEY", "test-key")
+    monkeypatch.setattr("mneva.providers.openrouter.OpenAI", StubOpenAI)
+    from mneva.providers.openrouter import OpenRouterProvider
+
+    with pytest.raises(ProviderError) as exc:
+        OpenRouterProvider().complete("hi", max_tokens=8)
+    msg = str(exc.value)
+    assert "no content" in msg
+    assert "content_filter" in msg

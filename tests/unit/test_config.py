@@ -8,7 +8,7 @@ from pathlib import Path
 
 import pytest
 
-from mneva.config import Config, generate_token, load_config, save_config
+from mneva.config import Config, ConfigError, generate_token, load_config, save_config
 from mneva.paths import ensure_home
 
 
@@ -34,10 +34,37 @@ def test_save_writes_0600_mode(tmp_mneva_home: Path) -> None:
     assert mode == 0o600
 
 
-def test_load_raises_when_missing(tmp_mneva_home: Path) -> None:
+def test_load_raises_config_error_when_missing(tmp_mneva_home: Path) -> None:
     home = ensure_home()
-    with pytest.raises(FileNotFoundError):
+    with pytest.raises(ConfigError) as exc:
         load_config(home)
+    assert "run `mneva init`" in str(exc.value)
+
+
+def test_load_raises_config_error_on_malformed_json(tmp_mneva_home: Path) -> None:
+    home = ensure_home()
+    (home / "config.json").write_text("{ not valid json", encoding="utf-8")
+    with pytest.raises(ConfigError) as exc:
+        load_config(home)
+    assert "not valid JSON" in str(exc.value)
+
+
+def test_load_raises_config_error_on_non_object_root(tmp_mneva_home: Path) -> None:
+    home = ensure_home()
+    (home / "config.json").write_text('["not", "an", "object"]', encoding="utf-8")
+    with pytest.raises(ConfigError) as exc:
+        load_config(home)
+    assert "JSON object" in str(exc.value)
+
+
+def test_load_raises_config_error_on_unknown_field(tmp_mneva_home: Path) -> None:
+    home = ensure_home()
+    (home / "config.json").write_text(
+        '{"token": "a", "totally_unknown_field": 42}', encoding="utf-8"
+    )
+    with pytest.raises(ConfigError) as exc:
+        load_config(home)
+    assert "unexpected or missing fields" in str(exc.value)
 
 
 def test_save_serialises_known_fields(tmp_mneva_home: Path) -> None:

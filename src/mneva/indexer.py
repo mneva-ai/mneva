@@ -7,7 +7,6 @@ from typing import Any
 
 from rank_bm25 import BM25Okapi
 
-from mneva.paths import mneva_home
 from mneva.store import Record, read_record
 
 
@@ -36,6 +35,7 @@ class Indexer:
 
     def __init__(self, db_path: Path) -> None:
         self._db_path = db_path
+        self._home = db_path.parent
         self._conn = sqlite3.connect(db_path)
         self._conn.row_factory = sqlite3.Row
         self._has_vec = try_load_sqlite_vec(self._conn)
@@ -105,8 +105,7 @@ class Indexer:
         bm = BM25Okapi(corpus)
         scores = bm.get_scores(list(query_tokens))
         ranked = sorted(zip(candidates, scores, strict=False), key=lambda x: x[1], reverse=True)
-        home = mneva_home()
-        return [read_record(row["id"], home=home) for row, _ in ranked[:k]]
+        return [read_record(row["id"], home=self._home) for row, _ in ranked[:k]]
 
     def status(self) -> dict[str, int | str]:
         count = self._conn.execute("SELECT COUNT(*) FROM records").fetchone()[0]

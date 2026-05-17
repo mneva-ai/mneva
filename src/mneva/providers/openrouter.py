@@ -8,7 +8,7 @@ import os
 
 from openai import OpenAI
 
-from mneva.providers.base import MissingAPIKeyError
+from mneva.providers.base import MissingAPIKeyError, ProviderError
 
 _BASE_URL = "https://openrouter.ai/api/v1"
 _DEFAULT_MODEL = "anthropic/claude-opus-4-7"
@@ -30,6 +30,12 @@ class OpenRouterProvider:
             max_tokens=max_tokens,
             messages=[{"role": "user", "content": prompt}],
         )
-        # SDK content is str | None (None on refusal/length cap); we treat None as a
-        # bug/upstream failure rather than a normal return — type: ignore for v0.
-        return resp.choices[0].message.content  # type: ignore[return-value]
+        choice = resp.choices[0]
+        content = choice.message.content
+        if content is None:
+            raise ProviderError(
+                f"openrouter: model {self._model!r} returned no content "
+                f"(finish_reason={choice.finish_reason!r}, max_tokens={max_tokens}). "
+                f"Some free-tier models refuse silently; try a paid model or switch backend."
+            )
+        return content

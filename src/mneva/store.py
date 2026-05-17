@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import hashlib
+import time
 from collections.abc import Iterator
 from dataclasses import dataclass
 from pathlib import Path
@@ -15,6 +17,15 @@ class Record:
     tool: str
     body: str
     source: str | None = None
+
+
+def make_record_id(scope: str, body: str) -> str:
+    """Generate a 16-hex-char record id from scope, time, and body prefix.
+
+    Time-based component makes practical collisions impossible.
+    """
+    raw = f"{scope}|{time.time_ns()}|{body[:64]}".encode()
+    return hashlib.sha256(raw).hexdigest()[:16]
 
 
 def _path_for(record_id: str, *, home: Path) -> Path:

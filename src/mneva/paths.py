@@ -3,7 +3,7 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
-_SUBDIRS = ("store", "index", "adr", "templates")
+_SUBDIRS = ("store",)
 
 
 def mneva_home() -> Path:

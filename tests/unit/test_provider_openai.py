@@ -78,3 +78,35 @@ def test_openai_provider_missing_key(monkeypatch: pytest.MonkeyPatch) -> None:
     with pytest.raises(MissingAPIKeyError) as exc:
         OpenAIProvider()
     assert exc.value.env_var == "OPENAI_API_KEY"
+
+
+def test_openai_provider_raises_provider_error_on_none_content(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Regression: SDK returning content=None (length cap / refusal) must raise."""
+    from mneva.providers.base import ProviderError
+
+    class StubCompletions:
+        def create(self, **kwargs: object) -> SimpleNamespace:
+            return SimpleNamespace(
+                choices=[
+                    SimpleNamespace(
+                        message=SimpleNamespace(content=None),
+                        finish_reason="length",
+                    )
+                ]
+            )
+
+    class StubOpenAI:
+        def __init__(self, **kw: object) -> None:
+            self.chat = SimpleNamespace(completions=StubCompletions())
+
+    monkeypatch.setenv("OPENAI_API_KEY", "test-key")
+    monkeypatch.setattr("mneva.providers.openai.OpenAI", StubOpenAI)
+    from mneva.providers.openai import OpenAIProvider
+
+    with pytest.raises(ProviderError) as exc:
+        OpenAIProvider().complete("hi", max_tokens=8)
+    msg = str(exc.value)
+    assert "no content" in msg
+    assert "length" in msg

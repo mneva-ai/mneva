@@ -12,7 +12,7 @@ def test_version_flag_prints_version() -> None:
     runner = CliRunner()
     result = runner.invoke(app, ["--version"])
     assert result.exit_code == 0
-    assert "0.1.0" in result.output
+    assert "0.1.1" in result.output
 
 
 def test_help_lists_core_commands() -> None:
@@ -156,3 +156,21 @@ def test_serve_requires_init(tmp_mneva_home: Path) -> None:
     result = runner.invoke(app, ["serve"])
     assert result.exit_code != 0
     assert "run `mneva init` first" in result.output
+
+
+def test_capture_collision_surfaces_friendly_message(
+    tmp_mneva_home: Path, monkeypatch
+) -> None:
+    """Regression: FileExistsError from write_record must be caught + friendly."""
+    runner = CliRunner()
+    runner.invoke(app, ["init"])
+
+    def _raise(*args: object, **kwargs: object) -> None:
+        raise FileExistsError("simulated collision")
+
+    monkeypatch.setattr("mneva.cli.write_record", _raise)
+    result = runner.invoke(app, ["capture", "--scope", "s", "Hello"])
+    assert result.exit_code != 0
+    assert "record id collision" in result.output
+    # Stack trace must NOT be in user output
+    assert "Traceback" not in result.output
