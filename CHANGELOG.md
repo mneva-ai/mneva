@@ -2,11 +2,50 @@
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-05-17
+
+### Fixed
+- **Record collision rescue**: `cli capture` and `POST /capture` now catch
+  `FileExistsError` from `write_record` and surface a friendly message
+  (CLI: `ClickException`; HTTP: 409 Conflict). Previously the raw exception
+  reached the user as a stack trace. Collisions are time-keyed and remain
+  practically impossible; this is defense in depth.
+- **Friendly config errors**: new `ConfigError` class. `load_config` now
+  reports clear messages for missing config (`mneva config not found at <path>;
+  run \`mneva init\` first`), malformed JSON (line + column), and
+  schema-drift (`unexpected or missing fields`). Previously these raised raw
+  `FileNotFoundError` / `JSONDecodeError` / `TypeError` with stack traces.
+- **OpenAI / OpenRouter `None`-return handling**: both providers now raise
+  `ProviderError` with model + `finish_reason` context when the SDK returns
+  `content=None` (length-cap, refusal, or unexpected tool-use). Previously the
+  function returned `None` typed as `str`, crashing downstream callers with an
+  obscure `AttributeError`.
+
 ### Changed
-- docs: regenerate `README.md` from v0.0.1 placeholder to v0.1.0 alpha-ready
-  content. Initial draft via `readme-ai` (OpenRouter / DeepSeek V4 Flash),
-  followed by a hand fix-up pass for install / usage / testing / roadmap /
-  links / license. Repo-visible immediately; PyPI page updates on next release.
+- `_new_id` helper consolidated into `mneva.store.make_record_id` (was
+  duplicated in `cli.py` and `api.py`). DRY hygiene; behavior unchanged.
+- `Indexer` now derives its `home` path from the SQLite db path's parent,
+  removing a stale `mneva_home()` call in `search()` that bypassed
+  dependency injection.
+- HTTP API token comparison uses `secrets.compare_digest` instead of `!=`
+  (defense in depth for the localhost-only API).
+- `paths._SUBDIRS` trimmed from `("store", "index", "adr", "templates")` to
+  `("store",)` — the other three were never used.
+- Dependency pins loosened from exact to ranges to avoid forcing
+  downgrades of co-installed tools:
+  - `anthropic==0.42.0` → `anthropic>=0.42.0,<1`
+  - `openai==1.58.0` → `openai>=1.58.0,<3`
+  - `google-generativeai==0.8.3` → `google-generativeai>=0.8.3,<1`
+
+### Added
+- Regression tests for all three CRITICAL GAPS above.
+- `install-verify.yml` matrix expanded to Python 3.13 + 3.14 (forward-defense
+  for upcoming Python releases).
+
+### Notes
+- Source-of-truth references for the change set: `D:/AI/specs/mneva-v0.1-ceo-review-2026-05-16.md`
+  (CEO review) and `D:/AI/specs/mneva-v0.1-eng-review-2026-05-17.md` (Eng review).
+- Next planned PRs: v0.1.2 (Obsidian read-write integration), v0.1.3 (`mneva distill`).
 
 ## [0.1.0] - 2026-05-10
 

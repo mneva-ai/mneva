@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "mneva"
-version = "0.1.0"
+version = "0.1.1"
 description = "Persistent agent context substrate. Local-first CLI."
 readme = "README.md"
 license = { file = "LICENSE" }
@@ -29,9 +29,9 @@ dependencies = [
     "rank-bm25>=0.2.2,<0.3",
     "sqlite-vec>=0.1.6,<0.2",
     "httpx>=0.27,<0.30",
-    "anthropic==0.42.0",
-    "openai==1.58.0",
-    "google-generativeai==0.8.3",
+    "anthropic>=0.42.0,<1",
+    "openai>=1.58.0,<3",
+    "google-generativeai>=0.8.3,<1",
 ]
 
 [project.optional-dependencies]

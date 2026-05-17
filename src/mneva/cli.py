@@ -1,17 +1,15 @@
 from __future__ import annotations
 
-import hashlib
 import sys
-import time
 
 import click
 
 from mneva import __version__
-from mneva.config import load_config
+from mneva.config import ConfigError, load_config
 from mneva.indexer import Indexer
 from mneva.paths import ensure_home
-from mneva.providers import get_provider
-from mneva.store import Record, forget_record, write_record
+from mneva.providers import ProviderError, get_provider
+from mneva.store import Record, forget_record, make_record_id, write_record
 from mneva.synth import digest_to_bootstrap, synthesize_2stage
 
 # Force UTF-8 stdout on Windows; default cp1252 crashes on LLM Unicode output.
@@ -21,10 +19,6 @@ if sys.platform == "win32":
     if hasattr(sys.stderr, "reconfigure"):
         sys.stderr.reconfigure(encoding="utf-8", errors="replace")
 
-
-def _new_id(scope: str, body: str) -> str:
-    raw = f"{scope}|{time.time_ns()}|{body[:64]}".encode()
-    return hashlib.sha256(raw).hexdigest()[:16]
 
 BOOTSTRAP_TEMPLATE = """\
 # Mneva Bootstrap
@@ -96,14 +90,19 @@ def capture(
         raise click.ClickException("body is empty")
     home = ensure_home()
     record = Record(
-        id=_new_id(scope, body),
+        id=make_record_id(scope, body),
         scope=scope,
         lifespan=lifespan,
         tool=tool,
         body=body,
         source=source,
     )
-    write_record(record, home=home)
+    try:
+        write_record(record, home=home)
+    except FileExistsError as e:
+        raise click.ClickException(
+            f"record id collision (very rare). Retry the command. ({e})"
+        ) from e
     Indexer(home / "mneva.sqlite").add(record)
     click.echo(record.id)
 
@@ -185,8 +184,10 @@ def _port_in_use(port: int) -> bool:
 def serve(port: int, host: str) -> None:
     """Start the localhost API."""
     home = ensure_home()
-    if not (home / "config.json").exists():
-        raise click.ClickException("run `mneva init` first")
+    try:
+        config = load_config(home)
+    except ConfigError as e:
+        raise click.ClickException(str(e)) from e
     if _port_in_use(port):
         raise click.ClickException(
             f"port {port} is already in use -- choose a different --port or stop the other process"
@@ -194,9 +195,7 @@ def serve(port: int, host: str) -> None:
     import uvicorn
 
     from mneva.api import create_app
-    from mneva.config import load_config
 
-    config = load_config(home)
     uvicorn.run(create_app(home=home, config=config), host=host, port=port, log_level="info")
 
 
@@ -210,9 +209,10 @@ def serve(port: int, host: str) -> None:
 def synthesize(scope: str, backend: str | None) -> None:
     """Two-stage synthesize: dump -> 100 ideas -> user-cut -> critical pass."""
     home = ensure_home()
-    if not (home / "config.json").exists():
-        raise click.ClickException("run `mneva init` first")
-    cfg = load_config(home)
+    try:
+        cfg = load_config(home)
+    except ConfigError as e:
+        raise click.ClickException(str(e)) from e
     chosen = backend or cfg.synthesize_default_backend
     try:
         provider = get_provider(chosen)
@@ -237,7 +237,7 @@ def synthesize(scope: str, backend: str | None) -> None:
             shortlist_input=shortlist_input,
             output=click.echo,
         )
-    except ValueError as e:
+    except (ValueError, ProviderError) as e:
         raise click.ClickException(str(e)) from e
 
 
@@ -257,9 +257,10 @@ def synthesize(scope: str, backend: str | None) -> None:
 def digest(scope: str | None, backend: str | None, write_bootstrap: bool) -> None:
     """Manual L1 bootstrap consolidation (auto-trigger deferred to v0.1)."""
     home = ensure_home()
-    if not (home / "config.json").exists():
-        raise click.ClickException("run `mneva init` first")
-    cfg = load_config(home)
+    try:
+        cfg = load_config(home)
+    except ConfigError as e:
+        raise click.ClickException(str(e)) from e
     chosen = backend or cfg.synthesize_default_backend
     try:
         provider = get_provider(chosen)
@@ -267,7 +268,7 @@ def digest(scope: str | None, backend: str | None, write_bootstrap: bool) -> Non
         raise click.ClickException(str(e)) from e
     try:
         text = digest_to_bootstrap(provider, scope=scope, home=home)
-    except ValueError as e:
+    except (ValueError, ProviderError) as e:
         raise click.ClickException(str(e)) from e
     if write_bootstrap:
         target = home / "bootstrap.md"

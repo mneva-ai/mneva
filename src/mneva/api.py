@@ -1,7 +1,6 @@
 from __future__ import annotations
 
-import hashlib
-import time
+import secrets
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, Query, Request
@@ -11,7 +10,7 @@ from pydantic import BaseModel
 from mneva.config import Config
 from mneva.indexer import Indexer
 from mneva.paths import ensure_home
-from mneva.store import Record, forget_record, write_record
+from mneva.store import Record, forget_record, make_record_id, write_record
 
 
 class CaptureBody(BaseModel):
@@ -26,11 +25,6 @@ class ForgetBody(BaseModel):
     id: str
 
 
-def _new_id(scope: str, body: str) -> str:
-    raw = f"{scope}|{time.time_ns()}|{body[:64]}".encode()
-    return hashlib.sha256(raw).hexdigest()[:16]
-
-
 def create_app(home: Path | None = None, config: Config | None = None) -> FastAPI:
     if home is None:
         home = ensure_home()
@@ -39,14 +33,14 @@ def create_app(home: Path | None = None, config: Config | None = None) -> FastAP
 
         config = load_config(home)
 
-    app = FastAPI(title="Mneva", version="0.1.0")
+    app = FastAPI(title="Mneva", version="0.1.1")
     expected_token = config.token
     resolved_home: Path = home
 
     @app.middleware("http")
     async def auth(request: Request, call_next):  # type: ignore[no-untyped-def]
-        token = request.headers.get("X-MNEVA-Token")
-        if token != expected_token:
+        token = request.headers.get("X-MNEVA-Token") or ""
+        if not secrets.compare_digest(token, expected_token):
             return JSONResponse(
                 status_code=401,
                 content={"detail": "missing or invalid X-MNEVA-Token"},
@@ -61,14 +55,20 @@ def create_app(home: Path | None = None, config: Config | None = None) -> FastAP
     @app.post("/capture")
     def capture(req: CaptureBody) -> dict[str, str]:
         rec = Record(
-            id=_new_id(req.scope, req.body),
+            id=make_record_id(req.scope, req.body),
             scope=req.scope,
             lifespan=req.lifespan,
             tool=req.tool,
             body=req.body,
             source=req.source,
         )
-        write_record(rec, home=resolved_home)
+        try:
+            write_record(rec, home=resolved_home)
+        except FileExistsError as e:
+            raise HTTPException(
+                status_code=409,
+                detail=f"record id collision (very rare). Retry the request: {e}",
+            ) from e
         Indexer(resolved_home / "mneva.sqlite").add(rec)
         return {"id": rec.id}
 

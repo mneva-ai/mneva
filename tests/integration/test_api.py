@@ -77,6 +77,24 @@ def test_search_returns_hits(client: TestClient) -> None:
     assert any("alpha bravo" in h["body"] for h in hits)
 
 
+def test_capture_collision_returns_409(
+    client: TestClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Regression: FileExistsError from write_record surfaces as 409 Conflict."""
+
+    def _raise(*args: object, **kwargs: object) -> None:
+        raise FileExistsError("simulated collision")
+
+    monkeypatch.setattr("mneva.api.write_record", _raise)
+    r = client.post(
+        "/capture",
+        json={"scope": "s", "tool": "cli", "lifespan": "permanent", "body": "x"},
+        headers=_h(),
+    )
+    assert r.status_code == 409, r.text
+    assert "record id collision" in r.json()["detail"]
+
+
 def test_replay_returns_context_block_for_tool(client: TestClient) -> None:
     client.post(
         "/capture",
