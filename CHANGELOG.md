@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+### Changed
+- docs: regenerate `README.md` from v0.0.1 placeholder to v0.1.0 alpha-ready
+  content. Initial draft via `readme-ai` (OpenRouter / DeepSeek V4 Flash),
+  followed by a hand fix-up pass for install / usage / testing / roadmap /
+  links / license. Repo-visible immediately; PyPI page updates on next release.
+
 ## [0.1.0] - 2026-05-10
 
 ### Added
