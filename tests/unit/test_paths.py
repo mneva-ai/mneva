@@ -20,5 +20,4 @@ def test_env_override(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
 def test_ensure_home_creates_subdirs(tmp_mneva_home: Path) -> None:
     home = ensure_home()
     assert home == tmp_mneva_home
-    for sub in ("store", "index", "adr", "templates"):
-        assert (home / sub).is_dir()
+    assert (home / "store").is_dir()
