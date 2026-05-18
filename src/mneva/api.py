@@ -33,7 +33,7 @@ def create_app(home: Path | None = None, config: Config | None = None) -> FastAP
 
         config = load_config(home)
 
-    app = FastAPI(title="Mneva", version="0.1.2")
+    app = FastAPI(title="Mneva", version="0.1.3")
     expected_token = config.token
     resolved_home: Path = home
 

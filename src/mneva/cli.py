@@ -323,7 +323,7 @@ def synthesize(scope: str, backend: str | None) -> None:
     chosen = backend or cfg.synthesize_default_backend
     try:
         provider = get_provider(chosen)
-    except ValueError as e:
+    except (ValueError, ProviderError) as e:
         raise click.ClickException(str(e)) from e
 
     def shortlist_input(stage1_output: str) -> str:
@@ -371,7 +371,7 @@ def digest(scope: str | None, backend: str | None, write_bootstrap: bool) -> Non
     chosen = backend or cfg.synthesize_default_backend
     try:
         provider = get_provider(chosen)
-    except ValueError as e:
+    except (ValueError, ProviderError) as e:
         raise click.ClickException(str(e)) from e
     try:
         text = digest_to_bootstrap(provider, scope=scope, home=home)
@@ -383,6 +383,95 @@ def digest(scope: str | None, backend: str | None, write_bootstrap: bool) -> Non
         click.echo(f"wrote {target}")
     else:
         click.echo(text)
+
+
+@app.command()
+@click.option(
+    "--source",
+    type=click.Path(exists=True, dir_okay=False, file_okay=True, path_type=Path),
+    required=True,
+    help="Path to a transcript file (.md, .txt, or .json).",
+)
+@click.option("--scope", required=True, help="Scope to attach to extracted records.")
+@click.option(
+    "--backend",
+    default=None,
+    help="anthropic | openai | google | openrouter (defaults to config.synthesize_default_backend)",
+)
+@click.option(
+    "--yes",
+    is_flag=True,
+    default=False,
+    help="Skip the cost confirmation prompt.",
+)
+def distill(source: Path, scope: str, backend: str | None, yes: bool) -> None:
+    """Extract permanent records from a raw conversation transcript via LLM."""
+    from mneva.distill import (
+        chunk_text,
+        estimate_cost_usd,
+        parse_transcript,
+    )
+    from mneva.distill import (
+        distill as distill_fn,
+    )
+
+    home = ensure_home()
+    try:
+        cfg = load_config(home)
+    except ConfigError as e:
+        raise click.ClickException(str(e)) from e
+    chosen = backend or cfg.synthesize_default_backend
+    try:
+        provider = get_provider(chosen)
+    except (ValueError, ProviderError) as e:
+        raise click.ClickException(str(e)) from e
+
+    # Pre-flight: parse + chunk + cost estimate. Refuse early on bad input.
+    try:
+        text = parse_transcript(source)
+    except ValueError as e:
+        raise click.ClickException(str(e)) from e
+    if not text.strip():
+        raise click.ClickException(f"transcript {source} is empty")
+    chunks = chunk_text(text)
+
+    estimate = estimate_cost_usd(text, backend=chosen, chunks=len(chunks))
+    if estimate is None:
+        click.echo(
+            f"distill: {len(chunks)} chunk(s), backend={chosen} (cost estimate unavailable)",
+            err=True,
+        )
+    elif estimate > 0.10 and not yes:
+        click.confirm(
+            f"distill will make {len(chunks)} LLM call(s) on {chosen}, "
+            f"costing approximately ${estimate:.2f}. Continue?",
+            abort=True,
+        )
+    else:
+        click.echo(
+            f"distill: {len(chunks)} chunk(s), backend={chosen}, "
+            f"estimated cost ~${estimate:.2f}",
+            err=True,
+        )
+
+    # Run the orchestrator.
+    try:
+        result = distill_fn(provider, source=source, scope=scope, home=home)
+    except (ValueError, ProviderError) as e:
+        raise click.ClickException(str(e)) from e
+
+    # Mirror to vault (best-effort, reuses PR #9 helper).
+    for rec in result.written:
+        _mirror_to_vault_if_configured(rec, home)
+
+    # Summary.
+    click.echo(
+        f"distilled {len(result.written)} records "
+        f"({result.skipped_dups} dups skipped) from {result.chunks_processed} chunk(s)"
+    )
+    for rec in result.written[:3]:
+        preview = rec.body.replace("\n", " ")[:80]
+        click.echo(f"  {rec.id}  {preview}")
 
 
 if __name__ == "__main__":
