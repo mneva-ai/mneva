@@ -42,13 +42,16 @@ def stub_provider(monkeypatch: pytest.MonkeyPatch) -> _StubProvider:
 def test_distill_happy_path_writes_records_and_summarizes(
     tmp_mneva_home: Path, tmp_path: Path, stub_provider: _StubProvider
 ) -> None:
+    """Default backend is Anthropic Opus, whose 4000-token output budget
+    already triggers the >$0.10 gate even on tiny inputs. Pass --yes so
+    this test exercises the post-confirm path, not the gate path."""
     runner = CliRunner()
     runner.invoke(app, ["init"])
     src = tmp_path / "session.md"
     src.write_text("we decided to use sqlite and append-mode\n", encoding="utf-8")
 
     result = runner.invoke(
-        app, ["distill", "--source", str(src), "--scope", "proj"]
+        app, ["distill", "--source", str(src), "--scope", "proj", "--yes"]
     )
     assert result.exit_code == 0, result.output
     assert "distilled 2 records" in result.output
@@ -66,8 +69,9 @@ def test_distill_refuses_empty_transcript(
     runner.invoke(app, ["init"])
     src = tmp_path / "empty.md"
     src.write_text("   \n", encoding="utf-8")
+    # Empty-check happens before the cost gate, so --yes not needed.
     result = runner.invoke(
-        app, ["distill", "--source", str(src), "--scope", "proj"]
+        app, ["distill", "--source", str(src), "--scope", "proj", "--yes"]
     )
     assert result.exit_code != 0
     assert "empty" in result.output
