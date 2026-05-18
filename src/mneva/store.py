@@ -51,13 +51,14 @@ def write_record(record: Record, *, home: Path, overwrite: bool = False) -> Path
 def read_record(record_id: str, *, home: Path) -> Record:
     target = _path_for(record_id, home=home)
     post = frontmatter.loads(target.read_text(encoding="utf-8"))
+    raw_source = post.get("source")
     return Record(
         id=record_id,
         scope=str(post["scope"]),
         lifespan=str(post["lifespan"]),
         tool=str(post["tool"]),
         body=post.content,
-        source=post.get("source"),
+        source=str(raw_source) if raw_source is not None else None,
     )
 
 
