@@ -2,6 +2,55 @@
 
 ## [Unreleased]
 
+## [0.1.3] - 2026-05-17
+
+### Fixed
+- `mneva synthesize` / `digest` / `distill` now catch `MissingAPIKeyError`
+  from `get_provider(...)` and surface it as a friendly `ClickException`
+  rather than a raw stack trace. Previously, running any LLM-backed command
+  without the corresponding `<PROVIDER>_API_KEY` env var produced a
+  `Traceback` ending in `MissingAPIKeyError`. Now produces:
+  `Error: missing API key for openrouter: set OPENROUTER_API_KEY in your environment`.
+
+### Added
+- **`mneva distill --source <transcript> --scope <name>`** — extract permanent
+  records from a raw conversation transcript via the configured LLM provider.
+  Closes the second ICP gap from interview #002 (geliming):
+  > "几百条会话…我没办法提取出真正有价值的信息"
+  - Supported transcript formats: `.md`, `.txt`, `.json` (Claude Code session
+    shape `{messages: [...]}` is auto-detected; other JSON shapes pass
+    through as raw dump).
+  - Long transcripts are chunked at 80,000 chars (safe for 200k-context
+    Anthropic with a 4k response budget); each chunk = one LLM call.
+  - Cost-estimate gate: above ~$0.10 estimated the CLI prompts for
+    confirmation; `--yes` bypasses for scripted use. OpenRouter backend
+    skips the gate (pricing unknown).
+  - Content-hash dedup across chunks within one run.
+  - Records flow to `~/.mneva/store/` AND to the configured vault (if PR #9's
+    vault is set up) via the existing `_mirror_to_vault_if_configured`
+    helper.
+  - `--backend` overrides the default provider (same pattern as
+    `synthesize` / `digest`).
+- New module `mneva.distill` with `parse_transcript`, `chunk_text`,
+  `_parse_response`, `distill` orchestrator, `DistillResult`, `estimate_cost_usd`.
+- 16 new tests:
+  - `tests/unit/test_distill.py` (12) — parse formats, chunk boundaries,
+    response parse incl. fence tolerance, malformed JSON → `ProviderError`,
+    orchestrator end-to-end with mocked provider, cost estimate.
+  - `tests/integration/test_cli_distill.py` (4) — happy path, empty refuse,
+    cost-gate trigger, `--yes` bypass.
+
+### Notes
+- v0.1.x ICP-gap closure complete. The PR sequence #8 (gap fixes) → #9
+  (Obsidian) → #10 (distill) closes both cherry-picks accepted in the
+  2026-05-16 CEO review.
+- Out of scope (TODOS for v0.1.4 / v0.2):
+  - `.zip` ChatGPT export support
+  - Eval suite for distill prompt golden tests
+  - `--prompt` flag for custom extraction prompts
+  - Source-hash fingerprint persistence for cross-run idempotency
+  - README "Distill" section (doc-polish PR)
+
 ## [0.1.2] - 2026-05-17
 
 ### Added

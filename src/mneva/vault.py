@@ -117,13 +117,14 @@ def sync_from_vault(vault: Path, home: Path) -> SyncResult:
             skipped += 1
             continue
 
+        raw_source = post.get("source")
         record = Record(
             id=str(post["mneva_id"]),
             scope=str(post.get("scope", "unknown")),
             lifespan=str(post.get("lifespan", "permanent")),
             tool=str(post.get("tool", "vault")),
             body=post.content,
-            source=post.get("source"),
+            source=str(raw_source) if raw_source is not None else None,
         )
         write_record(record, home=home, overwrite=True)
         imported += 1
