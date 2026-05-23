@@ -50,17 +50,17 @@
 
 ## Overview
 
-mneva is a local-first persistent context substrate for AI-assisted development. It captures, indexes, and replays your project's insights, decisions, and history across sessions, ensuring your AI tools never start from a blank slate.
+mneva is the local-first memory layer that follows you across AI assistants. Capture a decision in Claude Desktop; ask Cursor about it tomorrow. The records live as plain Markdown under `~/.mneva/`. You own the data; mneva owns the cross-tool persistence.
+
+**v0.2 — mneva now speaks MCP.** Wire `mneva-mcp` into any Model Context Protocol client (Claude Desktop, Claude Code, Cursor, Windsurf, Cline, Continue, ChatGPT Desktop in Developer Mode) in 30 seconds. The AI client supplies the intelligence; mneva supplies the memory. No API key required for the memory layer.
 
 **Why mneva?**
 
-This project eliminates session amnesia for AI agents and developers by providing a durable, searchable memory layer that runs entirely on your machine. The core features include:
-
-- **🏠 Local-First Context Store:** All data persists in `~/.mneva` as structured markdown. Your team's knowledge stays private, offline, and under your control.
-- **🔍 Hybrid Semantic Search:** Instantly surface relevant context using BM25 keyword matching combined with optional `sqlite-vec` vector reranking, filtered by scope and lifespan.
-- **🧩 Multi-Provider AI Engine:** Seamlessly swap between Anthropic, OpenAI, Google, or OpenRouter for synthesis and brainstorming, avoiding vendor lock-in.
-- **🔄 Context Replay for AI Tools:** Generate structured prompt blocks that inject captured context directly into your AI coding sessions, cutting out repetitive explanations.
-- **🖥️ Dual CLI & API Interface:** Manage your memory interactively via `mneva capture/search/replay` commands, or integrate it into automated pipelines using the built-in FastAPI server.
+- **🔌 MCP-native memory layer:** one server, every MCP-capable AI client. `capture_memory` / `search_memory` / `forget_memory` / `list_recent_memories` / `replay_context` / `get_status` tools auto-discovered by your AI client.
+- **🏠 Local-first, plain Markdown:** records live as `.md` files under `~/.mneva/`. Open them in any editor, sync via your own Obsidian vault, version with git. mneva makes zero outbound network calls unless you opt into BYOK LLM features.
+- **🔍 Hybrid search:** BM25 keyword ranking with optional `sqlite-vec` vector reranking, filtered by scope and lifespan.
+- **🧩 Optional BYOK intelligence:** for `synthesize` / `digest` / `distill`, bring your own Anthropic / OpenAI / Google / OpenRouter key. These are advanced power-user features, not the headline.
+- **🔒 No telemetry:** mneva collects nothing. The opt-in `mneva diagnose --share` command prints a sanitized report you can copy and paste in a bug report — zero record content, stdout only.
 
 ---
 
@@ -275,40 +275,120 @@ This project eliminates session amnesia for AI agents and developers by providin
 ### Prerequisites
 
 - **Python 3.11 or newer**
-- **pipx** (`pip install --user pipx && python -m pipx ensurepath`, then reopen your terminal)
+- **uv** (recommended). If you do not already have uv:
+  - **macOS / Linux:** `curl -LsSf https://astral.sh/uv/install.sh | sh`
+  - **Windows (PowerShell):** `irm https://astral.sh/uv/install.ps1 | iex`
+  - If `uv` is not recognized after install on Windows, close and reopen your terminal (uv writes itself to PATH at install time but the change is only picked up on a fresh shell — same gotcha pipx has).
 
-### Installation
+`pipx` is still supported as a fallback; see *Alternative installs* below.
 
-Install the latest release from PyPI:
+### Wire mneva into your AI agent (the headline path)
 
-```sh
-pipx install mneva
-mneva --version
+Pick the AI client you use most. Paste the snippet into its MCP config and restart the client. The first time mneva-mcp launches it creates `~/.mneva/` automatically — no `mneva init` required.
+
+**Claude Desktop** — edit `claude_desktop_config.json`:
+
+- **macOS:** `~/Library/Application Support/Claude/claude_desktop_config.json`
+- **Windows:** `%APPDATA%\Claude\claude_desktop_config.json`
+
+```json
+{
+  "mcpServers": {
+    "mneva": {
+      "command": "uvx",
+      "args": ["mneva-mcp"],
+      "env": { "MNEVA_MCP_CLIENT": "claude-desktop" }
+    }
+  }
+}
 ```
 
-Alternative without `pipx`: `pip install --user mneva`. This installs into your user site-packages and may conflict with pinned dependencies of other tools, so `pipx` is preferred.
+**Claude Code** — edit `~/.claude.json` (or run `claude mcp add`):
 
-To install from source (development):
-
-```sh
-git clone https://github.com/mneva-ai/mneva.git
-cd mneva
-pip install -e ".[dev]"
+```json
+{
+  "mcpServers": {
+    "mneva": {
+      "command": "uvx",
+      "args": ["mneva-mcp"],
+      "env": { "MNEVA_MCP_CLIENT": "claude-code" }
+    }
+  }
+}
 ```
 
-### Usage
+**Cursor** — create `~/.cursor/mcp.json` (or `.cursor/mcp.json` in your workspace):
 
-Initialize the store, capture a record, and replay it into your AI tool:
+```json
+{
+  "mcpServers": {
+    "mneva": {
+      "command": "uvx",
+      "args": ["mneva-mcp"],
+      "env": { "MNEVA_MCP_CLIENT": "cursor" }
+    }
+  }
+}
+```
+
+**Windsurf** — edit `~/.codeium/windsurf/mcp_config.json` with the same shape (`"MNEVA_MCP_CLIENT": "windsurf"`).
+
+**ChatGPT Desktop** — MCP support is currently behind **Developer Mode (beta)** in the in-app settings; enable it and add the same config block (`"MNEVA_MCP_CLIENT": "chatgpt-desktop"`).
+
+**Cline / Continue** — both honor the same Manifest, scoped to your VS Code workspace.
+
+After restart, ask the AI client *"remember that we decided X"* and watch mneva append a record. Search it next session.
+
+### Try it from the command line
+
+The CLI is the lower-level surface — useful for scripting and for use cases where you don't have an MCP client.
 
 ```sh
-mneva init
-mneva capture --scope my-project --lifespan permanent \
+uvx mneva init
+uvx mneva capture --scope my-project --lifespan permanent \
     "decision: use SQLite over Postgres for v0 because zero-ops"
-mneva search "SQLite"
-mneva replay --tool=claude-code --scope=my-project
+uvx mneva search "SQLite"
+uvx mneva replay --tool=claude-code --scope=my-project
 ```
 
-The full walkthrough is in [`docs/alpha-onboarding.md`](./docs/alpha-onboarding.md). Per-tool wiring (Claude Code → `CLAUDE.md`, Cursor → `.cursor/rules/mneva.mdc`, Codex → `AGENTS.md`) is covered there as well.
+### Using mneva from a browser chat UI
+
+The MCP path covers desktop AI clients. Browser-only AI chat UIs (claude.ai web, chatgpt.com, gemini.google.com, chat.deepseek.com) cannot speak MCP because browsers do not allow web pages to spawn local processes. Until v0.3 ships a browser extension, the workaround is:
+
+| Your AI                                | v0.2 native support              | Workaround                                              |
+| -------------------------------------- | -------------------------------- | ------------------------------------------------------- |
+| Claude Desktop / Claude Code           | ✅ MCP                            | —                                                       |
+| Cursor / Windsurf / Cline / Continue   | ✅ MCP                            | —                                                       |
+| ChatGPT Desktop                        | ⚠️ MCP (Developer Mode beta)     | Enable Developer Mode in the app                        |
+| claude.ai web                          | ❌                                | Install Claude Desktop (same account, same memory)      |
+| chatgpt.com web                        | ❌                                | Install ChatGPT Desktop + Developer Mode                |
+| gemini.google.com                      | ❌                                | CLI manual workflow (below)                             |
+| DeepSeek web                           | ❌                                | CLI manual workflow (below)                             |
+
+**CLI manual workflow:**
+1. `uvx mneva capture --scope myproj "..."` after an interesting decision in chat.
+2. `uvx mneva search "topic"` before asking a new AI a follow-up.
+3. Copy matching records from terminal output into the new chat as context.
+
+### Alternative installs
+
+- **`pipx install mneva`** — still supported. Existing v0.1.x users running `pipx upgrade mneva` get both `mneva` and `mneva-mcp` console scripts.
+- **`uv tool install mneva` + `uv tool upgrade mneva`** — preferred over bare `uvx mneva` when you want a single pinned install that you upgrade explicitly (`uvx` resolves on first run and caches; `uvx mneva@latest` forces a fresh resolve).
+- **From source:** `git clone https://github.com/mneva-ai/mneva.git && cd mneva && pip install -e ".[dev]"`.
+
+### Advanced — BYOK LLM features
+
+`mneva synthesize`, `mneva digest`, and `mneva distill` use an external LLM provider for summarization and record extraction. They require a key in your environment (Anthropic / OpenAI / Google / OpenRouter — pick one). These are power-user features, not part of the headline MCP path.
+
+- `mneva synthesize --scope X --backend anthropic` — two-stage Stage 1 / Stage 2 brainstorming over a scope.
+- `mneva digest --scope X --backend anthropic --write-bootstrap` — distills a scope into a `bootstrap.md` you can paste into a new tool session.
+- `mneva distill --source path/to/transcript.md --scope X` — extracts permanent records from a raw conversation transcript. Cost-gated; pass `--yes` to skip the prompt.
+
+See [`docs/providers.md`](./docs/providers.md) for per-provider setup.
+
+### Observability (opt-in)
+
+`mneva diagnose [--share]` prints a sanitized status report (platform, Python version, record counts by lifespan, configured backends, per-MCP-client attribution counts, last activity timestamp). The output goes to stdout only — mneva never sends it anywhere. Run it and paste the result into a bug report when something looks off.
 
 ### Testing
 
@@ -318,18 +398,19 @@ Tests use **pytest** with `pytest-asyncio` and `pytest-cov`. From a source check
 pytest
 ```
 
-CI runs the full matrix (ubuntu / macos / windows × Python 3.11 / 3.12) on every PR via [`.github/workflows/ci.yml`](./.github/workflows/ci.yml).
+CI runs the full matrix (ubuntu / macos / windows × Python 3.11 / 3.12 / 3.13 / 3.14) on every PR via [`.github/workflows/ci.yml`](./.github/workflows/ci.yml).
 
 ---
 
 ## Roadmap
 
-Mneva is in **alpha (v0.1.0)**. The CLI, store, indexer, replay templates, and HTTP API are all working. The next milestones, drawn from the known limitations in [`CHANGELOG.md`](./CHANGELOG.md):
+mneva is in **alpha**. v0.2 ships the MCP layer plus uvx-first install. Milestones:
 
 - [X] **v0.1.0** — CLI + store + BM25/sqlite-vec index + replay templates + HTTP API + four-provider BYOK
-- [ ] **v0.1.x** — Stability fixes, docs polish, expanded CI matrix (Python 3.14)
-- [ ] **v1** — MCP server endpoint, auto-distillation of long scopes
-- [ ] **v2** — Opt-in cloud sync (single-user → small-team)
+- [X] **v0.1.x** — Gap fixes, Obsidian vault read-write integration, `mneva distill`, CI matrix forward-defense
+- [X] **v0.2** — MCP server (`mneva-mcp` console script + 6 FastMCP tools), `uvx`-first install, WAL concurrency for cross-process safety, opt-in `mneva diagnose --share` observability
+- [ ] **v0.3** — Browser extension (Chrome / Firefox / Edge, Manifest V3) so chat UIs that cannot spawn MCP subprocesses (chatgpt.com, claude.ai web, gemini.google.com, DeepSeek) still see mneva. Entry condition: ≥10 real users + ≥3 explicit asks via `mneva diagnose --share`.
+- [ ] **v1+** — Native GUI installer for non-technical users; optional hosted `mneva.app` SaaS for phone / multi-device sync.
 
 ---
 

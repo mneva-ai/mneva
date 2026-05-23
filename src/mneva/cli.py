@@ -474,5 +474,24 @@ def distill(source: Path, scope: str, backend: str | None, yes: bool) -> None:
         click.echo(f"  {rec.id}  {preview}")
 
 
+@app.command()
+@click.option(
+    "--share",
+    is_flag=True,
+    default=False,
+    help="Verbose mode + share instructions. Output still goes to stdout only.",
+)
+def diagnose(share: bool) -> None:
+    """Print a sanitized diagnostic report. Opt-in, zero record content.
+
+    The output is safe to paste in a bug report — it contains platform,
+    Python version, mneva state, record counts, and per-client MCP
+    attribution counts, but NO record bodies, ids, or scopes-from-data.
+    """
+    from mneva.diagnose import render_diagnose
+
+    click.echo(render_diagnose(share=share), nl=False)
+
+
 if __name__ == "__main__":
     app()
