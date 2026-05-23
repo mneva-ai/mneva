@@ -2,6 +2,93 @@
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-05-22
+
+### Added
+- **MCP server (`mneva-mcp`)** — mneva now speaks Model Context Protocol so any
+  MCP-capable AI client (Claude Desktop, Claude Code, Cursor, Windsurf, Cline,
+  Continue, ChatGPT Desktop in Developer Mode) reads and writes mneva memories
+  natively. No API key required for the memory layer — the AI client supplies
+  the intelligence; mneva supplies the cross-session, cross-tool persistence.
+  - New module `mneva.mcp_server` using the official `mcp>=1.10,<2` SDK
+    (FastMCP decorator API).
+  - Six tools: `capture_memory`, `search_memory`, `forget_memory`,
+    `list_recent_memories`, `replay_context`, `get_status`.
+  - Each tool returns a dict with a human-readable `summary` field so the AI
+    client can speak "I remembered that" instead of returning silent ids.
+  - New console script `mneva-mcp` (entry point `mneva.mcp_server:main`).
+  - Auto-init on first run: missing `~/.mneva/` materializes via
+    `ensure_home()` + `load_or_init_config()` so users do not have to run
+    `mneva init` before wiring the MCP server.
+  - Startup failures (`OSError` on filesystem operations) write a structured
+    line to `stderr` and exit with code 2 so MCP hosts can surface a
+    diagnosable error.
+  - Client attribution via the `MNEVA_MCP_CLIENT` env var declared in each
+    client's MCP config block. Each tool call appends to
+    `~/.mneva/.mcp-attribution.log` (1 MB cap, monthly rotation; counts only,
+    zero record content).
+- **`mneva diagnose [--share]`** — opt-in, user-initiated observability
+  command. Prints a sanitized report (platform, Python version, mneva home
+  state, sqlite-vec mode, record counts by lifespan, configured backends,
+  per-client MCP attribution counts, last capture timestamp). The `--share`
+  flag controls verbosity; output stays on stdout, the user copies manually.
+  Zero passive collection — README's "no telemetry" promise stands.
+- **`uvx mneva-mcp` (and `uvx mneva`) install path** — README headline switches
+  to `uvx` for zero-install ad-hoc runs. `pipx` remains supported.
+- **WAL journal mode on the SQLite index** — `Indexer.__init__` now opens the
+  connection with `timeout=5.0` and immediately enables
+  `PRAGMA journal_mode=WAL`, `busy_timeout=5000`,
+  `synchronous=NORMAL`. Enables multiple `mneva-mcp` processes (one per AI
+  client) to read and write the same store concurrently without
+  `database is locked` errors. Existing v0.1.x databases auto-upgrade on first
+  open; no migration needed.
+- **`Record.to_dict()`** — single-source dataclass-to-dict helper used by the
+  MCP server tools (and reusable by the HTTP API surface later). Replaces
+  ad-hoc field-by-field serialization that would have duplicated 6 times
+  across the MCP tools.
+- Test additions:
+  - `tests/unit/test_mcp_server.py` — per-tool happy + edge + error coverage,
+    plus three IRON regression cases (auto-init on first run, env-var
+    attribution, `Record.to_dict` round-trip stability).
+  - `tests/unit/test_diagnose.py` — diagnose output + `--share` verbosity +
+    zero-record-content sanity check.
+  - `tests/integration/test_mcp_protocol.py` — `mcp.client.stdio.stdio_client`
+    round-trip (`initialize` → `tools/list` → `tools/call`).
+  - `tests/integration/test_concurrent_capture.py` — two-subprocess
+    concurrent capture + WAL-upgrade-from-legacy-DB regression.
+
+### Changed
+- README rewritten: `uvx mneva-mcp` headline + per-client MCP config snippets
+  (Claude Desktop, Claude Code, Cursor, Windsurf, ChatGPT Desktop, Cline,
+  Continue). BYOK features (`synthesize` / `digest` / `distill`) moved to an
+  "Advanced — BYOK features" section below the AI-agent wiring.
+- README adds a "Using mneva from a browser chat UI" subsection documenting
+  the v0.2 limitation (browser-only AIs cannot speak MCP) and the manual CLI
+  workaround until v0.3 ships a browser extension.
+- `pyproject.toml`: `mcp>=1.10,<2` dependency, `mneva-mcp` console script,
+  classifiers extended to Python 3.13 and 3.14, `Homepage` switched from the
+  parked `mneva.org` placeholder to the GitHub repo URL.
+- `install-verify.yml` matrix extended with a `uvx --from . mneva-mcp` cell
+  driving the SDK's `stdio_client` for a `tools/list` smoke check.
+
+### Notes
+- v0.1.x (pipx-based) install path remains supported. Existing users running
+  `pipx upgrade mneva` get both `mneva` and `mneva-mcp` console scripts.
+- `synthesize` / `digest` / `distill` (BYOK LLM features) intentionally NOT
+  exposed via MCP — they require provider keys + slow LLM calls and would
+  break the "instant local memory" MCP value proposition. They remain
+  CLI-only Advanced features.
+- v0.3 roadmap: browser extension for chat.openai.com / claude.ai /
+  gemini.google.com / chat.deepseek.com via Manifest V3 + Chrome Native
+  Messaging. Entry condition: v0.2 reaches ≥10 real users (verified via
+  `mneva diagnose --share` reports) AND ≥3 request browser-UI support.
+- v1+ roadmap: GUI installer for non-technical users + potential hosted
+  `mneva.app` SaaS. Both gated on validated demand from technical users
+  first; see `D:/AI/specs/mneva-v0.2-plan.md`-equivalent plan file.
+- Multi-user feedback after v0.1.x ship surfaced two friction blockers —
+  BYOK and `pipx` install — which drove the v0.2 product-form pivot from
+  "CLI users operate directly" to "AI clients read/write mneva via MCP".
+
 ## [0.1.3] - 2026-05-17
 
 ### Fixed

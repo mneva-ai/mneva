@@ -36,7 +36,14 @@ class Indexer:
     def __init__(self, db_path: Path) -> None:
         self._db_path = db_path
         self._home = db_path.parent
-        self._conn = sqlite3.connect(db_path)
+        # WAL + busy_timeout enable concurrent mneva-mcp processes (one per AI
+        # client) to share the same store without `database is locked` errors.
+        # WAL persists on the file once any connection enables it, so existing
+        # v0.1.x databases auto-upgrade on first v0.2 open with no migration.
+        self._conn = sqlite3.connect(db_path, timeout=5.0)
+        self._conn.execute("PRAGMA journal_mode=WAL")
+        self._conn.execute("PRAGMA busy_timeout=5000")
+        self._conn.execute("PRAGMA synchronous=NORMAL")
         self._conn.row_factory = sqlite3.Row
         self._has_vec = try_load_sqlite_vec(self._conn)
         self._init_schema()

@@ -25,6 +25,11 @@ jobs:
       - name: Install mneva
         shell: bash
         run: python -m pipx install "mneva==${MNEVA_VERSION#v}"
-      - name: Smoke
+      - name: Smoke (CLI)
         shell: bash
         run: pipx run mneva --version
+      - name: Smoke (MCP stdio)
+        shell: bash
+        run: |
+          python -m pip install "mcp>=1.10,<2"
+          python .github/scripts/mcp_smoke.py

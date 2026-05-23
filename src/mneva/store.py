@@ -5,6 +5,7 @@ import time
 from collections.abc import Iterator
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any
 
 import frontmatter
 
@@ -17,6 +18,17 @@ class Record:
     tool: str
     body: str
     source: str | None = None
+
+    def to_dict(self) -> dict[str, Any]:
+        """Single-source serialization for MCP tools (and any future caller)."""
+        return {
+            "id": self.id,
+            "scope": self.scope,
+            "lifespan": self.lifespan,
+            "tool": self.tool,
+            "body": self.body,
+            "source": self.source,
+        }
 
 
 def make_record_id(scope: str, body: str) -> str:
