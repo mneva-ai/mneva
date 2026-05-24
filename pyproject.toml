@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "mneva"
-version = "0.2.0"
+dynamic = ["version"]
 description = "Persistent agent context substrate. Local-first CLI."
 readme = "README.md"
 license = { file = "LICENSE" }
@@ -56,6 +56,9 @@ Issues = "https://github.com/mneva-ai/mneva/issues"
 [project.scripts]
 mneva = "mneva.cli:app"
 mneva-mcp = "mneva.mcp_server:main"
+
+[tool.hatch.version]
+path = "src/mneva/__init__.py"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/mneva"]

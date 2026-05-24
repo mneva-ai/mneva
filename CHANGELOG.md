@@ -2,6 +2,23 @@
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-05-23
+
+### Added
+- **`mneva upgrade`** — one command to update mneva to the latest published
+  version. Detects how the running interpreter was installed (pipx, `uv tool`,
+  `uvx`, or plain `pip`) from `sys.prefix` and runs the matching upgrade
+  command, so users don't have to remember which installer they used. `--dry-run`
+  prints the detected command without running it. For an ephemeral `uvx` run it
+  reports that nothing needs upgrading (uvx always fetches the latest).
+
+### Fixed
+- **`mneva --version` reported the wrong version.** The version was duplicated
+  in `pyproject.toml` and `src/mneva/__init__.py`; the latter was not bumped at
+  0.2.0 release, so `mneva --version` and `mneva diagnose` printed `0.1.3`.
+  Version is now sourced solely from `src/mneva/__init__.py` via Hatchling's
+  dynamic version (`[tool.hatch.version]`), eliminating the drift permanently.
+
 ## [0.2.0] - 2026-05-22
 
 ### Added
