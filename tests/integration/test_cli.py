@@ -5,6 +5,7 @@ from pathlib import Path
 
 from click.testing import CliRunner
 
+import mneva
 from mneva.cli import app
 
 
@@ -12,7 +13,9 @@ def test_version_flag_prints_version() -> None:
     runner = CliRunner()
     result = runner.invoke(app, ["--version"])
     assert result.exit_code == 0
-    assert "0.1.3" in result.output
+    # Tie --version to the package version (single source: src/mneva/__init__.py)
+    # rather than a hardcoded literal, so a future bump can't drift undetected.
+    assert mneva.__version__ in result.output
 
 
 def test_help_lists_core_commands() -> None:
