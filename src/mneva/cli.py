@@ -85,9 +85,7 @@ def capture(
     if body == "-":
         body = sys.stdin.read()
     elif body is None:
-        raise click.ClickException(
-            "body required: pass as positional argument or '-' for stdin"
-        )
+        raise click.ClickException("body required: pass as positional argument or '-' for stdin")
     if not body.strip():
         raise click.ClickException("body is empty")
     home = ensure_home()
@@ -246,9 +244,7 @@ def sync_vault_cmd() -> None:
     except ConfigError as e:
         raise click.ClickException(str(e)) from e
     if not cfg.vault_path:
-        raise click.ClickException(
-            "no vault configured; run `mneva config set-vault <path>` first"
-        )
+        raise click.ClickException("no vault configured; run `mneva config set-vault <path>` first")
     try:
         result = sync_from_vault(Path(cfg.vault_path), home)
     except VaultError as e:
@@ -449,8 +445,7 @@ def distill(source: Path, scope: str, backend: str | None, yes: bool) -> None:
         )
     else:
         click.echo(
-            f"distill: {len(chunks)} chunk(s), backend={chosen}, "
-            f"estimated cost ~${estimate:.2f}",
+            f"distill: {len(chunks)} chunk(s), backend={chosen}, estimated cost ~${estimate:.2f}",
             err=True,
         )
 
@@ -491,6 +486,43 @@ def diagnose(share: bool) -> None:
     from mneva.diagnose import render_diagnose
 
     click.echo(render_diagnose(share=share), nl=False)
+
+
+@app.command()
+@click.option(
+    "--dry-run",
+    is_flag=True,
+    default=False,
+    help="Show how mneva would update without running anything.",
+)
+def upgrade(dry_run: bool) -> None:
+    """Update mneva to the latest published version.
+
+    Detects how mneva was installed (pipx, uv tool, uvx, or pip) and runs the
+    matching upgrade command, so you don't have to remember which one you used.
+    Use --dry-run to see the command first.
+    """
+    import subprocess
+
+    from mneva.upgrade import detect_install_method, plan_for
+
+    plan = plan_for(detect_install_method())
+    click.echo(plan.message)
+    if plan.command is None:
+        return
+    if dry_run:
+        click.echo(f"(dry-run) would run: {' '.join(plan.command)}")
+        return
+    try:
+        result = subprocess.run(plan.command, check=False)  # noqa: S603
+    except FileNotFoundError as e:
+        raise click.ClickException(
+            f"could not find '{plan.command[0]}' on PATH. "
+            f"Update manually with: {' '.join(plan.command)}"
+        ) from e
+    if result.returncode != 0:
+        raise click.ClickException(f"upgrade command exited with status {result.returncode}")
+    click.echo("mneva upgrade complete. Run `mneva --version` to confirm.")
 
 
 if __name__ == "__main__":
