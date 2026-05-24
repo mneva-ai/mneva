@@ -27,6 +27,8 @@
 </div>
 <br clear="right">
 
+**English** | [中文](./README.zh-CN.md)
+
 ---
 
 ## Table of Contents
@@ -375,6 +377,14 @@ The MCP path covers desktop AI clients. Browser-only AI chat UIs (claude.ai web,
 - **`pipx install mneva`** — still supported. Existing v0.1.x users running `pipx upgrade mneva` get both `mneva` and `mneva-mcp` console scripts.
 - **`uv tool install mneva` + `uv tool upgrade mneva`** — preferred over bare `uvx mneva` when you want a single pinned install that you upgrade explicitly (`uvx` resolves on first run and caches; `uvx mneva@latest` forces a fresh resolve).
 - **From source:** `git clone https://github.com/mneva-ai/mneva.git && cd mneva && pip install -e ".[dev]"`.
+
+### Updating mneva
+
+```sh
+mneva upgrade
+```
+
+`mneva upgrade` detects how mneva was installed (`pipx` / `uv tool` / `uvx` / `pip`) and runs the matching update command, so you don't have to remember which one you used. Pass `--dry-run` to print the command without running it. If you run via bare `uvx mneva-mcp`, uvx already fetches the latest published version on each run, so there is nothing to upgrade.
 
 ### Advanced — BYOK LLM features
 
