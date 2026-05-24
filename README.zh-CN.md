@@ -35,7 +35,7 @@
 
 - [目录](#目录)
 - [概览](#概览)
-- [功能特性](#功能特性)
+- [你能得到什么](#你能得到什么)
 - [项目结构](#项目结构)
     - [项目索引](#项目索引)
 - [快速开始](#快速开始)
@@ -57,33 +57,37 @@
 
 ## 概览
 
-mneva 是一个本地优先的记忆层，能跟随你穿梭于各个 AI 助手之间。在 Claude Desktop 里记下一个决定，明天在 Cursor 里就能问到它。所有记录都以纯 Markdown 文件的形式存放在 `~/.mneva/` 下。数据归你所有，mneva 负责让它跨工具持久存在。
+**问题在哪：** 每个 AI 助手都健忘。开个新对话，你就得把项目从头解释一遍；从 Claude 换到 Cursor，上下文又跟不过去。你花时间教给一个工具的那些决定、约束和事实，下一个工具完全看不到。
+
+**mneva 就是来解决这个的。** 它是一个本地优先的记忆层，能跟随你穿梭于各个 AI 助手之间。在 Claude Desktop 里记下一个决定，明天在 Cursor 里就能问到它。所有记录都以纯 Markdown 文件的形式存放在 `~/.mneva/` 下——数据归你所有，mneva 负责让它跨工具持久存在。
 
 **v0.2 — mneva 现在会说 MCP 了。** 把 `mneva-mcp` 接进任何支持模型上下文协议（Model Context Protocol，MCP）的客户端（Claude Desktop、Claude Code、Cursor、Windsurf、Cline、Continue，以及开发者模式下的 ChatGPT Desktop），只需 30 秒。AI 客户端负责智能，mneva 负责记忆。记忆层本身不需要任何 API 密钥。
 
-**为什么用 mneva？**
-
-- **🔌 MCP 原生的记忆层：** 一个服务，对接所有支持 MCP 的 AI 客户端。`capture_memory` / `search_memory` / `forget_memory` / `list_recent_memories` / `replay_context` / `get_status` 这些工具会被你的 AI 客户端自动发现。
-- **🏠 本地优先、纯 Markdown：** 记录以 `.md` 文件形式存放在 `~/.mneva/` 下。可以用任何编辑器打开、通过你自己的 Obsidian 仓库同步、用 git 做版本管理。除非你主动启用自带密钥（BYOK）的 LLM 功能，否则 mneva 不会发起任何对外网络请求。
-- **🔍 混合搜索：** BM25 关键词排序，配合可选的 `sqlite-vec` 向量重排，并可按 scope（范围）和 lifespan（生命周期）过滤。
-- **🧩 可选的自带密钥智能：** `synthesize` / `digest` / `distill` 这几个命令支持自带 Anthropic / OpenAI / Google / OpenRouter 的密钥。它们是面向高级用户的功能，不是主打卖点。
-- **🔒 零遥测：** mneva 不收集任何东西。可选的 `mneva diagnose --share` 命令会打印一份脱敏报告，你可以复制粘贴到 bug 反馈里 — 不含任何记录内容，只输出到标准输出（stdout）。
-
 ---
 
-## 功能特性
+## 你能得到什么
 
-|      | 组件       | 说明                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| :--- | :-------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| ⚙️  | **架构**  | <ul><li>**FastAPI** Web 服务，搭配 **Uvicorn** ASGI 服务器</li><li>异步（async/await）设计，实现非阻塞 I/O</li><li>类 RAG 流水线：**BM25** 关键词排序 + **sqlite‑vec** 向量相似度</li><li>基于 **Click** 的命令行接口</li><li>模块化路由结构，分离各 AI 服务商的接口</li></ul>                                                                       |
-| 🔩 | **代码质量**  | <ul><li>用 **mypy** 做静态类型检查（配置见 <code>mypy.ini</code>）</li><li>用 **ruff** 做代码检查与格式化</li><li>用 **pytest‑cov** 强制覆盖率</li><li>CI 流程（<code>ci.yml</code>）运行检查、类型检查和测试</li><li>通过 <code>install-verify.yml</code> 验证打包</li></ul>                                                                                                                                       |
-| 📄 | **文档** | <ul><li>Apache 2.0 **许可证**（见 <code>LICENSE</code>）</li><li>用户文档在 <code>docs/</code>：<code>alpha-onboarding.md</code>、<code>providers.md</code></li><li>所有公开的命令行命令和 API 接口都有内联文档字符串</li></ul>                                                                                                                                                                                                                  |
-| 🔌 | **集成**  | <ul><li>**OpenAI**（GPT 系列模型）</li><li>**Anthropic**（Claude 系列模型）</li><li>**Google Generative AI**（Gemini）</li><li>用 **rank‑bm25** 做关键词检索</li><li>用 **sqlite‑vec** 做向量存储与相似度搜索</li><li>**python‑frontmatter**（解析 YAML/JSON 元数据）</li></ul>                                                                                                                                                                       |
-| 🧩 | **模块化**    | <ul><li>每个 AI 服务一个独立的 provider 模块</li><li>配置分散在 <code>pyproject.toml</code>、<code>mypy.ini</code>、<code>pytest.ini</code> 和 CI 的 YAML 文件中</li><li>清晰区分开发依赖与生产依赖（测试、检查、打包）</li><li>基于路由的 FastAPI 应用结构</li></ul>                                                                                                                                    |
-| 🧪 | **测试**       | <ul><li>用 **pytest** 做测试运行器，**pytest‑asyncio** 跑异步测试</li><li>用 **pytest‑cov** 测量覆盖率</li><li>CI 流程（<code>ci.yml</code>）在每次推送时执行测试</li><li>安装验证流程确保包能正确构建</li></ul>                                                                                                                                                                                  |
-| ⚡️  | **性能**   | <ul><li>通过 **Uvicorn** 和 **FastAPI** 做异步请求处理</li><li>**sqlite‑vec** 提供快速的近似最近邻搜索</li><li>**rank‑bm25** 提供高效的关键词打分</li><li>暂无明确的基准测试数据；性能受单节点 SQLite 限制</li></ul>                                                                                                                                                                               |
-| 🛡️ | **安全**      | <ul><li>各 AI 服务商的 API 密钥通过环境变量传入（标准做法）</li><li>暂未引入注入/漏洞检测工具（如 Bandit）</li><li>**httpx** 的对外请求使用 HTTPS</li><li>CI 中未显式强制密钥处理规范</li></ul>                                                                                                                                                                                             |
-| 📦 | **依赖**  | <ul><li><b>运行时：</b> <code>fastapi</code>、<code>uvicorn</code>、<code>click</code>、<code>httpx</code>、<code>openai</code>、<code>anthropic</code>、<code>google‑generativeai</code>、<code>rank‑bm25</code>、<code>sqlite‑vec</code>、<code>python‑frontmatter</code></li><li><b>开发：</b> <code>pytest</code>、<code>pytest‑asyncio</code>、<code>pytest‑cov</code>、<code>ruff</code>、<code>mypy</code>、<code>twine</code>、<code>build</code></li></ul> |
+- **🧠 跨工具的记忆。** 在一个 AI 客户端里记下，在另一个里就能调出。你的上下文不再困死在单个聊天窗口里。
+- **⚡ 零密钥、30 秒配好。** MCP 记忆层不需要任何 API 密钥——智能由你的 AI 客户端提供。粘一段配置、重启、搞定。
+- **🏠 数据在你自己硬盘上。** 记录就是 `~/.mneva/` 下的纯 `.md` 文件。用任何编辑器打开、通过你自己的 Obsidian 仓库同步、用 git 做版本管理。没有服务器、没有账号、不上传。
+- **🔍 搜得准。** BM25 关键词排序 + 可选的 `sqlite-vec` 向量重排，可按项目范围（scope）和记忆该存多久（临时 / 永久）过滤。
+- **🔒 默认私密。** 除非你主动启用进阶的 BYOK 功能，否则 mneva 不发起任何对外网络请求。永不遥测——唯一会“吐”东西的是可选的 `mneva diagnose --share`，而且它只把结果给到你的剪贴板，不是发给我们。
+
+### 用之前 / 用之后
+
+**没有 mneva 时**，每个新会话都这样开头：
+
+> “先交代下背景：我们用的是 SQLite 不是 Postgres，鉴权在 `auth.ts` 里，websocket 那个方案我们已经否了……”
+
+**有了 mneva**，你只说一次。之后你接入的任何 AI 客户端都直接知道——跨对话、跨工具、跨天。
+
+### 技术细节（实打实）
+
+- **Python 3.11+**，一个独立命令行（`mneva`）加一个 MCP 服务器（`mneva-mcp`）。
+- **MCP 服务器** 基于官方 `mcp` SDK（FastMCP），暴露 6 个会被你的 AI 客户端自动发现的工具：`capture_memory`、`search_memory`、`forget_memory`、`list_recent_memories`、`replay_context`、`get_status`。
+- **存储：** `~/.mneva/` 下的纯 Markdown + YAML frontmatter，用 SQLite 建索引（WAL 模式，支持多个 AI 客户端并发安全访问）。
+- **搜索：** `rank-bm25` 关键词打分 + 可选的 `sqlite-vec` 向量重排。
+- **可选 HTTP API**（`mneva serve`，FastAPI）和 **BYOK 服务商**（Anthropic / OpenAI / Google / OpenRouter）支撑进阶的 `synthesize` / `digest` / `distill` 命令。
 
 ---
 
