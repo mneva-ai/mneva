@@ -35,7 +35,7 @@
 
 - [Table of Contents](#table-of-contents)
 - [Overview](#overview)
-- [Features](#features)
+- [What you get](#what-you-get)
 - [Project Structure](#project-structure)
     - [Project Index](#project-index)
 - [Getting Started](#getting-started)
@@ -52,33 +52,37 @@
 
 ## Overview
 
-mneva is the local-first memory layer that follows you across AI assistants. Capture a decision in Claude Desktop; ask Cursor about it tomorrow. The records live as plain Markdown under `~/.mneva/`. You own the data; mneva owns the cross-tool persistence.
+**The problem:** every AI assistant forgets. Open a new chat and you re-explain your project from scratch. Switch from Claude to Cursor and the context doesn't follow. The decisions, constraints, and facts you spent time teaching one tool are invisible to the next.
+
+**mneva fixes that.** It's a local-first memory layer that follows you across AI assistants. Capture a decision in Claude Desktop; ask Cursor about it tomorrow. Records live as plain Markdown under `~/.mneva/` — you own the data, mneva owns the cross-tool persistence.
 
 **v0.2 — mneva now speaks MCP.** Wire `mneva-mcp` into any Model Context Protocol client (Claude Desktop, Claude Code, Cursor, Windsurf, Cline, Continue, ChatGPT Desktop in Developer Mode) in 30 seconds. The AI client supplies the intelligence; mneva supplies the memory. No API key required for the memory layer.
 
-**Why mneva?**
-
-- **🔌 MCP-native memory layer:** one server, every MCP-capable AI client. `capture_memory` / `search_memory` / `forget_memory` / `list_recent_memories` / `replay_context` / `get_status` tools auto-discovered by your AI client.
-- **🏠 Local-first, plain Markdown:** records live as `.md` files under `~/.mneva/`. Open them in any editor, sync via your own Obsidian vault, version with git. mneva makes zero outbound network calls unless you opt into BYOK LLM features.
-- **🔍 Hybrid search:** BM25 keyword ranking with optional `sqlite-vec` vector reranking, filtered by scope and lifespan.
-- **🧩 Optional BYOK intelligence:** for `synthesize` / `digest` / `distill`, bring your own Anthropic / OpenAI / Google / OpenRouter key. These are advanced power-user features, not the headline.
-- **🔒 No telemetry:** mneva collects nothing. The opt-in `mneva diagnose --share` command prints a sanitized report you can copy and paste in a bug report — zero record content, stdout only.
-
 ---
 
-## Features
+## What you get
 
-|      | Component       | Details                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| :--- | :-------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| ⚙️  | **Architecture**  | <ul><li>**FastAPI** web service with **Uvicorn** ASGI server</li><li>Async/await design for non‑blocking I/O</li><li>RAG‑like pipeline: **BM25** keyword ranking + **sqlite‑vec** vector similarity</li><li>CLI interface via **Click** (inferred from dependency)</li><li>Modular router structure for separate AI provider endpoints</li></ul>                                                                                                                       |
-| 🔩 | **Code Quality**  | <ul><li>Static type checking with **mypy** (config in <code>mypy.ini</code>)</li><li>Linting + formatting with **ruff**</li><li>Code coverage enforced via **pytest‑cov**</li><li>CI workflow (<code>ci.yml</code>) runs lint, type‑check, and tests</li><li>Packaging verified via <code>install-verify.yml</code></li></ul>                                                                                                                                       |
-| 📄 | **Documentation** | <ul><li>Apache 2.0 **License** (see <code>LICENSE</code>)</li><li>User docs in <code>docs/</code>: <code>alpha-onboarding.md</code>, <code>providers.md</code></li><li>Inline docstrings on all public CLI commands and API endpoints</li></ul>                                                                                                                                                                                                                  |
-| 🔌 | **Integrations**  | <ul><li>**OpenAI** (GPT models)</li><li>**Anthropic** (Claude models)</li><li>**Google Generative AI** (Gemini)</li><li>**rank‑bm25** for keyword retrieval</li><li>**sqlite‑vec** for vector storage & similarity search</li><li>**python‑frontmatter** (YAML/JSON metadata parsing)</li></ul>                                                                                                                                                                       |
-| 🧩 | **Modularity**    | <ul><li>Separate provider modules per AI service</li><li>Configuration split across <code>pyproject.toml</code>, <code>mypy.ini</code>, <code>pytest.ini</code>, and CI YAML files</li><li>Clear dev‑vs‑prod dependency groups (testing, linting, packaging)</li><li>Router‑based FastAPI app structure (common pattern)</li></ul>                                                                                                                                    |
-| 🧪 | **Testing**       | <ul><li>**pytest** as test runner with **pytest‑asyncio** for async tests</li><li>**pytest‑cov** for coverage measurement</li><li>CI pipeline (<code>ci.yml</code>) executes tests on each push</li><li>Installation verification workflow ensures package builds correctly</li></ul>                                                                                                                                                                                  |
-| ⚡️  | **Performance**   | <ul><li>Async request handling via **Uvicorn** and **FastAPI**</li><li>**sqlite‑vec** provides fast approximate nearest neighbor search</li><li>**rank‑bm25** delivers efficient keyword scoring</li><li>No explicit benchmark data; performance limited by single‑node SQLite</li></ul>                                                                                                                                                                               |
-| 🛡️ | **Security**      | <ul><li>API keys for AI providers expected via environment variables (standard practice)</li><li>No injection/flaw detection tools visible (e.g., Bandit)</li><li>**httpx** uses HTTPS for outbound calls</li><li>Secrets handling not explicitly enforced in CI</li></ul>                                                                                                                                                                                             |
-| 📦 | **Dependencies**  | <ul><li><b>Runtime:</b> <code>fastapi</code>, <code>uvicorn</code>, <code>click</code>, <code>httpx</code>, <code>openai</code>, <code>anthropic</code>, <code>google‑generativeai</code>, <code>rank‑bm25</code>, <code>sqlite‑vec</code>, <code>python‑frontmatter</code></li><li><b>Dev:</b> <code>pytest</code>, <code>pytest‑asyncio</code>, <code>pytest‑cov</code>, <code>ruff</code>, <code>mypy</code>, <code>twine</code>, <code>build</code></li></ul> |
+- **🧠 Memory that crosses tools.** Capture a fact in one AI client, recall it in another. Your context stops dying inside a single chat window.
+- **⚡ Zero-key, 30-second setup.** The MCP memory layer needs no API key — your AI client already supplies the intelligence. One config block, restart, done.
+- **🏠 Your data, on your disk.** Records are plain `.md` files under `~/.mneva/`. Read them in any editor, sync them through your own Obsidian vault, version them with git. No server, no account, no upload.
+- **🔍 Search that finds the right memory.** BM25 keyword ranking with optional `sqlite-vec` vector reranking, filtered by project scope and by how long a memory should live (transient vs permanent).
+- **🔒 Private by default.** mneva makes zero outbound network calls unless you opt into the advanced BYOK features. No telemetry, ever — the opt-in `mneva diagnose --share` is the only thing that emits anything, and it goes to your clipboard, not to us.
+
+### Before / after
+
+**Without mneva**, every new session starts the same way:
+
+> "Quick context: we're on SQLite not Postgres, auth lives in `auth.ts`, and we already ruled out websockets…"
+
+**With mneva**, you said it once. Any AI client you wire up just knows — across chats, across tools, across days.
+
+### Under the hood
+
+- **Python 3.11+**, one self-contained CLI (`mneva`) plus an MCP server (`mneva-mcp`).
+- **MCP server** built on the official `mcp` SDK (FastMCP), exposing six tools your AI client auto-discovers: `capture_memory`, `search_memory`, `forget_memory`, `list_recent_memories`, `replay_context`, `get_status`.
+- **Storage:** plain Markdown + YAML frontmatter under `~/.mneva/`, indexed by SQLite (WAL mode for safe concurrent access from multiple AI clients).
+- **Search:** `rank-bm25` keyword scoring with optional `sqlite-vec` vector reranking.
+- **Optional HTTP API** (`mneva serve`, FastAPI) and **BYOK providers** (Anthropic / OpenAI / Google / OpenRouter) power the advanced `synthesize` / `digest` / `distill` commands.
 
 ---
 
@@ -251,11 +255,11 @@ mneva is the local-first memory layer that follows you across AI assistants. Cap
 								</tr>
 								<tr style='border-bottom: 1px solid #eee;'>
 									<td style='padding: 8px;'><b><a href='https://github.com/mneva-ai/mneva/blob/main/src\mneva/providers/google.py'>google.py</a></b></td>
-									<td style='padding: 8px;'>- Configures the Google Generative AI provider as part of the provider abstraction layer, defaulting to the gemini-2.0-pro model with 1M-token context window<br>- It retrieves the API key from environment variables and exposes a completion interface for generating text responses, seamlessly integrating into the mneva ecosystem for multi-provider support.</td>
+									<td style='padding: 8px;'>- Configures the Google Generative AI provider as part of the provider abstraction layer, using Google's Gemini models<br>- It retrieves the API key from environment variables and exposes a completion interface for generating text responses, seamlessly integrating into the mneva ecosystem for multi-provider support.</td>
 								</tr>
 								<tr style='border-bottom: 1px solid #eee;'>
 									<td style='padding: 8px;'><b><a href='https://github.com/mneva-ai/mneva/blob/main/src\mneva/providers/openai.py'>openai.py</a></b></td>
-									<td style='padding: 8px;'>- Provides integration with OpenAIs GPT-5 model as the default provider for completions<br>- Handles API key authentication from environment variables and offers a simple interface to generate text responses<br>- This enables the mneva system to leverage OpenAIs large language models for various tasks.</td>
+									<td style='padding: 8px;'>- Provides integration with OpenAI's GPT models as a provider for completions<br>- Handles API key authentication from environment variables and offers a simple interface to generate text responses<br>- This enables the mneva system to leverage OpenAIs large language models for various tasks.</td>
 								</tr>
 								<tr style='border-bottom: 1px solid #eee;'>
 									<td style='padding: 8px;'><b><a href='https://github.com/mneva-ai/mneva/blob/main/src\mneva/providers/openrouter.py'>openrouter.py</a></b></td>
