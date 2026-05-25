@@ -292,6 +292,8 @@
 
 Pick the AI client you use most. Paste the snippet into its MCP config and restart the client. The first time mneva-mcp launches it creates `~/.mneva/` automatically — no `mneva init` required.
 
+> **First launch is slow, then instant.** The first run downloads mneva and its dependencies (a few seconds) and caches them. If your client flags the server as slow or failed on the very first try, restart the client once — it connects from cache immediately. To pre-warm, run `uvx --from mneva mneva-mcp` once in a terminal and press Ctrl-C after it starts.
+
 **Claude Desktop** — edit `claude_desktop_config.json`:
 
 - **macOS:** `~/Library/Application Support/Claude/claude_desktop_config.json`
@@ -302,7 +304,7 @@ Pick the AI client you use most. Paste the snippet into its MCP config and resta
   "mcpServers": {
     "mneva": {
       "command": "uvx",
-      "args": ["mneva-mcp"],
+      "args": ["--from", "mneva", "mneva-mcp"],
       "env": { "MNEVA_MCP_CLIENT": "claude-desktop" }
     }
   }
@@ -316,7 +318,7 @@ Pick the AI client you use most. Paste the snippet into its MCP config and resta
   "mcpServers": {
     "mneva": {
       "command": "uvx",
-      "args": ["mneva-mcp"],
+      "args": ["--from", "mneva", "mneva-mcp"],
       "env": { "MNEVA_MCP_CLIENT": "claude-code" }
     }
   }
@@ -330,7 +332,7 @@ Pick the AI client you use most. Paste the snippet into its MCP config and resta
   "mcpServers": {
     "mneva": {
       "command": "uvx",
-      "args": ["mneva-mcp"],
+      "args": ["--from", "mneva", "mneva-mcp"],
       "env": { "MNEVA_MCP_CLIENT": "cursor" }
     }
   }
@@ -388,7 +390,7 @@ The MCP path covers desktop AI clients. Browser-only AI chat UIs (claude.ai web,
 mneva upgrade
 ```
 
-`mneva upgrade` detects how mneva was installed (`pipx` / `uv tool` / `uvx` / `pip`) and runs the matching update command, so you don't have to remember which one you used. Pass `--dry-run` to print the command without running it. If you run via bare `uvx mneva-mcp`, uvx already fetches the latest published version on each run, so there is nothing to upgrade.
+`mneva upgrade` detects how mneva was installed (`pipx` / `uv tool` / `uvx` / `pip`) and runs the matching update command, so you don't have to remember which one you used. Pass `--dry-run` to print the command without running it. If you run the MCP server via `uvx --from mneva mneva-mcp`, uvx already fetches the latest published version on each run, so there is nothing to upgrade.
 
 ### Advanced — BYOK LLM features
 
