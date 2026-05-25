@@ -151,6 +151,8 @@
 
 挑一个你最常用的 AI 客户端，把下面的片段粘进它的 MCP 配置里，然后重启客户端。mneva-mcp 第一次启动时会自动创建 `~/.mneva/` — 不需要先跑 `mneva init`。
 
+> **第一次启动慢，之后秒开。** 第一次运行会下载 mneva 和它的依赖（几秒钟）并缓存起来。如果你的客户端在第一次尝试时提示服务器慢或失败，重启一次客户端即可——之后会直接从缓存秒连。想预热的话，可以先在终端里跑一次 `uvx --from mneva mneva-mcp`，看到它启动后按 Ctrl-C 停掉。
+
 **Claude Desktop** — 编辑 `claude_desktop_config.json`：
 
 - **macOS：** `~/Library/Application Support/Claude/claude_desktop_config.json`
@@ -161,7 +163,7 @@
   "mcpServers": {
     "mneva": {
       "command": "uvx",
-      "args": ["mneva-mcp"],
+      "args": ["--from", "mneva", "mneva-mcp"],
       "env": { "MNEVA_MCP_CLIENT": "claude-desktop" }
     }
   }
@@ -175,7 +177,7 @@
   "mcpServers": {
     "mneva": {
       "command": "uvx",
-      "args": ["mneva-mcp"],
+      "args": ["--from", "mneva", "mneva-mcp"],
       "env": { "MNEVA_MCP_CLIENT": "claude-code" }
     }
   }
@@ -189,7 +191,7 @@
   "mcpServers": {
     "mneva": {
       "command": "uvx",
-      "args": ["mneva-mcp"],
+      "args": ["--from", "mneva", "mneva-mcp"],
       "env": { "MNEVA_MCP_CLIENT": "cursor" }
     }
   }
@@ -247,7 +249,7 @@ MCP 这条路覆盖的是桌面 AI 客户端。纯网页版的 AI 聊天界面�
 mneva upgrade
 ```
 
-`mneva upgrade` 会自动识别你当初是怎么装的 mneva（`pipx` / `uv tool` / `uvx` / `pip`），然后跑对应的更新命令，这样你就不用记自己用的是哪种方式了。加上 `--dry-run` 可以只打印命令、不真正执行。如果你是用裸 `uvx mneva-mcp` 运行的，uvx 每次运行本来就会拉取最新发布版，所以没有需要“更新”的东西。
+`mneva upgrade` 会自动识别你当初是怎么装的 mneva（`pipx` / `uv tool` / `uvx` / `pip`），然后跑对应的更新命令，这样你就不用记自己用的是哪种方式了。加上 `--dry-run` 可以只打印命令、不真正执行。如果你是用 `uvx --from mneva mneva-mcp` 跑 MCP 服务器的，uvx 每次运行本来就会拉取最新发布版，所以没有需要“更新”的东西。
 
 ### 进阶 — 自带密钥（BYOK）的 LLM 功能
 

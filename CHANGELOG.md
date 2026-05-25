@@ -2,7 +2,19 @@
 
 ## [Unreleased]
 
-## [0.2.1] - 2026-05-23
+## [0.2.2] - 2026-05-24
+
+### Fixed
+- **MCP config in the README did not work as written.** Every per-client config
+  block used `"command": "uvx", "args": ["mneva-mcp"]`, i.e. `uvx mneva-mcp`,
+  which fails with `mneva-mcp was not found in the package registry` — `uvx`
+  resolves its argument as a *package* name, and `mneva-mcp` is a console script
+  inside the `mneva` package, not a package. Corrected all blocks (Claude
+  Desktop, Claude Code, Cursor, Windsurf, ChatGPT Desktop) to
+  `"args": ["--from", "mneva", "mneva-mcp"]` in both the English and Chinese
+  READMEs. Verified end-to-end against the published PyPI artifact. Added a
+  first-launch note (cold start downloads deps once, then caches). No code
+  change — the `mneva-mcp` entry point itself was always correct.
 
 ### Added
 - **`mneva upgrade`** — one command to update mneva to the latest published
