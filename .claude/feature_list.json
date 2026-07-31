@@ -50,7 +50,10 @@
       "context": {
         "field_groups": "git provenance (repo_path, branch, commit_sha, dirty, changed_files) | staleness (last_verified_at, stale_after, supersedes) | review state (status: draft/permanent)",
         "single_point": "src/mneva/store.py Record dataclass and to_dict() -- the only serialization point (CLAUDE.md architecture rule 3); MCP and the HTTP API both go through it.",
-        "backward_compat": "read_record must tolerate missing fields. Copy the existing optional-read pattern for `source` at store.py:66."
+        "backward_compat": "read_record must tolerate missing fields. Copy the existing optional-read pattern for `source` at store.py:66.",
+        "DECIDED_2026_07_31_git_fields": "Store ONLY stable git provenance: repo_path, branch, commit_sha. DROP `dirty` and `changed_files` -- both are volatile (stale the moment they are written), and changed_files can be long enough to bloat frontmatter, which directly undercuts the Obsidian-readability selling point of the new positioning. commit_sha already answers 'which code state did this memory correspond to'; recompute diffs from git when needed.",
+        "REVISIT_batching_rationale": "This entry originally argued for batching all three field groups into one schema change because migrations were expensive. p1-0 made migrations cheap (bump _SCHEMA_VERSION, rebuild() handles the rest), and every bump lands inside unreleased v0.3 so users only ever see one rescan. Prefer adding each field group WITH the feature that uses it, rather than landing unused columns ahead of their logic.",
+        "naming_note": "For p1-3, do NOT name the review field `status` with a `permanent` value -- `lifespan` already uses `permanent` and the two would be confused. Use `review: draft|approved`, defaulting to `approved` so pre-existing records are not all hidden from search."
       },
       "acceptance_criteria": [
         "One Record change covering all three groups, not three separate migrations"
