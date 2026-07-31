@@ -7,7 +7,13 @@ from typing import Any
 
 from rank_bm25 import BM25Okapi
 
-from mneva.store import Record, read_record
+from mneva.store import Record, iter_records, read_record
+
+# Bump whenever the `records` table shape changes. On open, a database at a
+# lower version is dropped and rebuilt from the Markdown store, which is the
+# source of truth. Without this, `CREATE TABLE IF NOT EXISTS` silently keeps
+# the old shape and every new column is missing forever.
+_SCHEMA_VERSION = 1
 
 
 def try_load_sqlite_vec(conn: sqlite3.Connection) -> bool:
@@ -48,7 +54,7 @@ class Indexer:
         self._has_vec = try_load_sqlite_vec(self._conn)
         self._init_schema()
 
-    def _init_schema(self) -> None:
+    def _create_table(self) -> None:
         self._conn.execute(
             """
             CREATE TABLE IF NOT EXISTS records (
@@ -60,7 +66,38 @@ class Indexer:
             )
             """
         )
+
+    def _init_schema(self) -> None:
+        found = int(self._conn.execute("PRAGMA user_version").fetchone()[0])
+        if found == _SCHEMA_VERSION:
+            self._create_table()
+            self._conn.commit()
+            return
+        # Stale (or pre-versioning, i.e. 0) schema. The Markdown store is the
+        # source of truth, so drop and repopulate rather than trying to patch
+        # columns onto whatever shape happens to be on disk.
+        self.rebuild()
+
+    def rebuild(self) -> int:
+        """Drop the index and repopulate it from the Markdown store.
+
+        Returns the number of records indexed. Safe to call at any time — the
+        index holds no data that does not also live in `~/.mneva/store/*.md`.
+        """
+        self._conn.execute("DROP TABLE IF EXISTS records")
+        self._create_table()
+        count = 0
+        for record in iter_records(home=self._home):
+            self._conn.execute(
+                "INSERT OR REPLACE INTO records(id, scope, lifespan, tool, body) "
+                "VALUES (?, ?, ?, ?, ?)",
+                (record.id, record.scope, record.lifespan, record.tool, record.body),
+            )
+            count += 1
+        # PRAGMA user_version does not accept a bound parameter.
+        self._conn.execute(f"PRAGMA user_version = {int(_SCHEMA_VERSION)}")
         self._conn.commit()
+        return count
 
     @property
     def mode(self) -> str:

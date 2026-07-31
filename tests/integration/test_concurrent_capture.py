@@ -79,7 +79,24 @@ def test_wal_upgrade_from_legacy_journal_mode(tmp_mneva_home: Path) -> None:
     patch. v0.1.x users running ``pipx upgrade mneva`` must not lose data or
     see migration errors.
     """
+    from mneva.store import Record, write_record
+
     db_path = tmp_mneva_home / "mneva.sqlite"
+
+    # A v0.1.x install always wrote the Markdown file first and indexed second
+    # (cli.py capture), so a real legacy record exists in BOTH places. Write the
+    # Markdown too, otherwise this fixture describes a state no install can
+    # reach: an index row with no backing file.
+    write_record(
+        Record(
+            id="legacy01",
+            scope="legacy-scope",
+            lifespan="transient",
+            tool="cli",
+            body="legacy data",
+        ),
+        home=tmp_mneva_home,
+    )
 
     # Simulate a v0.1.x install: open with default journal mode, add a row,
     # commit, close. Default mode is DELETE.
@@ -98,9 +115,11 @@ def test_wal_upgrade_from_legacy_journal_mode(tmp_mneva_home: Path) -> None:
     legacy.close()
     assert legacy_mode.lower() == "delete"
 
-    # Open with v0.2 Indexer. WAL kicks in; legacy row survives.
+    # Open with the current Indexer. WAL kicks in; legacy record survives.
     idx = Indexer(db_path)
     assert int(idx.status()["count"]) == 1
+    # Survives as a real record, not just a row count.
+    assert any(h.id == "legacy01" for h in idx.search("legacy data"))
 
     # Verify journal_mode persisted as WAL on the file.
     probe = sqlite3.connect(db_path)

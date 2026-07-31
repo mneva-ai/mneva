@@ -163,6 +163,18 @@ def status() -> None:
 
 
 @app.command()
+def reindex() -> None:
+    """Rebuild the search index from the Markdown store.
+
+    The Markdown files are the source of truth; the index is disposable. Use
+    this after editing records by hand, restoring files, or upgrading mneva.
+    """
+    home = ensure_home()
+    count = Indexer(home / "mneva.sqlite").rebuild()
+    click.echo(f"reindexed: {count} record(s) from {home / 'store'}")
+
+
+@app.command()
 @click.argument("record_id")
 @click.option("--confirm", is_flag=True, required=True, help="Required for safety.")
 def forget(record_id: str, confirm: bool) -> None:

@@ -7,7 +7,7 @@
     {
       "id": "p0-reposition-harness-and-copy",
       "priority": "P0",
-      "status": "in_progress",
+      "status": "done",
       "title": "Land the new positioning in the harness and user-facing copy",
       "description": "The harness files written earlier on 2026-07-31 encode the now-reversed non-technical strategy. Until they are corrected they actively misdirect every future session.",
       "context": {
@@ -18,24 +18,27 @@
         "No file in the repo still asserts the non-technical beachhead as current",
         "Positioning is consistent across CLAUDE.md, pyproject.toml, and both READMEs",
         "The reversal and its reasoning are recorded in the append-only progress log"
-      ]
+      ],
+      "completed_at": "2026-07-31"
     },
     {
       "id": "p1-0-index-migration-path",
       "priority": "P1",
-      "status": "pending",
+      "status": "done",
       "title": "Index schema versioning + rebuild (BLOCKS all v0.3 features)",
       "description": "Hard blocker found during the 2026-07-31 code review. Indexer._init_schema() uses CREATE TABLE IF NOT EXISTS, so adding a column is a silent no-op on any existing database. A codebase-wide grep found no rebuild, reindex, ALTER TABLE, or migration entry point anywhere. Every v0.3 feature below adds indexed fields, so all of them are blocked on this.",
       "context": {
         "evidence": "src/mneva/indexer.py:51 (_init_schema), src/mneva/indexer.py:89-100 (search filters in SQL before BM25 ranking). Closest thing to a rebuild is cli.py:255-257 inside sync-vault, which is tied to the vault flow.",
         "approach": "Add an explicit schema version to Indexer plus rebuild() that repopulates from store.iter_records() (store.py:85, already exists). Expose it as a new `mneva reindex` command.",
-        "key_constraints": "This also closes a real gap: CLAUDE.md architecture rule 1 says SQLite is rebuildable from Markdown, which is currently NOT true in code."
+        "key_constraints": "This also closes a real gap: CLAUDE.md architecture rule 1 says SQLite is rebuildable from Markdown, which is currently NOT true in code.",
+        "outcome": "Indexer now carries PRAGMA user_version (_SCHEMA_VERSION=1); an older-version DB is rebuilt from store.iter_records() on open. Added Indexer.rebuild() and the `mneva reindex` command. 4 new tests, incl. a regression guard verified to fail against the old code (asserted 1 == 2)."
       },
       "acceptance_criteria": [
         "Opening an old-schema sqlite DB with the new Indexer triggers migration or rebuild, never a silent failure",
         "`mneva reindex` rebuilds from Markdown; after deleting the DB, status() count equals the number of store/*.md files",
         "Reading an old .md file that lacks the new frontmatter fields still works"
-      ]
+      ],
+      "completed_at": "2026-07-31"
     },
     {
       "id": "p1-05-unified-schema-pass",

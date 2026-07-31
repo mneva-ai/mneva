@@ -30,6 +30,22 @@
   `.claude/feature_list.json`, both READMEs, and the package description.
 
 ### Added
+- **`mneva reindex`** — rebuilds the search index from the Markdown store. Use it
+  after editing records by hand, restoring files, or upgrading. The Markdown
+  files are the source of truth; the index is disposable.
+
+### Fixed
+- **New index columns were silently dropped on existing databases.**
+  `Indexer._init_schema()` used `CREATE TABLE IF NOT EXISTS` with no version
+  check, so any schema change was a no-op against a database that already
+  existed — the table kept its old shape forever, and there was no `ALTER
+  TABLE`, rebuild, or migration path anywhere in the codebase. The index now
+  carries a schema version (`PRAGMA user_version`); on open, a database at an
+  older version is rebuilt from the Markdown store. This also makes the
+  documented invariant "SQLite is a rebuildable index" true in code, where it
+  previously was not.
+
+### Added
 - **Project harness** — `CLAUDE.md`, `.claude/feature_list.json`, and
   `.claude/claude-progress.txt`. Records the architecture rules, the current
   strategy and its guardrail, the prioritized queue, and an append-only progress

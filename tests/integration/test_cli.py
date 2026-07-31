@@ -177,3 +177,35 @@ def test_capture_collision_surfaces_friendly_message(
     assert "record id collision" in result.output
     # Stack trace must NOT be in user output
     assert "Traceback" not in result.output
+
+
+def test_reindex_rebuilds_from_markdown_after_index_loss(tmp_mneva_home: Path) -> None:
+    """Deleting the index must be fully recoverable: Markdown is the truth."""
+    runner = CliRunner()
+    assert runner.invoke(app, ["init"]).exit_code == 0
+    for i in range(2):
+        result = runner.invoke(
+            app, ["capture", "--scope", "proj", f"reindexable note {i}"]
+        )
+        assert result.exit_code == 0
+
+    import gc
+
+    from mneva.paths import mneva_home
+
+    db = mneva_home() / "mneva.sqlite"
+    assert db.exists()
+    # Each CLI command builds its own Indexer and never closes it explicitly.
+    # On Windows the file stays locked until those connections are collected.
+    gc.collect()
+    for suffix in ("", "-wal", "-shm"):
+        db.with_name(db.name + suffix).unlink(missing_ok=True)
+    assert not db.exists()
+
+    result = runner.invoke(app, ["reindex"])
+    assert result.exit_code == 0
+    assert "reindexed: 2 record(s)" in result.output
+
+    found = runner.invoke(app, ["search", "reindexable"])
+    assert found.exit_code == 0
+    assert "reindexable note" in found.output
