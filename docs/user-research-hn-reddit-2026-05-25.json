@@ -1,0 +1,467 @@
+{
+  "title": "Mneva HN / Reddit 用户需求调研汇总",
+  "date": "2026-05-25",
+  "scope": ["Hacker News", "Reddit"],
+  "product": {
+    "name": "mneva",
+    "current_positioning": "Local-first, MCP-native, cross-tool AI coding memory substrate",
+    "recommended_positioning_en": "Local-first, Markdown-owned memory substrate for developers using multiple AI coding tools.",
+    "recommended_positioning_zh": "给多 AI 编码工具共用的本地记忆底座，数据仍然是你自己的 Markdown。"
+  },
+  "executive_summary": [
+    "公开讨论显示，AI 编码用户确实存在跨 session、跨工具、低 token 成本、可审计记忆层需求。",
+    "最常丢失的上下文包括架构决策、调试过程、任务状态、偏好约束、业务规则和团队上下文。",
+    "市场已有大量相邻项目，mneva 需要通过 Markdown source of truth、Git-aware scope、reviewable memory、token-budgeted replay 差异化。",
+    "不建议只主打 AI memory MCP；更适合主打本地、可拥有、可审计、跨工具的开发者记忆基建。"
+  ],
+  "keywords": {
+    "core": [
+      "AI coding agent memory",
+      "Claude Code memory",
+      "Cursor context loss",
+      "Claude Code Cursor context loss",
+      "persistent memory MCP",
+      "local-first memory MCP",
+      "cross-tool AI memory",
+      "agent context persistence",
+      "MCP memory server",
+      "AI agent memory stale context",
+      "memory.md context bloat",
+      "CLAUDE.md going stale",
+      "AI coding assistant forgets decisions",
+      "project scoped memory",
+      "debugging context across sessions",
+      "team shared AI memory",
+      "repo branch commit memory",
+      "context engineering agent amnesia"
+    ],
+    "queries": [
+      "site:news.ycombinator.com \"Claude Code\" \"memory\" \"context\"",
+      "site:news.ycombinator.com \"MCP\" \"memory\" \"coding agents\"",
+      "site:reddit.com/r/ClaudeCode \"context loss\" \"memory\"",
+      "site:reddit.com/r/cursor \"Claude Code\" \"Cursor\" \"context loss\"",
+      "site:reddit.com/r/mcp \"memory layer\" \"AI agents\"",
+      "site:reddit.com/r/ContextEngineering \"agent amnesia\""
+    ]
+  },
+  "personas": [
+    {
+      "name": "重度 AI 编码者",
+      "pain": "每次新 session 重新解释架构、约定、历史决策",
+      "mneva_opportunity": "自动或半自动 capture，session start replay"
+    },
+    {
+      "name": "跨工具用户",
+      "pain": "Claude Code、Cursor、Codex、Windsurf 之间记忆割裂",
+      "mneva_opportunity": "一份本地记忆，多工具读取"
+    },
+    {
+      "name": "团队/多机器用户",
+      "pain": "个人记忆无法共享，团队上下文分裂",
+      "mneva_opportunity": "git/文件夹同步、团队 scope、导出包"
+    },
+    {
+      "name": "Markdown/Obsidian 用户",
+      "pain": "喜欢透明文件，但手动维护会 stale",
+      "mneva_opportunity": "Markdown source of truth + 索引、审计、过期"
+    },
+    {
+      "name": "隐私敏感开发者",
+      "pain": "不愿把代码/项目知识交给第三方记忆 SaaS",
+      "mneva_opportunity": "local-first、zero telemetry、可解释 retrieval boundary"
+    },
+    {
+      "name": "单工具短任务用户",
+      "pain": "不一定需要复杂记忆系统",
+      "mneva_opportunity": "searchable history、handoff、audit"
+    }
+  ],
+  "research_questions": [
+    {
+      "id": "q1",
+      "question": "用户在几个 AI 编码工具之间切换？最常丢的是架构、偏好、bug 调试历史，还是业务上下文？",
+      "signal_strength": "strong",
+      "answer_summary": "常见组合包括 Claude Code + Cursor + Codex，也有人加 Gemini、Windsurf、OpenCode。丢失内容集中在架构决策、代码约定、个人偏好、bug 调试历史、任务状态、branch/commit、业务规则。",
+      "mneva_implications": [
+        "scope 不应只停留在 project",
+        "优先支持 repo + branch + commit/status + task state",
+        "记忆类型应覆盖 architecture、decision、debugging_lesson、blocker、preference、business_rule"
+      ],
+      "sources": [
+        "https://www.reddit.com/r/cursor/comments/1rp9emv/how_do_you_handle_context_loss_when_switching/",
+        "https://www.reddit.com/r/AI_Agents/comments/1rfe475/cli_that_lets_claude_code_cursor_and_codex_share/",
+        "https://www.reddit.com/r/ClaudeAI/comments/1rfwaxx/claude_code_forgets_everything_between_sessions_i/",
+        "https://news.ycombinator.com/item?id=46426624"
+      ]
+    },
+    {
+      "id": "q2",
+      "question": "用户愿意让 agent 自动写记忆吗？哪些类型必须人工确认？",
+      "signal_strength": "strong_but_split",
+      "answer_summary": "一派希望 auto-capture/hooks，另一派担心 agent 写入长期事实会污染记忆，要求 review layer、approve/promote、可回滚。",
+      "auto_ok": [
+        "transient session summary",
+        "debug trail",
+        "current blocker",
+        "changed files",
+        "test status",
+        "next action"
+      ],
+      "human_confirmation_required": [
+        "permanent architecture decision",
+        "business rule",
+        "security/compliance constraint",
+        "team shared memory",
+        "expensive/irreversible migration conclusion",
+        "user preference or identity-related memory"
+      ],
+      "mneva_implications": [
+        "默认不应全自动写 permanent",
+        "新增 draft -> review -> promote",
+        "MCP agent 写入默认进 draft/transient"
+      ],
+      "sources": [
+        "https://news.ycombinator.com/item?id=47189906",
+        "https://www.reddit.com/r/ClaudeCode/comments/1rmi2e6/memory_for_claude_code/",
+        "https://www.reddit.com/r/ClaudeAI/comments/1rfwaxx/claude_code_forgets_everything_between_sessions_i/",
+        "https://www.reddit.com/r/ClaudeAI/comments/1rfkmj1/new_automemory_feature_in_claude_code_details/"
+      ]
+    },
+    {
+      "id": "q3",
+      "question": "用户更信任 Markdown 文件、SQLite 数据库，还是带 GUI 的本地 app？",
+      "signal_strength": "strong",
+      "answer_summary": "高级用户信 Markdown，因为可读、可 diff、可 grep、可手改。SQLite 被接受为轻量本地索引或状态库。GUI 需求主要是 inspect/review/audit/token visibility。",
+      "mneva_implications": [
+        "保持 Markdown source of truth",
+        "SQLite 明确定位为可重建索引",
+        "GUI 后置，优先做 review/audit/stale/status CLI"
+      ],
+      "sources": [
+        "https://news.ycombinator.com/item?id=45517078",
+        "https://www.reddit.com/r/ClaudeAI/comments/1t6r3k2/mnemo_a_local_semantic_memory_for_claude_code/",
+        "https://www.reddit.com/r/ClaudeCode/comments/1s34ckp/i_connected_claude_code_to_12_systems_heres_what/",
+        "https://www.reddit.com/r/ClaudeAI/comments/1rpzdr4/gui_for_claude_code_skills_mcp_worktrees_and/"
+      ]
+    },
+    {
+      "id": "q4",
+      "question": "如果记忆和代码现状冲突，用户希望系统怎么处理？",
+      "signal_strength": "strong",
+      "answer_summary": "用户担心 stale lore。常见期望是先信当前代码，用 repo/branch/commit SHA 约束适用范围，提示冲突，保留历史，支持 supersede、expire、decay、last_verified_at。",
+      "mneva_implications": [
+        "新增 source_commit、source_branch、last_verified_at、stale_after、supersedes、confidence",
+        "检索结果提示历史事实需读当前文件确认",
+        "冲突策略为提示 + 保留历史 + 手动 supersede，不默认自动合并"
+      ],
+      "sources": [
+        "https://www.reddit.com/r/mcp/comments/1rflpbe/built_an_mcp_memory_layer_to_persist_ai_debugging/",
+        "https://www.reddit.com/r/mcp/comments/1shnxs3/your_claude_codex_cursor_doesnt_need_a_better/",
+        "https://www.reddit.com/r/ClaudeAI/comments/1rfwaxx/claude_code_forgets_everything_between_sessions_i/",
+        "https://www.reddit.com/r/ClaudeAI/comments/1s8ed6o/claude_code_memory_that_fits_in_a_single_sqlite/"
+      ]
+    },
+    {
+      "id": "q5",
+      "question": "用户能接受每次 session 开始消耗多少 token？",
+      "signal_strength": "medium_strong",
+      "answer_summary": "几百 token 的 brief/index 被认为好，约 800 token/query 被当成优势，小于 3K session context 通常可接受，3K-8K 是用户原本手动 re-context 的典型成本，30K 或更高 overhead 被认为严重。",
+      "mneva_implications": [
+        "新增 replay --budget 500|1000|3000|full",
+        "默认不要全量注入",
+        "控制 MCP tool descriptions 长度"
+      ],
+      "sources": [
+        "https://www.reddit.com/r/ClaudeAI/comments/1rgoyao/i_built_an_opensource_memory_layer_for_claude/",
+        "https://www.reddit.com/r/ClaudeAI/comments/1tcl813/how_i_keep_my_ais_context_window_under_3k_tokens/",
+        "https://www.reddit.com/r/ClaudeAI/comments/1sa643r/i_built_a_persistent_memory_system_for_claude/",
+        "https://www.reddit.com/r/ClaudeAI/comments/1sm66h8/psa_audited_my_claude_code_setup_30000_tokens_15/",
+        "https://www.reddit.com/r/ClaudeAI/comments/1q7h2pj/understanding_claude_codes_context_window/"
+      ]
+    },
+    {
+      "id": "q6",
+      "question": "跨工具是否真有价值，还是用户主要只用一个工具？",
+      "signal_strength": "split",
+      "answer_summary": "有真实跨工具需求，例如 Claude 写、Codex review、Cursor debugging、Claude.ai mobile thinking；也有用户认为应保持 context 接近 0 或只用一个主工具。",
+      "mneva_implications": [
+        "ICP 应明确为 2+ AI tools / 2+ machines / long-lived projects",
+        "对单工具短任务用户卖 searchable history、handoff、reviewable memory，而不是硬卖跨工具"
+      ],
+      "sources": [
+        "https://www.reddit.com/r/AI_Agents/comments/1rfe475/cli_that_lets_claude_code_cursor_and_codex_share/",
+        "https://www.reddit.com/r/ClaudeCode/comments/1rg2odm/common_context_across_claude_gemini_codex_etc/",
+        "https://www.reddit.com/r/ClaudeAI/comments/1sd9cpj/claude_ai_and_claude_code_sharing_context/",
+        "https://www.reddit.com/r/cursor/comments/1rp9emv/how_do_you_handle_context_loss_when_switching/"
+      ]
+    },
+    {
+      "id": "q7",
+      "question": "团队共享记忆是否有需求？如果有，哪些内容不能共享？",
+      "signal_strength": "early_but_clear",
+      "answer_summary": "团队想共享 bug gotchas、deployment notes、architecture decisions、project conventions、onboarding knowledge、agent handoff。不能共享 secrets、.env、API keys、凭据、私有业务信息、个人偏好、客户数据、未确认 agent 推断。",
+      "mneva_implications": [
+        "不要过早做团队 SaaS",
+        "先做本地 team scope + allowlist + redaction + audit log",
+        "visibility 分层：personal、project、team"
+      ],
+      "sources": [
+        "https://www.reddit.com/r/ClaudeAI/comments/1s7pig6/built_a_shared_memory_layer_for_claude_code_teams/",
+        "https://news.ycombinator.com/item?id=47075973",
+        "https://www.reddit.com/r/AI_Agents/comments/1sihpbj/we_gave_our_multiagent_workspaces_a_shared_memory/",
+        "https://www.reddit.com/r/ClaudeAI/comments/1rspjb8/my_opensource_mcp_memory_server_got_formally/",
+        "https://www.reddit.com/r/ClaudeAI/comments/1lgudw2/security_claude_code_reads_env_files_by_default/"
+      ]
+    },
+    {
+      "id": "q8",
+      "question": "什么证据会让用户相信 memory layer 值得安装？",
+      "signal_strength": "strong",
+      "answer_summary": "用户需要可复现 benchmark、token savings、re-context 时间节省、真实项目 before/after、可运行 demo、与普通 Markdown/full dump 的对比、检索命中率和错误率。",
+      "mneva_implications": [
+        "做 benchmark：retrieval relevance、token budget、session recovery",
+        "做 dogfood case：Claude Code -> Cursor/Codex 切换同一 repo",
+        "做 5 分钟 demo：安装、capture、replay、跨工具读取、Markdown 文件可见"
+      ],
+      "sources": [
+        "https://news.ycombinator.com/item?id=46426624",
+        "https://www.reddit.com/r/ClaudeAI/comments/1rgoyao/i_built_an_opensource_memory_layer_for_claude/",
+        "https://www.reddit.com/r/ClaudeAI/comments/1szvo7t/open_source_we_built_a_local_code_search_mcp_for/",
+        "https://www.reddit.com/r/ClaudeAI/comments/1sp22el/spent_3_months_building_an_mcp_memory_server_for/",
+        "https://www.reddit.com/r/ClaudeCode/comments/1shp98n/save_tokens_save_more_with_your_claude_code/"
+      ]
+    }
+  ],
+  "needs_matrix": [
+    {
+      "priority": "P0",
+      "need": "跨 session 不再从零开始",
+      "current_mneva_coverage": "capture/search/replay/MCP",
+      "gap": "默认流程不够明确",
+      "recommended_action": "agent workflow snippets + session start replay"
+    },
+    {
+      "priority": "P0",
+      "need": "跨工具共享记忆",
+      "current_mneva_coverage": "MCP 多客户端",
+      "gap": "文案差异化不足",
+      "recommended_action": "强化不是单工具插件"
+    },
+    {
+      "priority": "P0",
+      "need": "避免 MEMORY.md / CLAUDE.md 上下文膨胀",
+      "current_mneva_coverage": "BM25 + scope/lifespan",
+      "gap": "token budget replay",
+      "recommended_action": "replay --budget"
+    },
+    {
+      "priority": "P0",
+      "need": "stale memory / contradiction control",
+      "current_mneva_coverage": "forget + lifespan",
+      "gap": "git 元数据、过期、supersede",
+      "recommended_action": "Git-aware metadata + stale review"
+    },
+    {
+      "priority": "P1",
+      "need": "自动 capture 但不污染长期事实",
+      "current_mneva_coverage": "MCP capture 可被 agent 调用",
+      "gap": "review queue",
+      "recommended_action": "draft/review/promote"
+    },
+    {
+      "priority": "P1",
+      "need": "可审计和可管理",
+      "current_mneva_coverage": "Markdown 文件透明",
+      "gap": "audit/review CLI",
+      "recommended_action": "mneva audit, mneva review"
+    },
+    {
+      "priority": "P1",
+      "need": "证明有效",
+      "current_mneva_coverage": "工程测试多",
+      "gap": "产品效果证据少",
+      "recommended_action": "benchmark + dogfood demo"
+    },
+    {
+      "priority": "P2",
+      "need": "浏览器聊天 UI 支持",
+      "current_mneva_coverage": "路线图已有",
+      "gap": "需求需继续验证",
+      "recommended_action": "等真实 pull signal"
+    },
+    {
+      "priority": "P2",
+      "need": "团队共享",
+      "current_mneva_coverage": "local-first 单机强",
+      "gap": "visibility/redaction/audit",
+      "recommended_action": "local team scope first"
+    }
+  ],
+  "competitor_signals": [
+    {
+      "name": "Linggen",
+      "signal": "local-first, MCP, Cursor/Zed/Claude, Team Memory, visual map",
+      "implication": "mneva 需解释 local-first 与云模型边界"
+    },
+    {
+      "name": "Hmem",
+      "signal": "SQLite .hmem, hierarchical memory, 避免 MEMORY.md 全量注入",
+      "implication": "mneva 可学习 L1/L2/L3 分层 replay"
+    },
+    {
+      "name": "paradigm-memory",
+      "signal": "SQLite, MCP-native, multi-agent, audit log, review queue, desktop inspectable",
+      "implication": "直接威胁，mneva 应补 review/audit"
+    },
+    {
+      "name": "Memory Bank / memori / Recall / Engram / Locus / agent-recall / Core",
+      "signal": "大量项目围绕 Claude memory MCP、decay、benchmarks、review",
+      "implication": "市场拥挤，必须差异化"
+    },
+    {
+      "name": "纯 Markdown / handoff workflows",
+      "signal": "高级用户仍偏好 git-versioned Markdown 和明确 handoff",
+      "implication": "mneva 应拥抱 Markdown，不要替代它"
+    },
+    {
+      "name": "TeamMind / SageOx",
+      "signal": "团队共享记忆、多 agent workspace",
+      "implication": "团队需求存在，但安全和权限必须先设计"
+    }
+  ],
+  "product_opportunities": {
+    "P0": [
+      {
+        "name": "Git-aware scope",
+        "details": [
+          "自动记录 repo path、branch、commit SHA、dirty state、changed files",
+          "搜索和 replay 默认按当前 repo/branch 过滤"
+        ]
+      },
+      {
+        "name": "Review queue",
+        "details": [
+          "agent 写入默认为 draft/transient",
+          "用户 approve 后 promote 到 permanent",
+          "支持 reject/edit/promote"
+        ]
+      },
+      {
+        "name": "Token-budgeted replay",
+        "details": [
+          "--budget 500|1000|3000|full",
+          "默认不全量注入",
+          "输出按 relevance + freshness + lifespan 排序"
+        ]
+      },
+      {
+        "name": "Stale / supersede",
+        "details": [
+          "last_verified_at、stale_after、supersedes",
+          "冲突时提示而不是自动合并"
+        ]
+      }
+    ],
+    "P1": [
+      {
+        "name": "Memory hygiene CLI",
+        "details": ["mneva stale", "mneva audit", "mneva review", "mneva promote"]
+      },
+      {
+        "name": "Agent workflow snippets",
+        "details": [
+          "session start search/replay",
+          "decision capture",
+          "debug lesson capture",
+          "session end handoff"
+        ]
+      },
+      {
+        "name": "Evidence assets",
+        "details": ["dogfood demo", "benchmark script", "token savings comparison", "real project case study"]
+      }
+    ],
+    "P2": [
+      {
+        "name": "Browser extension",
+        "details": ["用真实用户请求触发，不要现在抢跑"]
+      },
+      {
+        "name": "Team sharing",
+        "details": ["先做 local/git/Obsidian sync + visibility + redaction", "不急于 SaaS"]
+      }
+    ]
+  },
+  "roadmap_suggestions": {
+    "v0.3": [
+      "Git-aware metadata",
+      "token-budgeted replay",
+      "draft/review/promote",
+      "stale/supersede basics",
+      "improved Claude Code / Cursor / Codex workflow templates"
+    ],
+    "v0.4": [
+      "audit/review CLI",
+      "Obsidian-friendly review views",
+      "benchmark/demo package",
+      "session transcript distill defaults",
+      "browser extension validation prototype"
+    ],
+    "v1_plus": [
+      "GUI memory inspector",
+      "team/shared scope",
+      "redaction policies",
+      "optional sync / hosted service"
+    ]
+  },
+  "messaging": {
+    "en": "Local-first, Markdown-owned memory substrate for developers using multiple AI coding tools.",
+    "zh": "给多 AI 编码工具共用的本地记忆底座，数据仍然是你自己的 Markdown。",
+    "differentiators": [
+      "Markdown is the source of truth.",
+      "SQLite is a rebuildable local index.",
+      "Git-aware memories avoid stale lore.",
+      "Agents can suggest memories, but users approve permanent truth.",
+      "Replay is token-budgeted, not a context dump.",
+      "Built for developers who use more than one AI coding tool."
+    ]
+  },
+  "sources": {
+    "hacker_news": [
+      "https://news.ycombinator.com/item?id=46328769",
+      "https://news.ycombinator.com/item?id=47103237",
+      "https://news.ycombinator.com/item?id=46426624",
+      "https://news.ycombinator.com/item?id=46626639",
+      "https://news.ycombinator.com/item?id=47189906",
+      "https://news.ycombinator.com/item?id=45517078",
+      "https://news.ycombinator.com/item?id=47075973"
+    ],
+    "reddit": [
+      "https://www.reddit.com/r/cursor/comments/1rp9emv/how_do_you_handle_context_loss_when_switching/",
+      "https://www.reddit.com/r/AI_Agents/comments/1rfe475/cli_that_lets_claude_code_cursor_and_codex_share/",
+      "https://www.reddit.com/r/ClaudeAI/comments/1rfwaxx/claude_code_forgets_everything_between_sessions_i/",
+      "https://www.reddit.com/r/ClaudeCode/comments/1rmi2e6/memory_for_claude_code/",
+      "https://www.reddit.com/r/ClaudeAI/comments/1rfkmj1/new_automemory_feature_in_claude_code_details/",
+      "https://www.reddit.com/r/ClaudeAI/comments/1t6r3k2/mnemo_a_local_semantic_memory_for_claude_code/",
+      "https://www.reddit.com/r/ClaudeCode/comments/1s34ckp/i_connected_claude_code_to_12_systems_heres_what/",
+      "https://www.reddit.com/r/ClaudeAI/comments/1rpzdr4/gui_for_claude_code_skills_mcp_worktrees_and/",
+      "https://www.reddit.com/r/mcp/comments/1rflpbe/built_an_mcp_memory_layer_to_persist_ai_debugging/",
+      "https://www.reddit.com/r/mcp/comments/1shnxs3/your_claude_codex_cursor_doesnt_need_a_better/",
+      "https://www.reddit.com/r/ClaudeAI/comments/1s8ed6o/claude_code_memory_that_fits_in_a_single_sqlite/",
+      "https://www.reddit.com/r/ClaudeAI/comments/1rgoyao/i_built_an_opensource_memory_layer_for_claude/",
+      "https://www.reddit.com/r/ClaudeAI/comments/1tcl813/how_i_keep_my_ais_context_window_under_3k_tokens/",
+      "https://www.reddit.com/r/ClaudeAI/comments/1sa643r/i_built_a_persistent_memory_system_for_claude/",
+      "https://www.reddit.com/r/ClaudeAI/comments/1sm66h8/psa_audited_my_claude_code_setup_30000_tokens_15/",
+      "https://www.reddit.com/r/ClaudeAI/comments/1q7h2pj/understanding_claude_codes_context_window/",
+      "https://www.reddit.com/r/ClaudeCode/comments/1rg2odm/common_context_across_claude_gemini_codex_etc/",
+      "https://www.reddit.com/r/ClaudeAI/comments/1sd9cpj/claude_ai_and_claude_code_sharing_context/",
+      "https://www.reddit.com/r/ClaudeAI/comments/1s7pig6/built_a_shared_memory_layer_for_claude_code_teams/",
+      "https://www.reddit.com/r/AI_Agents/comments/1sihpbj/we_gave_our_multiagent_workspaces_a_shared_memory/",
+      "https://www.reddit.com/r/ClaudeAI/comments/1rspjb8/my_opensource_mcp_memory_server_got_formally/",
+      "https://www.reddit.com/r/ClaudeAI/comments/1lgudw2/security_claude_code_reads_env_files_by_default/",
+      "https://www.reddit.com/r/ClaudeAI/comments/1szvo7t/open_source_we_built_a_local_code_search_mcp_for/",
+      "https://www.reddit.com/r/ClaudeAI/comments/1sp22el/spent_3_months_building_an_mcp_memory_server_for/",
+      "https://www.reddit.com/r/ClaudeCode/comments/1shp98n/save_tokens_save_more_with_your_claude_code/"
+    ]
+  }
+}

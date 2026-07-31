@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "mneva"
 dynamic = ["version"]
-description = "Persistent agent context substrate. Local-first CLI."
+description = "AI coding memory as plain Markdown. Follows your repo, lives in git, opens in Obsidian. No account, no cloud."
 readme = "README.md"
 license = { file = "LICENSE" }
 requires-python = ">=3.11"
@@ -33,7 +33,7 @@ dependencies = [
     "httpx>=0.27,<0.30",
     "anthropic>=0.42.0,<1",
     "openai>=1.58.0,<3",
-    "google-generativeai>=0.8.3,<1",
+    "google-genai>=1.0,<3",
     "mcp>=1.10,<2",
 ]
 

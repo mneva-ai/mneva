@@ -1,0 +1,162 @@
+{
+  "updated_at": "2026-07-31",
+  "strategy_ref": "CLAUDE.md -> ## Current Strategy; full reasoning in .claude/claude-progress.txt (2026-07-31 strategy-reversal entry)",
+  "strategy_summary": "Markdown/privacy/Obsidian engineer line. Positioning: your AI memory is your own Markdown files -- follows the repo, goes into git, opens in Obsidian, reviewed in a PR, no account, no cloud. Reversed the 2026-05-25 non-technical beachhead on 2026-07-31 after the memmy-agent competitive analysis.",
+  "roadmap_design_ref": "docs/user-research-hn-reddit-2026-05-25.md sections 7-8",
+  "features": [
+    {
+      "id": "p0-reposition-harness-and-copy",
+      "priority": "P0",
+      "status": "done",
+      "title": "Land the new positioning in the harness and user-facing copy",
+      "description": "The harness files written earlier on 2026-07-31 encode the now-reversed non-technical strategy. Until they are corrected they actively misdirect every future session.",
+      "context": {
+        "files": "CLAUDE.md (## Current Strategy rewritten, ## Common Mistakes updated), .claude/feature_list.json (this file), .claude/claude-progress.txt, pyproject.toml description, README.md + README.zh-CN.md positioning paragraphs",
+        "key_constraints": "READMEs are 30KB/19KB -- change only the positioning paragraphs, do not rewrite them. CLAUDE.md must keep a one-line trace of the 5/25 -> 7/31 reversal so nobody re-proposes the non-technical line in three months."
+      },
+      "acceptance_criteria": [
+        "No file in the repo still asserts the non-technical beachhead as current",
+        "Positioning is consistent across CLAUDE.md, pyproject.toml, and both READMEs",
+        "The reversal and its reasoning are recorded in the append-only progress log"
+      ],
+      "completed_at": "2026-07-31"
+    },
+    {
+      "id": "p1-0-index-migration-path",
+      "priority": "P1",
+      "status": "done",
+      "title": "Index schema versioning + rebuild (BLOCKS all v0.3 features)",
+      "description": "Hard blocker found during the 2026-07-31 code review. Indexer._init_schema() uses CREATE TABLE IF NOT EXISTS, so adding a column is a silent no-op on any existing database. A codebase-wide grep found no rebuild, reindex, ALTER TABLE, or migration entry point anywhere. Every v0.3 feature below adds indexed fields, so all of them are blocked on this.",
+      "context": {
+        "evidence": "src/mneva/indexer.py:51 (_init_schema), src/mneva/indexer.py:89-100 (search filters in SQL before BM25 ranking). Closest thing to a rebuild is cli.py:255-257 inside sync-vault, which is tied to the vault flow.",
+        "approach": "Add an explicit schema version to Indexer plus rebuild() that repopulates from store.iter_records() (store.py:85, already exists). Expose it as a new `mneva reindex` command.",
+        "key_constraints": "This also closes a real gap: CLAUDE.md architecture rule 1 says SQLite is rebuildable from Markdown, which is currently NOT true in code.",
+        "outcome": "Indexer now carries PRAGMA user_version (_SCHEMA_VERSION=1); an older-version DB is rebuilt from store.iter_records() on open. Added Indexer.rebuild() and the `mneva reindex` command. 4 new tests, incl. a regression guard verified to fail against the old code (asserted 1 == 2)."
+      },
+      "acceptance_criteria": [
+        "Opening an old-schema sqlite DB with the new Indexer triggers migration or rebuild, never a silent failure",
+        "`mneva reindex` rebuilds from Markdown; after deleting the DB, status() count equals the number of store/*.md files",
+        "Reading an old .md file that lacks the new frontmatter fields still works"
+      ],
+      "completed_at": "2026-07-31"
+    },
+    {
+      "id": "p1-05-unified-schema-pass",
+      "priority": "P1",
+      "status": "pending",
+      "blocked_by": "p1-0-index-migration-path",
+      "title": "Design all three Record field groups in one pass",
+      "description": "Features 1, 2, and 3 each add fields to Record. Designing them together avoids repeating the Record + to_dict() + frontmatter + index column + migration work three times.",
+      "context": {
+        "field_groups": "git provenance (repo_path, branch, commit_sha, dirty, changed_files) | staleness (last_verified_at, stale_after, supersedes) | review state (status: draft/permanent)",
+        "single_point": "src/mneva/store.py Record dataclass and to_dict() -- the only serialization point (CLAUDE.md architecture rule 3); MCP and the HTTP API both go through it.",
+        "backward_compat": "read_record must tolerate missing fields. Copy the existing optional-read pattern for `source` at store.py:66.",
+        "DECIDED_2026_07_31_git_fields": "Store ONLY stable git provenance: repo_path, branch, commit_sha. DROP `dirty` and `changed_files` -- both are volatile (stale the moment they are written), and changed_files can be long enough to bloat frontmatter, which directly undercuts the Obsidian-readability selling point of the new positioning. commit_sha already answers 'which code state did this memory correspond to'; recompute diffs from git when needed.",
+        "REVISIT_batching_rationale": "This entry originally argued for batching all three field groups into one schema change because migrations were expensive. p1-0 made migrations cheap (bump _SCHEMA_VERSION, rebuild() handles the rest), and every bump lands inside unreleased v0.3 so users only ever see one rescan. Prefer adding each field group WITH the feature that uses it, rather than landing unused columns ahead of their logic.",
+        "naming_note": "For p1-3, do NOT name the review field `status` with a `permanent` value -- `lifespan` already uses `permanent` and the two would be confused. Use `review: draft|approved`, defaulting to `approved` so pre-existing records are not all hidden from search."
+      },
+      "acceptance_criteria": [
+        "One Record change covering all three groups, not three separate migrations"
+      ]
+    },
+    {
+      "id": "p1-1-git-aware-metadata",
+      "priority": "P1",
+      "status": "pending",
+      "blocked_by": "p1-05-unified-schema-pass",
+      "title": "Git-aware metadata -- the strongest differentiator",
+      "description": "memmy's memory is one global personal SQLite. mneva's memory can follow the repo and branch. This is the structural advantage; build it first.",
+      "context": {
+        "behavior": "capture records git provenance automatically; search/replay default to filtering by current repo + branch",
+        "files": "new src/mneva/gitctx.py (extraction, must degrade gracefully outside a git repo), src/mneva/indexer.py (columns + search WHERE), src/mneva/cli.py, src/mneva/mcp_server.py, src/mneva/api.py (builds an Indexer in four places, api.py:52-90)",
+        "key_constraints": "Filter in the SQL WHERE clause, never after retrieval -- post-filtering breaks top_k."
+      },
+      "acceptance_criteria": [
+        "Capturing inside a git repo records repo/branch/commit/dirty state",
+        "Capturing outside a git repo still works",
+        "search/replay scope to the current repo+branch by default and can be overridden"
+      ]
+    },
+    {
+      "id": "p1-2-stale-supersede",
+      "priority": "P1",
+      "status": "pending",
+      "blocked_by": "p1-1-git-aware-metadata",
+      "title": "Stale / supersede",
+      "description": "Every competitor talks about memory going stale, but mneva has git and can tell precisely what changed. That is the version nobody else can build.",
+      "context": {
+        "key_constraints": "On conflict, surface it -- do NOT auto-merge. Explicitly required by the research doc. Stale records get down-ranked or flagged at retrieval (indexer.py)."
+      },
+      "acceptance_criteria": [
+        "A memory whose commit context has moved on is detectable",
+        "Conflicts prompt rather than silently merging"
+      ]
+    },
+    {
+      "id": "p1-3-draft-review-promote",
+      "priority": "P1",
+      "status": "pending",
+      "blocked_by": "p1-2-stale-supersede",
+      "title": "Draft / review / promote",
+      "description": "Agent writes land as draft; the user approves before anything becomes permanent truth. Fits the reviewable positioning and was the core ask in the 5/25 research.",
+      "context": {
+        "files": "src/mneva/cli.py (new `mneva review` / `mneva promote`), src/mneva/mcp_server.py (capture_memory defaults to draft), src/mneva/indexer.py (drafts excluded from search by default)"
+      },
+      "acceptance_criteria": [
+        "MCP capture_memory writes draft by default",
+        "Drafts do not appear in default search results",
+        "review/promote/reject round-trip works from the CLI"
+      ]
+    },
+    {
+      "id": "p1-35-obsidian-presentation",
+      "priority": "P1",
+      "status": "pending",
+      "blocked_by": "p1-1-git-aware-metadata",
+      "title": "Obsidian presentation -- the best demo of the whole pivot",
+      "description": "The new positioning leads with Obsidian, and _mirror_to_vault_if_configured (cli.py:111) mirrors records into the vault. New frontmatter fields flow there automatically; design how they look deliberately rather than discovering it later.",
+      "context": {
+        "files": "src/mneva/vault.py (131 lines)",
+        "why": "Git provenance visible inside Obsidian -- which repo, which branch, which commit, whether it is stale -- is the most direct demonstration of Markdown-as-truth."
+      },
+      "acceptance_criteria": [
+        "Capture a memory with git provenance, open the vault in real Obsidian, frontmatter is readable and looks intentional"
+      ]
+    },
+    {
+      "id": "p1-4-token-budgeted-replay",
+      "priority": "P1",
+      "status": "pending",
+      "blocked_by": "p1-05-unified-schema-pass",
+      "title": "Token-budgeted replay",
+      "description": "--budget 500|1000|3000|full. No full-context dump by default; rank by relevance + freshness + lifespan.",
+      "context": {
+        "files": "src/mneva/replay.py (79 lines, currently the simplest module), src/mneva/cli.py replay command",
+        "key_constraints": "Weakest differentiator (everyone is building this), so it goes last -- but it is the direct answer to the highest-frequency complaint, context bloat."
+      },
+      "acceptance_criteria": [
+        "replay respects the budget and degrades gracefully when memories exceed it"
+      ]
+    },
+    {
+      "id": "p2-evidence-assets",
+      "priority": "P2",
+      "status": "pending",
+      "title": "Evidence assets",
+      "description": "dogfood demo (use mneva to build mneva, show the memory files), token savings comparison (budgeted replay vs full injection), and the hygiene CLI (`mneva stale`, `mneva audit`)."
+    },
+    {
+      "id": "cancelled-nontechnical-line",
+      "priority": "CANCELLED",
+      "status": "cancelled",
+      "cancelled_at": "2026-07-31",
+      "title": "Non-technical beachhead: validation experiment, landing page, usability",
+      "description": "Cancelled by the 2026-07-31 strategy reversal. Covers the former p0a-rebuild-validation-experiment, p0a-landing-page, and p1-nontechnical-usability entries.",
+      "context": {
+        "why": "memmy-agent already shipped a better version of this plan (desktop app, free credits, one-click install, automatic history import). Competing head-on against a funded team with distribution, while mneva has not even solved installation, is a losing position.",
+        "important": "This is NOT 'non-technical demand was falsified'. The 0/5 outreach had no statistical power; that question still has zero evidence either way. The cancellation is about competitive position, not demand.",
+        "revival_condition": "Only if the competitive landscape changes materially."
+      }
+    }
+  ]
+}

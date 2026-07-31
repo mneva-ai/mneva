@@ -86,3 +86,107 @@ def test_force_bm25_when_sqlite_vec_disabled(
     idx.add(rec)
     write_record(rec, home=home)
     assert {r.id for r in idx.search("fox")} == {"r1"}
+
+
+def test_rebuild_repopulates_from_markdown(tmp_mneva_home: Path) -> None:
+    """The Markdown store is the source of truth; the index is disposable."""
+    home = ensure_home()
+    idx = Indexer(home / "mneva.sqlite")
+    for i in range(3):
+        rec = _record(f"rb{i}", f"rebuildable record number {i}")
+        write_record(rec, home=home)
+        idx.add(rec)
+    assert idx.status()["count"] == 3
+
+    # Wipe the index without touching the Markdown files.
+    idx._conn.execute("DELETE FROM records")
+    idx._conn.commit()
+    assert idx.status()["count"] == 0
+
+    assert idx.rebuild() == 3
+    assert idx.status()["count"] == 3
+    assert any(h.id == "rb1" for h in idx.search("rebuildable"))
+
+
+def test_stale_schema_is_rebuilt_not_silently_kept(tmp_mneva_home: Path) -> None:
+    """A pre-versioning DB must be rebuilt on open, not left with the old shape.
+
+    Regression guard: `_init_schema` used to be CREATE TABLE IF NOT EXISTS with
+    no version check, so any new column was a silent no-op on existing
+    databases.
+    """
+    import sqlite3
+
+    home = ensure_home()
+    db = home / "mneva.sqlite"
+
+    # Two records exist as Markdown; only one made it into a legacy-shaped DB.
+    for i in range(2):
+        write_record(_record(f"lg{i}", f"legacy record {i}"), home=home)
+
+    conn = sqlite3.connect(db)
+    conn.execute(
+        "CREATE TABLE records (id TEXT PRIMARY KEY, scope TEXT NOT NULL, "
+        "lifespan TEXT NOT NULL, tool TEXT NOT NULL, body TEXT NOT NULL)"
+    )
+    conn.execute(
+        "INSERT INTO records VALUES (?, ?, ?, ?, ?)",
+        ("lg0", "s", "permanent", "claude-code", "legacy record 0"),
+    )
+    conn.execute("PRAGMA user_version = 0")
+    conn.commit()
+    conn.close()
+
+    # Opening it must notice the stale version and rebuild from Markdown.
+    idx = Indexer(db)
+    assert idx.status()["count"] == 2
+    assert int(idx._conn.execute("PRAGMA user_version").fetchone()[0]) > 0
+
+
+def test_current_schema_version_is_not_rebuilt_every_open(tmp_mneva_home: Path) -> None:
+    """An up-to-date DB keeps rows that are not on disk, proving no rebuild ran."""
+    home = ensure_home()
+    db = home / "mneva.sqlite"
+    idx = Indexer(db)
+    rec = _record("keep1", "record present in index only")
+    idx.add(rec)  # deliberately NOT written to Markdown
+    assert idx.status()["count"] == 1
+
+    reopened = Indexer(db)
+    assert reopened.status()["count"] == 1
+
+
+def test_failed_rebuild_does_not_stamp_the_schema_version(
+    tmp_mneva_home: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A rebuild that dies part-way must not leave a stamped, partial index.
+
+    This is what BEGIN IMMEDIATE + rollback buys. Without the transaction the
+    DROP and CREATE autocommit on their own, so a failure mid-insert leaves an
+    emptied table behind. If the version had also been stamped, every later
+    open would skip the rebuild and the index would stay silently incomplete
+    forever -- the exact failure mode schema versioning exists to prevent.
+    """
+    import mneva.indexer as indexer_mod
+
+    home = ensure_home()
+    for i in range(5):
+        write_record(_record(f"boom{i}", f"record {i}"), home=home)
+
+    idx = Indexer(home / "mneva.sqlite")
+    assert idx.status()["count"] == 5
+
+    def exploding_iter(*, home: Path):  # type: ignore[no-untyped-def]
+        yield _record("boom0", "record 0")
+        raise OSError("disk gave up mid-rebuild")
+
+    monkeypatch.setattr(indexer_mod, "iter_records", exploding_iter)
+    monkeypatch.setattr(indexer_mod, "_SCHEMA_VERSION", 99)
+
+    with pytest.raises(OSError):
+        idx.rebuild()
+
+    # Version must still be the pre-failure value, so the next open retries.
+    assert int(idx._conn.execute("PRAGMA user_version").fetchone()[0]) != 99
+    # And the partial write must be gone, not half-applied.
+    assert idx.status()["count"] == 5

@@ -17,5 +17,14 @@ secrets/
 .secrets/
 .pypirc
 
+# Test and type-check caches
+.coverage
+.coverage.*
+htmlcov/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
 # OMC harness state
 .omc/
+.gstack/

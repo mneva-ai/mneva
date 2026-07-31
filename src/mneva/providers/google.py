@@ -3,7 +3,8 @@ from __future__ import annotations
 
 import os
 
-import google.generativeai as genai
+from google import genai
+from google.genai import types
 
 from mneva.providers.base import MissingAPIKeyError
 
@@ -17,15 +18,15 @@ class GoogleProvider:
         key = os.environ.get("GOOGLE_API_KEY")
         if not key:
             raise MissingAPIKeyError("google", "GOOGLE_API_KEY")
-        # google-generativeai exports these at runtime but does not declare
-        # them in __all__; suppress mypy attr-defined for the public API.
-        genai.configure(api_key=key)  # type: ignore[attr-defined]
-        model_name = os.environ.get("MNEVA_GOOGLE_MODEL", _DEFAULT_MODEL)
-        self._model = genai.GenerativeModel(model_name)  # type: ignore[attr-defined]
+        self._client = genai.Client(api_key=key)
+        self._model_name = os.environ.get("MNEVA_GOOGLE_MODEL", _DEFAULT_MODEL)
 
     def complete(self, prompt: str, *, max_tokens: int) -> str:
-        resp = self._model.generate_content(
-            prompt,
-            generation_config={"max_output_tokens": max_tokens},
+        resp = self._client.models.generate_content(
+            model=self._model_name,
+            contents=prompt,
+            config=types.GenerateContentConfig(max_output_tokens=max_tokens),
         )
-        return resp.text  # type: ignore[no-any-return]  # resp.text is Any
+        # google-genai types response.text as str | None; the other providers
+        # all return str, so normalize a None response to the empty string.
+        return resp.text or ""

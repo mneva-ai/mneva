@@ -1,0 +1,536 @@
+{
+  "metadata": {
+    "title": "Mneva non-technical beachhead user research integrated package",
+    "created_at": "2026-05-25",
+    "timezone": "America/New_York",
+    "language": "zh-CN",
+    "strategic_guardrail": "非技术用户优先滩头。工程师路线只作为未来引擎/高级玩家层输入，不作为当前 v0.3 主线。",
+    "scope": [
+      "Reddit recent non-technical / zero-coding / vibe-coding posts",
+      "Older but high-signal non-technical candidate shortlist",
+      "Positioning copy for non-technical outreach",
+      "Outreach templates without phone-call requests"
+    ],
+    "exclusions": [
+      "MCP-first engineer posts are excluded from primary outreach",
+      "Git/token/benchmark/CLI product roadmap items are excluded from current beachhead priorities",
+      "Technical competitor authors are not treated as primary WTP validation candidates"
+    ],
+    "note_on_post_content": "This file includes accurate structured summaries and key short excerpts from public posts/comments gathered during research, with source links for verification. It does not duplicate every full Reddit thread wholesale."
+  },
+  "strategic_decision": {
+    "chosen_path": "守住非技术线, 先验证付费",
+    "why": [
+      "工程师信号更响、更具体，但会把 mneva 拉回拥挤的工程师记忆工具红海。",
+      "5/25 已拍板：非技术用户优先滩头，工程师降为引擎和高级玩家层。",
+      "当前唯一未堵上的关键缺口是：非技术用户是否愿意为了“不再重讲项目”留下邮箱或付钱。",
+      "因此本轮调研和外展只服务非技术付费意愿验证。"
+    ],
+    "current_validation_question": "非技术用户是否真的愿意为了“不再重讲项目/不再让 AI 忘记项目”留下邮箱、回复调研，或支付 $5/$10/$20?"
+  },
+  "positioning_for_nontechnical_users": {
+    "primary_value_prop_en": "Your AI forgets your project every time you switch tools. Mneva remembers, so you never explain it twice.",
+    "primary_value_prop_zh": "换个 AI 工具, 它就忘了你的项目。Mneva 帮你记住, 这样你不用再重讲第二遍。",
+    "alternate_value_props": [
+      {
+        "id": "A2",
+        "en": "One memory for all your AI tools. Jump between ChatGPT, Claude and Cursor without starting over.",
+        "zh": "给你所有 AI 工具共用的一份记忆。在 ChatGPT、Claude、Cursor 之间切换, 不用从头再来。"
+      },
+      {
+        "id": "A3",
+        "en": "Stop re-explaining your project to every AI. No code, no setup.",
+        "zh": "别再对每个 AI 重讲一遍你的项目。不用写代码, 不用配置。"
+      }
+    ],
+    "safe_language": [
+      "AI forgets your project",
+      "re-explain",
+      "switching tools",
+      "copy-pasting summaries",
+      "keeping track of decisions",
+      "where you left off",
+      "keep the AI on track"
+    ],
+    "avoid_language": [
+      "MCP",
+      "CLI",
+      "Git",
+      "SQLite",
+      "token",
+      "benchmark",
+      "memory substrate",
+      "developer tool",
+      "embeddings",
+      "local-first architecture"
+    ]
+  },
+  "search_strategy": {
+    "primary_platform": "Reddit",
+    "hn_status": "Recent HN results were not useful for non-technical outreach. HN mostly produced engineering/meta discussion rather than reachable non-technical candidates.",
+    "best_subreddits": [
+      "r/SaasDevelopers",
+      "r/vibecoding",
+      "r/nocode",
+      "r/lovable",
+      "r/ClaudeAI",
+      "r/SaaS",
+      "r/Femalefounders",
+      "r/aitoolhq"
+    ],
+    "best_search_phrases": [
+      "zero coding experience",
+      "no coding background",
+      "non technical founder",
+      "which vibe coding tool",
+      "built a SaaS with zero experience",
+      "Lovable handoff developer",
+      "AI forgets project",
+      "keep AI on track",
+      "I don't know how to explain this to a developer"
+    ],
+    "important_observation": "非技术用户很少直接说 memory layer 或 context loss。他们通常说：不知道自己在做什么、工具太多、AI 跑偏、不会 debug、不会向开发者解释、需要让 AI 一步步带着做。"
+  },
+  "recent_priority_candidates": [
+    {
+      "rank": 1,
+      "username": "ersinkiymaz",
+      "subreddit": "r/vibecoding",
+      "post_age_when_collected": "5h ago",
+      "post_title": "I Published My First iOS App in Just 5 Days (From Idea to Release) With Zero Coding Knowledge via Claude Code",
+      "post_url": "https://www.reddit.com/r/vibecoding/comments/1tddq2e/i_published_my_first_ios_app_in_just_5_days_from/",
+      "contact_url": "https://www.reddit.com/message/compose/?to=ersinkiymaz",
+      "nontechnical_signal": "UI designer with zero coding skills.",
+      "tools_mentioned": [
+        "Claude Code",
+        "Supabase",
+        "Telegram bot",
+        "App Store"
+      ],
+      "post_content": {
+        "summary": "The author says they released their first native iOS app in five days despite being a UI designer with zero coding skills. They used Claude Code to go from MVP requirements to backend setup, low-fi UI concepts, frontend iterations, moderation bot, App Store fixes, and final approval.",
+        "key_excerpts": [
+          "I'm a UI designer with zero coding skills.",
+          "I started by explaining the MVP requirements and setting up a backend server on Supabase.",
+          "After many iterations and polishing, I had a fully working app.",
+          "Apple asked me to fix some missing items, and Claude helped me address those as well."
+        ],
+        "comment_signal": "A commenter asked for the Claude-to-App-Store process; the author described a step-by-step workflow that depends heavily on Claude remembering MVP requirements, UI concepts, moderation needs, and App Store review fixes."
+      },
+      "mneva_relevance": [
+        "Perfect recent non-technical/vibe-coder candidate.",
+        "Can validate whether a successful zero-code builder had to repeatedly restate product requirements, UI intent, compliance fixes, and app-review constraints.",
+        "Useful for testing whether 'AI forgets your project' resonates with builders who just shipped."
+      ],
+      "recommended_question": "When going from MVP requirements to App Store approval, what did you have to keep re-explaining to Claude so it stayed aligned with the app you wanted?",
+      "outreach": {
+        "subject": "Question about your Claude Code app",
+        "message": "Hey, I saw your post about publishing your first iOS app in 5 days with zero coding skills using Claude Code.\n\nI’m researching how non-coders keep AI tools on track while building real apps. Your workflow from MVP requirements to Supabase, UI iterations, moderation, and App Store fixes stood out.\n\nNo call needed. If you’re open to a quick written reply, what did you have to keep re-explaining to Claude so it didn’t lose track of the app you wanted?"
+      }
+    },
+    {
+      "rank": 2,
+      "username": "Any_Enthusiasm8346",
+      "subreddit": "r/SaasDevelopers",
+      "post_age_when_collected": "16h ago",
+      "post_title": "built a SaaS in a week with zero experience. Here's what actually happened.",
+      "post_url": "https://www.reddit.com/r/SaasDevelopers/comments/1t2gszs/built_a_saas_in_a_week_with_zero_experience_heres/",
+      "contact_url": "https://www.reddit.com/message/compose/?to=Any_Enthusiasm8346",
+      "nontechnical_signal": "Says they had no idea what they were doing and had never built SaaS, done marketing, set up payments, or written a privacy policy.",
+      "tools_mentioned": [
+        "Supabase",
+        "DodoPayments",
+        "Vercel",
+        "AI listing generator"
+      ],
+      "post_content": {
+        "summary": "The author built an AI real-estate listing generator in one week with zero experience. They set up auth, payments, deployment, and a live product but currently have a handful of signups and zero paying customers. Their main lesson is that building was easier than distribution.",
+        "key_excerpts": [
+          "i had no idea what i was doing.",
+          "never built a SaaS before. never done marketing. never set up payments. never wrote a privacy policy.",
+          "built the product (AI listing generator)",
+          "current status: live ... a handful of signups, zero paying customers.",
+          "building is the easy part",
+          "distribution is the actual job"
+        ],
+        "comment_signal": "Comments push the author toward direct outreach and real user validation, and challenge whether the product has true domain expertise. This makes the candidate useful for validating whether memory is a pain during building, but also whether payment willingness is weak without user traction."
+      },
+      "mneva_relevance": [
+        "Recent zero-experience SaaS builder.",
+        "Good for validating whether nontechnical builders need AI to remember product setup, customer assumptions, payment/auth decisions, and domain constraints.",
+        "Also useful caution: this user may currently care more about distribution than build-context memory."
+      ],
+      "recommended_question": "While building with no SaaS experience, what project background or decisions did you have to repeat to AI/tools so the product did not drift?",
+      "outreach": {
+        "subject": "Question about building with zero experience",
+        "message": "Hey, I saw your post about building a SaaS in a week with zero experience.\n\nThe part that stood out was that you had to figure out product, auth, payments, deployment, and marketing all at once.\n\nNo call needed. If you’re open to a quick written reply, while building it, what project details or decisions did you have to keep re-explaining so the AI/tools didn’t lose track?"
+      }
+    },
+    {
+      "rank": 3,
+      "username": "FounderArcs",
+      "subreddit": "r/SaasDevelopers",
+      "post_age_when_collected": "3d ago / 9d ago",
+      "post_title": "Which Vibe Coding Tool Is Actually Best for Someone With Zero Coding Experience?",
+      "post_url": "https://www.reddit.com/r/SaasDevelopers/comments/1t9qhxy/which_vibe_coding_tool_is_actually_best_for/",
+      "related_post_url": "https://www.reddit.com/r/SaasDevelopers/comments/1t9qdsx/can_someone_with_zero_coding_experience_actually/",
+      "contact_url": "https://www.reddit.com/message/compose/?to=FounderArcs",
+      "nontechnical_signal": "Wants to build small SaaS products without a traditional coding background and says the tool landscape is overwhelming.",
+      "tools_mentioned": [
+        "Lovable",
+        "Bolt",
+        "Cursor",
+        "Claude",
+        "Replit",
+        "v0",
+        "n8n"
+      ],
+      "post_content": {
+        "summary": "The author asks which vibe-coding tool is best for someone starting from absolute zero. They are not trying to become a full developer overnight; they want to build and validate MVP ideas faster. Their concern is choosing the wrong stack and wasting weeks.",
+        "key_excerpts": [
+          "I want to build small SaaS products without a traditional coding background.",
+          "the number of tools is overwhelming now.",
+          "Which tool is genuinely beginner-friendly for someone starting from absolute zero?",
+          "Not looking to become a full developer overnight — just want to build and validate MVP ideas faster.",
+          "Would love honest opinions before I spend weeks learning the wrong stack."
+        ],
+        "comment_signal": "Comments say Lovable/Bolt are easiest, Cursor + Claude is more powerful but harder once things break, and beginners underestimate debugging. One commenter warns that AI can take users down a bad path while saying everything is okay."
+      },
+      "mneva_relevance": [
+        "Excellent early-stage nontechnical candidate because the pain is not yet framed technically.",
+        "Can validate whether 'one memory across AI tools' matters to a user choosing between tools.",
+        "Can test whether the immediate fear is context loss, debugging, tool-switching, or wasted learning time."
+      ],
+      "recommended_question": "When choosing between Lovable, Bolt, Cursor, Claude, and Replit, what worries you most: the AI losing track, bugs you cannot debug, or wasting time learning the wrong tool?",
+      "outreach": {
+        "subject": "Question about choosing AI coding tools",
+        "message": "Hey, I saw your post asking which vibe-coding tool is best for someone with zero coding experience.\n\nThe part that stood out was how overwhelming the tool choices are: Lovable, Bolt, Cursor + Claude, Replit, v0, n8n, etc.\n\nNo call needed. If you’re open to a quick written reply, what worries you most right now: the AI losing track of your project, bugs you can’t debug, or wasting weeks learning the wrong tool?"
+      }
+    },
+    {
+      "rank": 4,
+      "username": "Such_Grace",
+      "subreddit": "r/SaasDevelopers",
+      "post_age_when_collected": "8d ago",
+      "post_title": "Comment on: Can Someone With Zero Coding Experience Actually Build a SaaS Today?",
+      "post_url": "https://www.reddit.com/r/SaasDevelopers/comments/1t9qdsx/can_someone_with_zero_coding_experience_actually/",
+      "contact_url": "https://www.reddit.com/message/compose/?to=Such_Grace",
+      "nontechnical_signal": "Self-identifies as a non-technical founder and says they have never written a line of real code.",
+      "tools_mentioned": [
+        "Latenode",
+        "Bolt"
+      ],
+      "post_content": {
+        "summary": "The commenter has been building automation-heavy workflows on Latenode for about eight months without writing real code. They say the more important lesson is validation: they wasted three months building features nobody asked for before talking to real users.",
+        "key_excerpts": [
+          "Non-technical founder here",
+          "I've never written a line of real code in my life.",
+          "I wasted 3 months building features nobody asked for before I talked to a single real user.",
+          "I spent two weeks with Bolt trying to get a simple form to CRM pipeline working and it kept falling apart the moment I added a third step."
+        ],
+        "comment_signal": "This user bridges workflow automation and vibe coding. They have concrete experience with tools falling apart as steps are added and a strong lesson about wasted build effort."
+      },
+      "mneva_relevance": [
+        "Strong nontechnical founder candidate with workflow complexity pain.",
+        "Can test whether project memory is valuable if the deeper pain is validation and workflow state.",
+        "Good candidate for the 'do not build features nobody asked for' lesson."
+      ],
+      "recommended_question": "When Bolt/Latenode workflows got more complex, what did you wish the AI/tool remembered about your goal, user, or workflow?",
+      "outreach": {
+        "subject": "Question about non-technical SaaS building",
+        "message": "Hey, I saw your comment about being a non-technical founder building workflows on Latenode, and how you wasted 3 months building features nobody asked for.\n\nI’m researching how non-technical builders keep AI/tools aligned with the real project goal as things get more complex.\n\nNo call needed. If you’re open to replying here, what do you wish the AI/tool remembered better: the user problem, the workflow steps, or why you were building each feature?"
+      }
+    },
+    {
+      "rank": 5,
+      "username": "yanguoyu",
+      "subreddit": "r/SaasDevelopers",
+      "post_age_when_collected": "8d ago",
+      "post_title": "Comment on: Can Someone With Zero Coding Experience Actually Build a SaaS Today?",
+      "post_url": "https://www.reddit.com/r/SaasDevelopers/comments/1t9qdsx/can_someone_with_zero_coding_experience_actually/",
+      "contact_url": "https://www.reddit.com/message/compose/?to=yanguoyu",
+      "nontechnical_signal": "Says they have basically zero coding background.",
+      "tools_mentioned": [
+        "AI builder unspecified",
+        "AidAppeal AI"
+      ],
+      "post_content": {
+        "summary": "The commenter built AidAppeal AI in the previous week despite basically zero coding background. The product helps students/families organize financial aid appeal letters, documentation checklists, and submission emails. They say getting live was easiest; harder parts were workflow, promises, sensitive information, usefulness, trust, distribution, and edge cases.",
+        "key_excerpts": [
+          "I have basically zero coding background",
+          "getting something live was the easiest part.",
+          "The harder part was figuring out the workflow, what not to promise, how to handle sensitive info, and whether anyone would actually find it useful.",
+          "The wall just moved from syntax to product judgment, trust, distribution, and edge cases."
+        ],
+        "comment_signal": "This is unusually close to a real nontechnical SaaS problem involving sensitive data and trust."
+      },
+      "mneva_relevance": [
+        "Strong candidate for validating whether AI should remember user promises, sensitive-data boundaries, workflow assumptions, and product judgment.",
+        "Good for WTP probe because their product involves sensitive information and correctness/trust concerns."
+      ],
+      "recommended_question": "While building AidAppeal AI, what did you most need the AI to remember: workflow, what not to promise, sensitive-info boundaries, or user needs?",
+      "outreach": {
+        "subject": "Question about building with zero coding background",
+        "message": "Hey, I saw your comment about building AidAppeal AI with basically zero coding background.\n\nThe part that stood out was that getting it live was the easy part, but workflow, what not to promise, sensitive info, and usefulness were harder.\n\nNo call needed. If you’re open to a quick written reply, what did you most need the AI to remember while building: the workflow, privacy boundaries, user needs, or something else?"
+      }
+    },
+    {
+      "rank": 6,
+      "username": "Downtown_Pudding9728",
+      "subreddit": "r/SaasDevelopers",
+      "post_age_when_collected": "9d ago",
+      "post_title": "Comment on: Can Someone With Zero Coding Experience Actually Build a SaaS Today?",
+      "post_url": "https://www.reddit.com/r/SaasDevelopers/comments/1t9qdsx/can_someone_with_zero_coding_experience_actually/",
+      "contact_url": "https://www.reddit.com/message/compose/?to=Downtown_Pudding9728",
+      "nontechnical_signal": "Says they have zero actual understanding of code.",
+      "tools_mentioned": [
+        "AI builder unspecified"
+      ],
+      "post_content": {
+        "summary": "The commenter says they have zero actual understanding of code but still had to make complex product and architectural decisions independently for their SaaS. They say fixing, debugging, and iterating is a nonstop process that takes substantial time and effort.",
+        "key_excerpts": [
+          "I have zero actual understanding of code",
+          "I still had to make complex product and architectural decisions independently for my SaaS",
+          "you have to be willing to put in work to fix/debug/iterate",
+          "it’s a non stop process that takes a huge amount of time and effort"
+        ],
+        "comment_signal": "This is a very direct signal that nontechnical users still need help preserving product/architecture decisions, but language must avoid engineer jargon."
+      },
+      "mneva_relevance": [
+        "Good candidate for decision-memory validation.",
+        "Can ask how they currently remember why they made product/architecture decisions.",
+        "Likely understands the pain of repeatedly reconstructing reasoning even if they do not use technical terms."
+      ],
+      "recommended_question": "When you had to make product/architecture decisions without understanding code, how did you keep track of why each decision was made?",
+      "outreach": {
+        "subject": "Question about AI-built SaaS decisions",
+        "message": "Hey, I saw your comment about having zero actual understanding of code but still needing to make complex product and architecture decisions for your SaaS.\n\nI’m researching how non-technical builders keep track of what was decided and why when AI is doing a lot of the building.\n\nNo call needed. If you’re open to a quick written reply, how do you currently remember why each product or technical decision was made?"
+      }
+    }
+  ],
+  "recent_candidates_needing_manual_author_verification": [
+    {
+      "label": "Comprendo / AI-powered document simplifier",
+      "subreddit": "r/aitoolhq",
+      "post_title": "Built an AI powered document simplifier with no coding experience",
+      "post_url": "https://www.reddit.com/r/aitoolhq/comments/1tfd9a1/built_an_ai_powered_document_simplifier_with_no/",
+      "status": "Page did not reliably expose the username during tool lookup. Manually open in Reddit before contact.",
+      "known_content_signal": "Zero coding experience; built with Lovable, Claude API, Supabase, Paddle; likely strong nontechnical builder if author can be confirmed.",
+      "recommended_next_step": "Open post in browser, confirm author, add DM link, then ask what project details they had to keep re-explaining while integrating Lovable/Claude API/Supabase/Paddle."
+    },
+    {
+      "label": "Magazine editor -> AI workflow builder",
+      "subreddit": "r/Femalefounders",
+      "post_title": "I accidentally created my first AI skill while...",
+      "post_url": "https://www.reddit.com/r/Femalefounders/comments/1taumv4/i_accidentally_created_my_first_ai_skill_while/",
+      "status": "Page did not reliably expose the username during tool lookup. Manually open in Reddit before contact.",
+      "known_content_signal": "Traditional magazine editor, zero coding background, solo founder workflow. Strong fit if author can be confirmed.",
+      "recommended_next_step": "Open post in browser, confirm author, then ask what AI had to remember about her workflow for the skill to remain useful."
+    }
+  ],
+  "older_high_signal_candidates": [
+    {
+      "username": "dmc_3",
+      "subreddit": "r/lovable",
+      "post_age_when_collected": "2mo ago",
+      "post_title": "Anyone else hit a wall trying to hand off their Lovable build to a developer?",
+      "post_url": "https://www.reddit.com/r/lovable/comments/1res8ef/anyone_else_hit_a_wall_trying_to_hand_off_their/",
+      "contact_url": "https://www.reddit.com/message/compose/?to=dmc_3",
+      "why_still_matters": "Although older, this is one of the cleanest nontechnical pain examples: working prototype exists, but user cannot communicate what was built and what is needed to developers.",
+      "post_content": {
+        "summary": "The author used Lovable to prototype an app and liked the building part, but hit a wall when trying to hand it off to a developer. Developers asked about database structure, edge cases, authentication flows, API integrations, and scalability, which the user had not considered. The author later described wanting a TurboTax-like guided process for software scoping.",
+        "key_excerpts": [
+          "I have this working prototype but when I talk to developers they ask me questions I never even considered",
+          "database structure, edge cases, authentication flows, API integrations, scalability stuff",
+          "I just wanted the thing to work like my prototype",
+          "what I wish existed is something like TurboTax but for scoping software projects",
+          "I’ve basically been doing this manually with ChatGPT but it’s messy and I never know if I’m covering everything"
+        ],
+        "comment_signal": "Multiple comments recommend PRDs/spec docs, plain-English summaries, and using the prototype as a visual spec. The thread strongly validates a nontechnical translation/scoping problem."
+      },
+      "mneva_relevance": [
+        "Strong evidence that nontechnical users need project memory/spec continuity, not engineering-memory jargon.",
+        "Useful for landing page direction: guided questions, plain-English project memory, developer handoff, no repeated back-and-forth.",
+        "Potentially adjacent to mneva if framed as remembering decisions and generating clean project briefs."
+      ],
+      "recommended_question": "When you tried to hand off the Lovable prototype, what project details did you wish had been captured automatically as you built?"
+    },
+    {
+      "username": "TroubleH",
+      "subreddit": "r/ClaudeAI",
+      "post_age_when_collected": "2mo ago",
+      "post_title": "Can someone with zero coding experience actually use Claude Code (or similar) to build stuff now?",
+      "post_url": "https://www.reddit.com/r/ClaudeAI/comments/1s0krn2/can_someone_with_zero_coding_experience_actually/",
+      "contact_url": "https://www.reddit.com/message/compose/?to=TroubleH",
+      "why_still_matters": "Clean early-stage nontechnical user asking whether AI-assisted coding has become good enough for a complete non-coder.",
+      "post_content": {
+        "summary": "The author has literally no coding background and asks whether a complete non-coder can now give AI a project idea and get something functional, or whether they still need basics to guide, catch mistakes, and debug. Comments generally say prototypes are possible but production software requires security, architecture, and maintainability awareness.",
+        "key_excerpts": [
+          "I have literally no coding background.",
+          "I have never written a line in my life",
+          "has AI-assisted coding reached a point where a complete non-coder can give it a project idea and get something functional out of it?",
+          "do you still need to understand the basics to guide it properly, catch its mistakes, debug, etc.?"
+        ],
+        "comment_signal": "The thread repeatedly says nontechnical users can prototype, but need planning, specificity, security review, and architecture help. Some comments describe writing specs and todos for Claude Code."
+      },
+      "mneva_relevance": [
+        "Validates early-user anxiety before tool adoption.",
+        "Useful for understanding the language of people before they know terms like context loss.",
+        "Can test whether 'Mneva remembers your project' makes sense before they have a workflow."
+      ],
+      "recommended_question": "As someone starting from zero, what would make you trust an AI coding tool to remember your project goal and constraints between sessions?"
+    },
+    {
+      "username": "iThunderclap",
+      "subreddit": "r/ClaudeAI",
+      "post_age_when_collected": "2mo ago",
+      "post_title": "Comment on zero coding experience Claude Code thread",
+      "post_url": "https://www.reddit.com/r/ClaudeAI/comments/1s0krn2/can_someone_with_zero_coding_experience_actually/",
+      "contact_url": "https://www.reddit.com/message/compose/?to=iThunderclap",
+      "why_still_matters": "UX-background user who still cannot write code but already has a self-made memory/workflow system with LLM brain, Notion docs, session logs, branches, reviews, and deployments.",
+      "post_content": {
+        "summary": "The commenter says they used an LLM brain, Perplexity agent, Google Cloud/Cloudflare, IDE iterations, branches, reviews, merges, session logs in Markdown, and Notion documentation. They have UX background but still cannot write code.",
+        "key_excerpts": [
+          "I used an LLM brain where I dumped my ideas and it directed me",
+          "When the model updates things, it creates session logs for itself in .md files and it updates my Notion documentation",
+          "I do have a background in UX design",
+          "I still can't write a line of code."
+        ],
+        "comment_signal": "This is a sophisticated non-coder workaround: they are manually approximating a project memory system."
+      },
+      "mneva_relevance": [
+        "High-quality second-wave candidate.",
+        "Likely understands the value of persistent project memory because they already built a workaround.",
+        "Good for validating whether Mneva can replace Notion/session-log manual process for nontechnical users."
+      ],
+      "recommended_question": "You already use session logs and Notion docs to keep AI work organized. What still feels manual or fragile in that process?"
+    }
+  ],
+  "older_shortlist_summary": {
+    "source_file": "D:/AI/Temp/interview-candidates-nontechnical-2026-05-25.md",
+    "shortlist_size": 17,
+    "note": "This older scrape-based shortlist remains useful for broader nontechnical segment coverage, but the first outreach batch should prioritize the newer candidates above.",
+    "top_names_from_old_list": [
+      {
+        "username": "mert_jh",
+        "subreddit": "r/SaaS",
+        "post_url": "https://www.reddit.com/r/SaaS/comments/1r6kgv4/",
+        "signal": "Researcher who can't code; built SaaS with Claude, Cursor, ChatGPT; $1K MRR; strong cross-tool and copy-paste workaround signal."
+      },
+      {
+        "username": "SoftSoftware4087",
+        "subreddit": "r/nocode",
+        "post_url": "https://www.reddit.com/r/nocode/comments/1rdg29b/",
+        "signal": "Nontechnical founders using Lovable/Bolt; context problem across features."
+      },
+      {
+        "username": "Naveja",
+        "subreddit": "r/nocode",
+        "post_url": "https://www.reddit.com/r/nocode/comments/1tjyaml/",
+        "signal": "Zero coding experience, multi-tool pipeline, shipped app."
+      },
+      {
+        "username": "KaleidoscopeExtra206",
+        "subreddit": "r/ChatGPTCoding",
+        "post_url": "https://www.reddit.com/r/ChatGPTCoding/comments/18slcxw/",
+        "signal": "Non-coder says ChatGPT forgets the main goal every 8-10 messages."
+      },
+      {
+        "username": "Content_Bathroom_707",
+        "subreddit": "r/SaaS",
+        "post_url": "https://www.reddit.com/r/SaaS/comments/1rr040t/",
+        "signal": "Brand designer, not developer; used ChatGPT, Claude, Lovable."
+      },
+      {
+        "username": "Thepeebandit",
+        "subreddit": "r/nocode",
+        "post_url": "https://www.reddit.com/r/nocode/comments/1rywx3o/",
+        "signal": "Nontechnical founder concerned with losing track of why AI made decisions."
+      }
+    ]
+  },
+  "immediate_outreach_batch": {
+    "recommended_batch_size": 5,
+    "send_order": [
+      "ersinkiymaz",
+      "Any_Enthusiasm8346",
+      "FounderArcs",
+      "Such_Grace",
+      "yanguoyu"
+    ],
+    "why_these_five": [
+      "They are recent.",
+      "They fit nontechnical/zero-coding/vibe-coding criteria.",
+      "They are reachable Reddit users with identifiable pain or workflow questions.",
+      "They avoid the engineering-memory-tool-builder trap.",
+      "They can validate whether the pain is strong enough for email/payment intent."
+    ],
+    "do_not_do": [
+      "Do not ask for a phone call.",
+      "Do not pitch Mneva in the first message.",
+      "Do not mention MCP, Git, token, benchmark, SQLite, CLI.",
+      "Do not send all messages at once if Reddit rate/spam limits are a risk."
+    ],
+    "success_metrics": [
+      "At least 2 written replies from first 5 messages.",
+      "At least 3 exact pain quotes.",
+      "At least 1 user says they already use a workaround such as notes, Notion, summaries, copy-paste, docs, or repeated prompts.",
+      "At least 1 user answers the WTP probe with $5 or higher.",
+      "Clear evidence whether 'AI forgets your project' resonates without technical explanation."
+    ]
+  },
+  "followup_questions_for_replies": [
+    "What do you currently do when the AI loses track of the project?",
+    "Do you use notes, Notion, a README, screenshots, copied summaries, or just restart the chat?",
+    "What is the most annoying thing to re-explain?",
+    "Does the AI forget the product goal, the workflow, user requirements, design decisions, or previous fixes?",
+    "If a tool saved that project memory automatically, what would it need to get right for you to trust it?",
+    "If this saved you from re-explaining your project every day, what would feel fair per month: free only, $5, $10, $20, or more?",
+    "What would need to be true for you to actually pay that?"
+  ],
+  "product_implications_for_nontechnical_beachhead": {
+    "current_priority": [
+      "Landing page and outreach validation before engineering roadmap.",
+      "Nontechnical language focused on forgetting/re-explaining, not memory architecture.",
+      "Manual concierge or mock demo is acceptable before building a full product.",
+      "A simple guided project memory or handoff flow may be more legible than an engineer memory server."
+    ],
+    "validated_pain_themes": [
+      "Tool overwhelm for people starting from zero.",
+      "AI can build fast, but users hit walls around debugging, product judgment, sensitive info, workflow, and handoff.",
+      "Users manually create specs, docs, Notion notes, or repeated prompts to keep AI aligned.",
+      "Handoff from AI-built prototypes to developers is painful because nontechnical users do not know which questions to answer.",
+      "Nontechnical users want AI to hold their hand and remember why things were decided."
+    ],
+    "do_not_prioritize_now": [
+      "Git-aware scope as a headline feature",
+      "Token-budgeted replay as a headline feature",
+      "MCP templates",
+      "Benchmark claims",
+      "Engineer-facing stale/supersede workflows"
+    ],
+    "possible_v0_validation_artifacts": [
+      "One-page landing page with email capture and WTP micro-question.",
+      "Written interview outreach to 5-10 recent nontechnical Reddit users.",
+      "Manual 'project memory brief' generated from a user's existing AI build story.",
+      "Short demo: paste your project notes once, then ask another AI and it remembers what matters.",
+      "Offer language: 'Stop re-explaining your project to every AI.'"
+    ]
+  },
+  "source_links": {
+    "recent_verified": [
+      "https://www.reddit.com/r/vibecoding/comments/1tddq2e/i_published_my_first_ios_app_in_just_5_days_from/",
+      "https://www.reddit.com/r/SaasDevelopers/comments/1t2gszs/built_a_saas_in_a_week_with_zero_experience_heres/",
+      "https://www.reddit.com/r/SaasDevelopers/comments/1t9qhxy/which_vibe_coding_tool_is_actually_best_for/",
+      "https://www.reddit.com/r/SaasDevelopers/comments/1t9qdsx/can_someone_with_zero_coding_experience_actually/"
+    ],
+    "older_verified_high_signal": [
+      "https://www.reddit.com/r/lovable/comments/1res8ef/anyone_else_hit_a_wall_trying_to_hand_off_their/",
+      "https://www.reddit.com/r/ClaudeAI/comments/1s0krn2/can_someone_with_zero_coding_experience_actually/"
+    ],
+    "needs_manual_author_verification": [
+      "https://www.reddit.com/r/aitoolhq/comments/1tfd9a1/built_an_ai_powered_document_simplifier_with_no/",
+      "https://www.reddit.com/r/Femalefounders/comments/1taumv4/i_accidentally_created_my_first_ai_skill_while/"
+    ]
+  }
+}

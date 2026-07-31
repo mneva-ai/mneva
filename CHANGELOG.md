@@ -2,6 +2,69 @@
 
 ## [Unreleased]
 
+### Changed
+- **Migrated off the end-of-life Google SDK.** `google-generativeai` reached EOL
+  upstream ("All support for the `google.generativeai` package has ended") and
+  emitted a `FutureWarning` on every import. The Google provider now uses the
+  current `google-genai` SDK: `genai.Client(api_key=...)` plus
+  `client.models.generate_content(model=..., contents=..., config=types.GenerateContentConfig(...))`,
+  replacing the removed `genai.configure()` / `genai.GenerativeModel()` API.
+  The default model, the `MNEVA_GOOGLE_MODEL` override, and the
+  `complete(prompt, *, max_tokens) -> str` contract are all unchanged. The new
+  SDK types `response.text` as `str | None`, so an empty response now normalizes
+  to `""` rather than propagating `None` — covered by a new test.
+- **Package description** now leads with the user-facing problem instead of
+  internal architecture vocabulary.
+
+### Changed (strategy)
+- **Repositioned around Markdown ownership.** New positioning: *your AI memory is
+  your own Markdown files — follows the repo, lives in git, opens in Obsidian, no
+  account, no cloud.* This reverses the 2026-05-25 decision to target
+  non-technical users first. The reversal followed a competitive analysis of
+  `MemTensor/memmy-agent`, which had already shipped a stronger version of that
+  plan (desktop app, free credits, one-click install, automatic history import).
+  mneva's remaining differentiators all matter specifically to developers,
+  Obsidian users, and privacy-sensitive users. Full reasoning is recorded in
+  `.claude/claude-progress.txt`; this is a positioning change, not a claim that
+  non-technical demand was disproven. Updated `CLAUDE.md`,
+  `.claude/feature_list.json`, both READMEs, and the package description.
+
+### Added
+- **`mneva reindex`** — rebuilds the search index from the Markdown store. Use it
+  after editing records by hand, restoring files, or upgrading. The Markdown
+  files are the source of truth; the index is disposable.
+
+### Fixed
+- **New index columns were silently dropped on existing databases.**
+  `Indexer._init_schema()` used `CREATE TABLE IF NOT EXISTS` with no version
+  check, so any schema change was a no-op against a database that already
+  existed — the table kept its old shape forever, and there was no `ALTER
+  TABLE`, rebuild, or migration path anywhere in the codebase. The index now
+  carries a schema version (`PRAGMA user_version`); on open, a database at an
+  older version is rebuilt from the Markdown store. This also makes the
+  documented invariant "SQLite is a rebuildable index" true in code, where it
+  previously was not. Note: because every existing database predates the
+  version stamp, the **first** open after upgrading does a full rescan of
+  `~/.mneva/store/`. It is synchronous, so a large store makes that one launch
+  slower; subsequent opens skip it.
+- **Concurrent startup could fail with "database is locked".**
+  `PRAGMA journal_mode=WAL` ran *before* `busy_timeout` was configured, and
+  SQLite returns `SQLITE_BUSY` for a journal-mode conversion without invoking
+  the busy handler — so two `mneva-mcp` processes (one per AI client) opening a
+  fresh or pre-WAL database at the same moment could race, and one would error
+  out instead of waiting. `busy_timeout` is now set first, and the WAL switch
+  is best-effort: losing that race is harmless, since the winner sets the same
+  mode on the same file and the mode persists on disk.
+
+### Added
+- **Project harness** — `CLAUDE.md`, `.claude/feature_list.json`, and
+  `.claude/claude-progress.txt`. Records the architecture rules, the current
+  strategy and its guardrail, the prioritized queue, and an append-only progress
+  log, so picking the project back up does not require re-exploring it.
+- **User research committed to version control.** Three research documents from
+  2026-05-25 (118KB, including the strategic decision record) had been sitting
+  untracked in the working tree.
+
 ## [0.2.2] - 2026-05-24
 
 ### Fixed
