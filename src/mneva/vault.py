@@ -24,7 +24,12 @@ from pathlib import Path
 
 import frontmatter
 
-from mneva.store import Record, write_record
+from mneva.store import (
+    Record,
+    record_from_frontmatter,
+    record_frontmatter,
+    write_record,
+)
 
 _LOG = logging.getLogger("mneva.vault")
 
@@ -73,13 +78,11 @@ def write_to_vault(record: Record, vault: Path) -> Path:
         )
     target = vault_record_path(record, vault)
     target.parent.mkdir(parents=True, exist_ok=True)
+    # Goes through store.record_frontmatter so the vault copy carries exactly
+    # the same fields as the canonical record. These lists used to be separate,
+    # which meant a new field silently failed to reach Obsidian.
     post = frontmatter.Post(
-        record.body,
-        mneva_id=record.id,
-        scope=record.scope,
-        lifespan=record.lifespan,
-        tool=record.tool,
-        source=record.source,
+        record.body, **record_frontmatter(record, mneva_id=record.id)
     )
     target.write_text(frontmatter.dumps(post), encoding="utf-8")
     return target
@@ -117,15 +120,10 @@ def sync_from_vault(vault: Path, home: Path) -> SyncResult:
             skipped += 1
             continue
 
-        raw_source = post.get("source")
-        record = Record(
-            id=str(post["mneva_id"]),
-            scope=str(post.get("scope", "unknown")),
-            lifespan=str(post.get("lifespan", "permanent")),
-            tool=str(post.get("tool", "vault")),
-            body=post.content,
-            source=str(raw_source) if raw_source is not None else None,
-        )
+        # Shared reader: syncing back must not strip fields off the canonical
+        # record. This overwrites the local store, so a dropped field here is
+        # silent data loss, not just a missing display value.
+        record = record_from_frontmatter(post, record_id=str(post["mneva_id"]))
         write_record(record, home=home, overwrite=True)
         imported += 1
     return SyncResult(imported=imported, skipped=skipped)

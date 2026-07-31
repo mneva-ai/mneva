@@ -373,6 +373,35 @@ uvx mneva reindex   # rebuild the search index from the Markdown files
 The index is disposable — delete `~/.mneva/mneva.sqlite`, run `reindex`, and
 nothing is lost.
 
+### Memories that follow your repo
+
+Capture inside a git repository and the memory records where it came from —
+repo, branch, and commit — right in the note's frontmatter:
+
+```yaml
+scope: my-project
+lifespan: permanent
+repo: github.com/mneva-ai/mneva
+branch: main
+commit_sha: cd6d7af1c3a2982810799d2f023a028fc361c6dc
+```
+
+`mneva search` then scopes to the repo you're standing in:
+
+```sh
+uvx mneva search "SQLite"              # this repo (plus memories tied to none)
+uvx mneva search "SQLite" --all-repos  # everything
+uvx mneva capture --scope p --no-git "…"  # don't record provenance at all
+```
+
+`repo` comes from the remote URL, normalized — so it keeps matching after you
+clone the project to another machine or a different directory. Memories
+captured outside a repo are never hidden; only memories belonging to a
+*different* repo are filtered out.
+
+Nothing here is required: no git, no repo, no remote. Each one just degrades to
+"no provenance" and capture works exactly as before.
+
 ### Using mneva from a browser chat UI
 
 The MCP path covers desktop AI clients. Browser-only AI chat UIs (claude.ai web, chatgpt.com, gemini.google.com, chat.deepseek.com) cannot speak MCP because browsers do not allow web pages to spawn local processes. Until v0.3 ships a browser extension, the workaround is:

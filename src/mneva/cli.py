@@ -6,7 +6,7 @@ from pathlib import Path
 
 import click
 
-from mneva import __version__
+from mneva import __version__, gitctx
 from mneva.config import ConfigError, load_config, save_config
 from mneva.indexer import Indexer
 from mneva.paths import ensure_home
@@ -73,11 +73,18 @@ def init() -> None:
 @click.option("--tool", default="cli")
 @click.option("--lifespan", type=click.Choice(["transient", "permanent"]), default="transient")
 @click.option("--source", default=None, help="Optional source URL/ref.")
+@click.option(
+    "--no-git",
+    is_flag=True,
+    default=False,
+    help="Do not record git provenance (repo, branch, commit) with this memory.",
+)
 @click.argument("body", required=False)
 def capture(
     scope: str,
     tool: str,
     lifespan: str,
+    no_git: bool,
     source: str | None,
     body: str | None,
 ) -> None:
@@ -89,6 +96,10 @@ def capture(
     if not body.strip():
         raise click.ClickException("body is empty")
     home = ensure_home()
+    # Detected from the shell's cwd, which for the CLI really is the project.
+    # (The MCP server cannot do this -- its cwd belongs to the AI client, so it
+    # takes repo_path as an argument instead.)
+    git = None if no_git else gitctx.detect()
     record = Record(
         id=make_record_id(scope, body),
         scope=scope,
@@ -96,6 +107,7 @@ def capture(
         tool=tool,
         body=body,
         source=source,
+        **gitctx.as_record_fields(git),
     )
     try:
         write_record(record, home=home)
@@ -138,17 +150,49 @@ def _mirror_to_vault_if_configured(record: Record, home: Path) -> None:
 @click.option("--scope", default=None)
 @click.option("--lifespan", type=click.Choice(["transient", "permanent"]), default=None)
 @click.option("-k", "top_k", default=10, type=int)
-def search(query: str, scope: str | None, lifespan: str | None, top_k: int) -> None:
-    """Search the index. Scope filter narrows; lifespan filter is exact-match."""
+@click.option("--repo", default=None, help="Filter to this repo instead of the current one.")
+@click.option(
+    "--all-repos",
+    is_flag=True,
+    default=False,
+    help="Do not scope results to the current repo.",
+)
+def search(
+    query: str,
+    scope: str | None,
+    lifespan: str | None,
+    top_k: int,
+    repo: str | None,
+    all_repos: bool,
+) -> None:
+    """Search the index. Scope filter narrows; lifespan filter is exact-match.
+
+    Results are scoped to the current repo by default. Memories with no repo
+    (captured outside a repo, or before v0.3) always show; only memories
+    belonging to a *different* repo are hidden. Use --all-repos to see those.
+    """
     home = ensure_home()
     idx = Indexer(home / "mneva.sqlite")
-    hits = idx.search(query, scope=scope, lifespan=lifespan, k=top_k)
+    effective_repo = _effective_repo(repo=repo, all_repos=all_repos)
+    hits = idx.search(
+        query, scope=scope, lifespan=lifespan, repo=effective_repo, k=top_k
+    )
     if not hits:
         click.echo("(no matches)")
         return
     for r in hits:
         click.echo(f"--- {r.id} (scope: {r.scope}, lifespan: {r.lifespan}, tool: {r.tool}) ---")
         click.echo(r.body)
+
+
+def _effective_repo(*, repo: str | None, all_repos: bool) -> str | None:
+    """Resolve which repo to filter on. None means no repo filtering at all."""
+    if all_repos:
+        return None
+    if repo is not None:
+        return repo
+    git = gitctx.detect()
+    return git.repo if git else None
 
 
 @app.command()
@@ -160,6 +204,12 @@ def status() -> None:
     click.echo(f"home: {home}")
     click.echo(f"mode: {s['mode']}")
     click.echo(f"count: {s['count']}")
+    # Surfaces whether git-aware capture is actually landing. The MCP path
+    # relies on the AI client passing repo_path; without this line, a client
+    # that never passes it looks identical to one that does.
+    click.echo(f"with repo provenance: {s['with_repo']} / {s['count']}")
+    git = gitctx.detect()
+    click.echo(f"current repo: {git.repo if git else '(not a git repo)'}")
 
 
 @app.command()

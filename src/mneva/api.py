@@ -7,6 +7,7 @@ from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.responses import JSONResponse, PlainTextResponse
 from pydantic import BaseModel
 
+from mneva import gitctx
 from mneva.config import Config
 from mneva.indexer import Indexer
 from mneva.paths import ensure_home
@@ -19,6 +20,10 @@ class CaptureBody(BaseModel):
     lifespan: str
     body: str
     source: str | None = None
+    # Absolute path to the caller's project root. The server process does not
+    # share the caller's working directory, so provenance has to be told, not
+    # discovered.
+    repo_path: str | None = None
 
 
 class ForgetBody(BaseModel):
@@ -61,6 +66,9 @@ def create_app(home: Path | None = None, config: Config | None = None) -> FastAP
             tool=req.tool,
             body=req.body,
             source=req.source,
+            **gitctx.as_record_fields(
+                gitctx.detect(Path(req.repo_path)) if req.repo_path else None
+            ),
         )
         try:
             write_record(rec, home=resolved_home)
@@ -85,10 +93,11 @@ def create_app(home: Path | None = None, config: Config | None = None) -> FastAP
         q: str = Query(...),
         scope: str | None = Query(None),
         lifespan: str | None = Query(None),
+        repo: str | None = Query(None),
         k: int = Query(10),
     ) -> dict[str, list[dict[str, str]]]:
         idx = Indexer(resolved_home / "mneva.sqlite")
-        hits = idx.search(q, scope=scope, lifespan=lifespan, k=k)
+        hits = idx.search(q, scope=scope, lifespan=lifespan, repo=repo, k=k)
         return {
             "hits": [
                 {"id": r.id, "scope": r.scope, "tool": r.tool, "body": r.body}

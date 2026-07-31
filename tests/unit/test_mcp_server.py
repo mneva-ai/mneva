@@ -226,7 +226,18 @@ def test_record_to_dict_round_trip_stable() -> None:
         source="readme",
     )
     d = rec.to_dict()
-    assert set(d.keys()) == {"id", "scope", "lifespan", "tool", "body", "source"}
+    assert set(d.keys()) == {
+        "id",
+        "scope",
+        "lifespan",
+        "tool",
+        "body",
+        "source",
+        "repo",
+        "repo_path",
+        "branch",
+        "commit_sha",
+    }
     assert d == {
         "id": "abc123",
         "scope": "proj-a",
@@ -234,4 +245,30 @@ def test_record_to_dict_round_trip_stable() -> None:
         "tool": "claude-desktop",
         "body": "hello",
         "source": "readme",
+        # Git provenance is absent unless captured inside a repo. It must still
+        # appear as an explicit null so MCP clients see a stable payload shape.
+        "repo": None,
+        "repo_path": None,
+        "branch": None,
+        "commit_sha": None,
     }
+
+
+def test_record_to_dict_carries_git_provenance() -> None:
+    """Provenance must reach MCP clients, not just the local Markdown file."""
+    rec = Record(
+        id="abc123",
+        scope="proj-a",
+        lifespan="permanent",
+        tool="claude-code",
+        body="hello",
+        repo="github.com/mneva-ai/mneva",
+        repo_path="/home/dev/mneva",
+        branch="main",
+        commit_sha="0" * 40,
+    )
+    d = rec.to_dict()
+    assert d["repo"] == "github.com/mneva-ai/mneva"
+    assert d["repo_path"] == "/home/dev/mneva"
+    assert d["branch"] == "main"
+    assert d["commit_sha"] == "0" * 40
