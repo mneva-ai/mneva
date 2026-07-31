@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "mneva"
 dynamic = ["version"]
-description = "Your AI forgets your project when you switch tools. Mneva remembers, so you never explain it twice."
+description = "AI coding memory as plain Markdown. Follows your repo, lives in git, opens in Obsidian. No account, no cloud."
 readme = "README.md"
 license = { file = "LICENSE" }
 requires-python = ">=3.11"

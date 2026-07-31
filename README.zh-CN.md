@@ -5,7 +5,7 @@
 
 # MNEVA
 
-<em>持久化的智能体上下文底座。本地优先的 Markdown 仓库，任何 AI 工具都能查询。</em>
+<em>AI 编码记忆，就是你自己的 Markdown 文件。跟着 repo 走，能进 git，能用 Obsidian 打开。无账号，无云。</em>
 
 <!-- BADGES -->
 <!-- local repository, no metadata badges. -->
@@ -57,9 +57,13 @@
 
 ## 概览
 
-**问题在哪：** 每个 AI 助手都健忘。开个新对话，你就得把项目从头解释一遍；从 Claude 换到 Cursor，上下文又跟不过去。你花时间教给一个工具的那些决定、约束和事实，下一个工具完全看不到。
+**别的 AI 记忆工具把你的记忆存进它自己的数据库。mneva 把它存成你的文件。**
 
-**mneva 就是来解决这个的。** 它是一个本地优先的记忆层，能跟随你穿梭于各个 AI 助手之间。在 Claude Desktop 里记下一个决定，明天在 Cursor 里就能问到它。所有记录都以纯 Markdown 文件的形式存放在 `~/.mneva/` 下——数据归你所有，mneva 负责让它跨工具持久存在。
+记录是带 YAML frontmatter 的纯 Markdown，放在 `~/.mneva/store/` 下。你可以读它、`grep` 它、用任何编辑器改它、提交进 git、在 Obsidian 里打开它。SQLite 索引是可丢弃的——删掉它，会从 Markdown 重建。不用注册账号，没有云端同步，默认不开任何遥测。
+
+**它解决的问题：** 每个 AI 助手都健忘。开个新对话，你就得把项目从头解释一遍；从 Claude Code 换到 Cursor，上下文又跟不过去。记一次，所有支持 MCP 的工具都读得到。
+
+**为什么这比存储引擎更重要：** 读不到的记忆，就是审计不了、纠正不了、也信不过的记忆。当助手把你的架构记错了，你要的是打开文件改掉那一行，而不是去查一个不透明的存储然后祈祷。
 
 **v0.2 — mneva 现在会说 MCP 了。** 把 `mneva-mcp` 接进任何支持模型上下文协议（Model Context Protocol，MCP）的客户端（Claude Desktop、Claude Code、Cursor、Windsurf、Cline、Continue，以及开发者模式下的 ChatGPT Desktop），只需 30 秒。AI 客户端负责智能，mneva 负责记忆。记忆层本身不需要任何 API 密钥。
 

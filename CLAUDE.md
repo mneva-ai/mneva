@@ -32,13 +32,18 @@ Read these three, in order, then start. **Do not pre-explore the codebase.**
 
 ## Current Strategy — READ BEFORE PROPOSING PRODUCT WORK
 
-Decided 2026-05-25, reconfirmed 2026-07-31. Source of truth: `docs/nontechnical-user-research-integrated-2026-05-25.json`.
+**Decided 2026-07-31.** History: 5/25 chose a non-technical beachhead → **7/31 reversed** after the `MemTensor/memmy-agent` competitive analysis. Full reasoning in `.claude/claude-progress.txt`. Do not re-propose the non-technical line without reading that entry first.
 
-- **Beachhead is non-technical users.** The engineer line is demoted to a future engine / power-user tier, not the current main line.
-- **Guardrail**: Git-aware metadata, token-budgeted replay, benchmarks, and new CLI surface are **excluded from current priorities**. The full engineer roadmap is preserved in `docs/user-research-hn-reddit-2026-05-25.md` §7–8 as a fallback if the non-technical line is falsified.
-- **Validation status: zero evidence, not negative evidence.** One outreach batch (5 cold Reddit DMs) returned 0 replies. n=5 has no statistical power — it neither validated nor falsified demand. **Do not build non-technical product features until the validation experiment produces a verdict.**
-- **In user-facing copy, avoid**: MCP, CLI, Git, SQLite, token, benchmark, memory substrate, developer tool, embeddings, local-first architecture.
-- **Use instead**: "AI forgets your project", "re-explain", "switching tools", "where you left off".
+**Positioning:**
+
+> Your AI memory is your own Markdown files. It follows the repo, goes into git, opens in Obsidian, gets reviewed in a PR. No account, no cloud.
+
+- **Target user**: developers who use more than one AI coding tool, Obsidian users, privacy-sensitive developers. Not non-technical users.
+- **The five differentiators** (everything we build should sharpen at least one): Markdown is the source of truth; zero account / zero cloud; Obsidian two-way sync; deliberately scoped to the memory layer only; usable as a Python library.
+- **Main line**: the engineer roadmap in `docs/user-research-hn-reddit-2026-05-25.md` §7–8 — git-aware metadata, stale/supersede, draft→review→promote, token-budgeted replay.
+- **In user-facing copy, lead with**: Markdown, git-native, no account, reviewable, Obsidian, local. These were on the old avoid-list; that list is void.
+
+**Why the reversal** (so it is not re-litigated): `memmy-agent` (created 2026-07-16, 355 stars in 15 days, MemTensor team) already shipped a better version of the non-technical plan — desktop app, free trial credits, one-click install, automatic history import from 6 agents, a four-layer memory engine. mneva's feature surface is a strict subset except Obsidian. All five differentiators above matter **only** to engineers, which is exactly who the 5/25 decision demoted. The reversal is not "non-technical demand was falsified" — that question still has zero evidence — it is that the competitive landscape made that line unwinnable while making this one defensible. memmy structurally cannot copy Markdown-as-truth: its four-layer engine requires a structured DB.
 
 ## Architecture Rules
 
@@ -78,7 +83,9 @@ Bump `src/mneva/__init__.py`, update `CHANGELOG.md`, PR into `main`. CI (`.githu
 3. **Truncating pytest output.** `pytest.ini` sets `-ra -q`, so the `N passed` line is the **last** line. Piping through `tail`/`grep` silently swallows it and makes a green run look empty.
 4. **Treating the SQLite index as durable.** It is rebuilt from Markdown. Never write data that exists only in the index.
 5. **Using `google.generativeai`.** EOL upstream; removed in `## [Unreleased]` (post-0.2.2). The provider now uses `google-genai` (`genai.Client(...)` → `client.models.generate_content(model=…, contents=…, config=types.GenerateContentConfig(…))`).
-6. **Proposing engineer-line features** (git-aware scope, token budgets, `mneva audit`) as if they were next up. They are explicitly deferred — see `## Current Strategy`.
+6. **Re-proposing the non-technical beachhead** (desktop app, landing page, Reddit outreach) as if 5/25 were still in force. It was reversed on 7/31 — see `## Current Strategy` and the progress log.
+7. **Adding a column to `Indexer` and assuming it lands.** `_init_schema()` uses `CREATE TABLE IF NOT EXISTS`, so on an existing database a new column is a **silent no-op**. There is no `ALTER TABLE` and, as of this writing, no rebuild path. Any new indexed field needs a schema version + `rebuild()` from `store.iter_records()`.
+8. **Post-filtering search results.** `Indexer.search()` filters in SQL *before* BM25 ranking. Filtering after retrieval breaks `top_k` — you ask for k and get fewer.
 
 ## Token Efficiency
 

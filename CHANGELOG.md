@@ -16,6 +16,19 @@
 - **Package description** now leads with the user-facing problem instead of
   internal architecture vocabulary.
 
+### Changed (strategy)
+- **Repositioned around Markdown ownership.** New positioning: *your AI memory is
+  your own Markdown files — follows the repo, lives in git, opens in Obsidian, no
+  account, no cloud.* This reverses the 2026-05-25 decision to target
+  non-technical users first. The reversal followed a competitive analysis of
+  `MemTensor/memmy-agent`, which had already shipped a stronger version of that
+  plan (desktop app, free credits, one-click install, automatic history import).
+  mneva's remaining differentiators all matter specifically to developers,
+  Obsidian users, and privacy-sensitive users. Full reasoning is recorded in
+  `.claude/claude-progress.txt`; this is a positioning change, not a claim that
+  non-technical demand was disproven. Updated `CLAUDE.md`,
+  `.claude/feature_list.json`, both READMEs, and the package description.
+
 ### Added
 - **Project harness** — `CLAUDE.md`, `.claude/feature_list.json`, and
   `.claude/claude-progress.txt`. Records the architecture rules, the current

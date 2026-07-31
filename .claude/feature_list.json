@@ -1,96 +1,155 @@
 {
   "updated_at": "2026-07-31",
-  "strategy_ref": "docs/nontechnical-user-research-integrated-2026-05-25.json",
-  "strategy_summary": "Non-technical beachhead. Engineer line deferred to a future engine/power-user tier. Validation status is ZERO evidence (one n=5 outreach batch, 0 replies, no statistical power). No product features until the validation experiment returns a verdict.",
+  "strategy_ref": "CLAUDE.md -> ## Current Strategy; full reasoning in .claude/claude-progress.txt (2026-07-31 strategy-reversal entry)",
+  "strategy_summary": "Markdown/privacy/Obsidian engineer line. Positioning: your AI memory is your own Markdown files -- follows the repo, goes into git, opens in Obsidian, reviewed in a PR, no account, no cloud. Reversed the 2026-05-25 non-technical beachhead on 2026-07-31 after the memmy-agent competitive analysis.",
+  "roadmap_design_ref": "docs/user-research-hn-reddit-2026-05-25.md sections 7-8",
   "features": [
     {
-      "id": "p0a-rebuild-validation-experiment",
+      "id": "p0-reposition-harness-and-copy",
       "priority": "P0",
-      "status": "pending",
-      "title": "Rebuild the non-technical demand validation experiment",
-      "description": "The 2026-05-25 outreach (5 cold Reddit DMs) returned 0 replies and is uninterpretable: n=5 has no statistical power, the channel was DM, and the copy that was actually sent was never recorded. Rebuild the experiment so it can produce a verdict.",
+      "status": "in_progress",
+      "title": "Land the new positioning in the harness and user-facing copy",
+      "description": "The harness files written earlier on 2026-07-31 encode the now-reversed non-technical strategy. Until they are corrected they actively misdirect every future session.",
       "context": {
-        "channel_change": "Public replies under posts already complaining about the pain, not cold DMs. All 6 candidates in recent_priority_candidates had contact_url = reddit.com/message/compose, confirming the original batch was DM.",
-        "copy_is_a_rewrite_not_a_reuse": "docs/user-research-complete-2026-05-25.json -> copy_paste_outreach_templates_recent is the only written copy in the repo, but it is DM-shaped AND engineer-voiced ('CLAUDE.md goes stale', 'repo gets huge', 'duplicate logic, missing abstractions') and targets a different set of 5 usernames. Tone reference only. A public-reply, non-technical version must be written from scratch.",
-        "sample_size": "30-50 contacts, up from 5. Cold-outreach base reply rate is 5-20%; n=5 has an expected reply count below 1.",
-        "friction": "Add a landing page with email capture so 'leave an email' is the low-friction intent signal, instead of requiring a written reply.",
-        "copy_source": "docs/nontechnical-user-research-integrated-2026-05-25.json -> positioning_for_nontechnical_users (primary_value_prop_en/zh, safe_language, avoid_language)",
-        "followup_script": "same file -> followup_questions_for_replies",
-        "key_constraints": "Every message sent MUST be logged (platform / user / date / copy version / outcome), or the result is uninterpretable again. Reddit anti-spam is a live risk: 30-50 public comments mentioning your own product is a standard auto-removal/shadowban pattern, which would produce another zero-information 0-reply result. Batch and rate-limit; periodically verify comments are still visible from a logged-out browser."
-      },
-      "kill_criteria": {
-        "basis": "30 contacts",
-        "pass": ">=3 substantive replies AND >=2 emails AND >=1 explicit $5+ willingness-to-pay -> non-technical line holds, proceed to p1-nontechnical-usability",
-        "middle": "Replies exist but pass conditions unmet (e.g. 2 replies / 1 email / 0 WTP) -> verdict is 'pain is real, willingness to pay unproven'. Do NOT add more contacts. Run followup_questions_for_replies against everyone who replied and ask price directly. Still no $5+ signal -> treat as falsified.",
-        "falsify": "<2 substantive replies AND 0 emails -> non-technical beachhead assumption fails. Revert to the engineer line (docs/user-research-hn-reddit-2026-05-25.md sections 7-8, which has an existing code base to build on)."
+        "files": "CLAUDE.md (## Current Strategy rewritten, ## Common Mistakes updated), .claude/feature_list.json (this file), .claude/claude-progress.txt, pyproject.toml description, README.md + README.zh-CN.md positioning paragraphs",
+        "key_constraints": "READMEs are 30KB/19KB -- change only the positioning paragraphs, do not rewrite them. CLAUDE.md must keep a one-line trace of the 5/25 -> 7/31 reversal so nobody re-proposes the non-technical line in three months."
       },
       "acceptance_criteria": [
-        "Kill criteria are written down before the first message goes out",
-        "Every contact logged with platform / user / date / copy version / outcome",
-        "New public-reply non-technical copy written and reviewed against avoid_language",
-        "After 30 contacts, one of the three branches is declared and appended to .claude/claude-progress.txt"
-      ],
-      "blocked_on_user": "Outward-facing. Posting to Reddit and publishing a landing page both need explicit user confirmation before execution."
-    },
-    {
-      "id": "p0a-landing-page",
-      "priority": "P0",
-      "status": "pending",
-      "title": "Landing page + email capture (scoped exception to 'no product code')",
-      "description": "The lowest-friction intent signal for the validation experiment. Deliberately carved out as an exception to the no-product-code rule, and the largest work item in P0.",
-      "context": {
-        "copy": "primary_value_prop_en: 'Your AI forgets your project every time you switch tools. Mneva remembers, so you never explain it twice.'",
-        "key_constraints": "Bound by avoid_language (no MCP/CLI/Git/SQLite/token/local-first). Outward-facing and makes public claims in mneva's name.",
-        "scope": "hosting + form + email storage. Nothing else."
-      },
-      "acceptance_criteria": [
-        "Page content confirmed by the user before publishing",
-        "Email capture works end to end",
-        "No term from avoid_language appears on the page"
-      ],
-      "blocked_on_user": "Publishing is outward-facing and requires explicit confirmation."
-    },
-    {
-      "id": "p0b-repo-hygiene",
-      "priority": "P0",
-      "status": "done",
-      "completed_at": "2026-07-31",
-      "title": "Repo hygiene: commit research, build harness, migrate EOL dependency",
-      "description": "Low-cost cleanup so a 67-day dormancy does not cost a full re-exploration again.",
-      "context": {
-        "done": "Committed 3 research docs (118KB) into git; created CLAUDE.md + .claude/feature_list.json + .claude/claude-progress.txt; migrated google-generativeai (EOL) to google-genai; aligned pyproject description with the positioning doc."
-      },
-      "acceptance_criteria": [
-        "pytest green (173 passed)",
-        "ruff check . clean",
-        "mypy src clean",
-        "EOL FutureWarning gone"
+        "No file in the repo still asserts the non-technical beachhead as current",
+        "Positioning is consistent across CLAUDE.md, pyproject.toml, and both READMEs",
+        "The reversal and its reasoning are recorded in the append-only progress log"
       ]
     },
     {
-      "id": "p1-nontechnical-usability",
+      "id": "p1-0-index-migration-path",
       "priority": "P1",
-      "status": "blocked",
-      "blocked_by": "p0a-rebuild-validation-experiment",
-      "title": "Make mneva installable by a non-technical user",
-      "description": "Today a non-technical user cannot install mneva at all: it requires `uvx --from mneva mneva-mcp` plus hand-editing a JSON config file. If the non-technical line is validated, this is the gap to close.",
+      "status": "pending",
+      "title": "Index schema versioning + rebuild (BLOCKS all v0.3 features)",
+      "description": "Hard blocker found during the 2026-07-31 code review. Indexer._init_schema() uses CREATE TABLE IF NOT EXISTS, so adding a column is a silent no-op on any existing database. A codebase-wide grep found no rebuild, reindex, ALTER TABLE, or migration entry point anywhere. Every v0.3 feature below adds indexed fields, so all of them are blocked on this.",
       "context": {
-        "options": "graphical installer, or a hosted entry point, or a one-click config writer",
-        "key_constraints": "DO NOT START until p0a-rebuild-validation-experiment passes its kill criteria. Building here before a verdict is betting on zero evidence."
+        "evidence": "src/mneva/indexer.py:51 (_init_schema), src/mneva/indexer.py:89-100 (search filters in SQL before BM25 ranking). Closest thing to a rebuild is cli.py:255-257 inside sync-vault, which is tied to the vault flow.",
+        "approach": "Add an explicit schema version to Indexer plus rebuild() that repopulates from store.iter_records() (store.py:85, already exists). Expose it as a new `mneva reindex` command.",
+        "key_constraints": "This also closes a real gap: CLAUDE.md architecture rule 1 says SQLite is rebuildable from Markdown, which is currently NOT true in code."
       },
       "acceptance_criteria": [
-        "A user who has never opened a terminal can install and use mneva"
+        "Opening an old-schema sqlite DB with the new Indexer triggers migration or rebuild, never a silent failure",
+        "`mneva reindex` rebuilds from Markdown; after deleting the DB, status() count equals the number of store/*.md files",
+        "Reading an old .md file that lacks the new frontmatter fields still works"
       ]
     },
     {
-      "id": "deferred-engineer-line",
-      "priority": "DEFERRED",
-      "status": "deferred",
-      "title": "Engineer-line v0.3 (git-aware scope, token-budgeted replay, review queue, stale/supersede)",
-      "description": "Fully designed and NOT to be built under the current strategy. Kept here so it is not rediscovered from scratch: this is the ready-made fallback if p0a triggers its falsify branch.",
+      "id": "p1-05-unified-schema-pass",
+      "priority": "P1",
+      "status": "pending",
+      "blocked_by": "p1-0-index-migration-path",
+      "title": "Design all three Record field groups in one pass",
+      "description": "Features 1, 2, and 3 each add fields to Record. Designing them together avoids repeating the Record + to_dict() + frontmatter + index column + migration work three times.",
       "context": {
-        "design_ref": "docs/user-research-hn-reddit-2026-05-25.md sections 7-8",
-        "key_constraints": "Explicitly excluded by the 2026-05-25 strategic guardrail, reconfirmed 2026-07-31."
+        "field_groups": "git provenance (repo_path, branch, commit_sha, dirty, changed_files) | staleness (last_verified_at, stale_after, supersedes) | review state (status: draft/permanent)",
+        "single_point": "src/mneva/store.py Record dataclass and to_dict() -- the only serialization point (CLAUDE.md architecture rule 3); MCP and the HTTP API both go through it.",
+        "backward_compat": "read_record must tolerate missing fields. Copy the existing optional-read pattern for `source` at store.py:66."
+      },
+      "acceptance_criteria": [
+        "One Record change covering all three groups, not three separate migrations"
+      ]
+    },
+    {
+      "id": "p1-1-git-aware-metadata",
+      "priority": "P1",
+      "status": "pending",
+      "blocked_by": "p1-05-unified-schema-pass",
+      "title": "Git-aware metadata -- the strongest differentiator",
+      "description": "memmy's memory is one global personal SQLite. mneva's memory can follow the repo and branch. This is the structural advantage; build it first.",
+      "context": {
+        "behavior": "capture records git provenance automatically; search/replay default to filtering by current repo + branch",
+        "files": "new src/mneva/gitctx.py (extraction, must degrade gracefully outside a git repo), src/mneva/indexer.py (columns + search WHERE), src/mneva/cli.py, src/mneva/mcp_server.py, src/mneva/api.py (builds an Indexer in four places, api.py:52-90)",
+        "key_constraints": "Filter in the SQL WHERE clause, never after retrieval -- post-filtering breaks top_k."
+      },
+      "acceptance_criteria": [
+        "Capturing inside a git repo records repo/branch/commit/dirty state",
+        "Capturing outside a git repo still works",
+        "search/replay scope to the current repo+branch by default and can be overridden"
+      ]
+    },
+    {
+      "id": "p1-2-stale-supersede",
+      "priority": "P1",
+      "status": "pending",
+      "blocked_by": "p1-1-git-aware-metadata",
+      "title": "Stale / supersede",
+      "description": "Every competitor talks about memory going stale, but mneva has git and can tell precisely what changed. That is the version nobody else can build.",
+      "context": {
+        "key_constraints": "On conflict, surface it -- do NOT auto-merge. Explicitly required by the research doc. Stale records get down-ranked or flagged at retrieval (indexer.py)."
+      },
+      "acceptance_criteria": [
+        "A memory whose commit context has moved on is detectable",
+        "Conflicts prompt rather than silently merging"
+      ]
+    },
+    {
+      "id": "p1-3-draft-review-promote",
+      "priority": "P1",
+      "status": "pending",
+      "blocked_by": "p1-2-stale-supersede",
+      "title": "Draft / review / promote",
+      "description": "Agent writes land as draft; the user approves before anything becomes permanent truth. Fits the reviewable positioning and was the core ask in the 5/25 research.",
+      "context": {
+        "files": "src/mneva/cli.py (new `mneva review` / `mneva promote`), src/mneva/mcp_server.py (capture_memory defaults to draft), src/mneva/indexer.py (drafts excluded from search by default)"
+      },
+      "acceptance_criteria": [
+        "MCP capture_memory writes draft by default",
+        "Drafts do not appear in default search results",
+        "review/promote/reject round-trip works from the CLI"
+      ]
+    },
+    {
+      "id": "p1-35-obsidian-presentation",
+      "priority": "P1",
+      "status": "pending",
+      "blocked_by": "p1-1-git-aware-metadata",
+      "title": "Obsidian presentation -- the best demo of the whole pivot",
+      "description": "The new positioning leads with Obsidian, and _mirror_to_vault_if_configured (cli.py:111) mirrors records into the vault. New frontmatter fields flow there automatically; design how they look deliberately rather than discovering it later.",
+      "context": {
+        "files": "src/mneva/vault.py (131 lines)",
+        "why": "Git provenance visible inside Obsidian -- which repo, which branch, which commit, whether it is stale -- is the most direct demonstration of Markdown-as-truth."
+      },
+      "acceptance_criteria": [
+        "Capture a memory with git provenance, open the vault in real Obsidian, frontmatter is readable and looks intentional"
+      ]
+    },
+    {
+      "id": "p1-4-token-budgeted-replay",
+      "priority": "P1",
+      "status": "pending",
+      "blocked_by": "p1-05-unified-schema-pass",
+      "title": "Token-budgeted replay",
+      "description": "--budget 500|1000|3000|full. No full-context dump by default; rank by relevance + freshness + lifespan.",
+      "context": {
+        "files": "src/mneva/replay.py (79 lines, currently the simplest module), src/mneva/cli.py replay command",
+        "key_constraints": "Weakest differentiator (everyone is building this), so it goes last -- but it is the direct answer to the highest-frequency complaint, context bloat."
+      },
+      "acceptance_criteria": [
+        "replay respects the budget and degrades gracefully when memories exceed it"
+      ]
+    },
+    {
+      "id": "p2-evidence-assets",
+      "priority": "P2",
+      "status": "pending",
+      "title": "Evidence assets",
+      "description": "dogfood demo (use mneva to build mneva, show the memory files), token savings comparison (budgeted replay vs full injection), and the hygiene CLI (`mneva stale`, `mneva audit`)."
+    },
+    {
+      "id": "cancelled-nontechnical-line",
+      "priority": "CANCELLED",
+      "status": "cancelled",
+      "cancelled_at": "2026-07-31",
+      "title": "Non-technical beachhead: validation experiment, landing page, usability",
+      "description": "Cancelled by the 2026-07-31 strategy reversal. Covers the former p0a-rebuild-validation-experiment, p0a-landing-page, and p1-nontechnical-usability entries.",
+      "context": {
+        "why": "memmy-agent already shipped a better version of this plan (desktop app, free credits, one-click install, automatic history import). Competing head-on against a funded team with distribution, while mneva has not even solved installation, is a losing position.",
+        "important": "This is NOT 'non-technical demand was falsified'. The 0/5 outreach had no statistical power; that question still has zero evidence either way. The cancellation is about competitive position, not demand.",
+        "revival_condition": "Only if the competitive landscape changes materially."
       }
     }
   ]

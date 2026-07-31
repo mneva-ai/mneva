@@ -5,7 +5,7 @@
 
 # MNEVA
 
-<em>Persistent agent context substrate. Local-first markdown store that every AI tool can query.</em>
+<em>AI coding memory as plain Markdown. Follows your repo, lives in git, opens in Obsidian. No account, no cloud.</em>
 
 <!-- BADGES -->
 <!-- local repository, no metadata badges. -->
@@ -52,9 +52,13 @@
 
 ## Overview
 
-**The problem:** every AI assistant forgets. Open a new chat and you re-explain your project from scratch. Switch from Claude to Cursor and the context doesn't follow. The decisions, constraints, and facts you spent time teaching one tool are invisible to the next.
+**Every AI memory tool keeps your memory in its own database. mneva keeps it in your files.**
 
-**mneva fixes that.** It's a local-first memory layer that follows you across AI assistants. Capture a decision in Claude Desktop; ask Cursor about it tomorrow. Records live as plain Markdown under `~/.mneva/` — you own the data, mneva owns the cross-tool persistence.
+Records are plain Markdown with YAML frontmatter under `~/.mneva/store/`. You can read them, `grep` them, edit them in any editor, commit them to git, and open them in Obsidian. The SQLite index is disposable — delete it and it rebuilds from the Markdown. No account to create, no cloud to sync to, no telemetry on by default.
+
+**The problem it solves:** every AI assistant forgets. Open a new chat and you re-explain your project from scratch. Switch from Claude Code to Cursor and the context doesn't follow. Capture a decision once; every MCP-capable tool can read it.
+
+**Why that matters more than the storage engine:** a memory you can't read is a memory you can't audit, correct, or trust. When your assistant records something wrong about your architecture, you want to open the file and fix the line — not query an opaque store and hope.
 
 **v0.2 — mneva now speaks MCP.** Wire `mneva-mcp` into any Model Context Protocol client (Claude Desktop, Claude Code, Cursor, Windsurf, Cline, Continue, ChatGPT Desktop in Developer Mode) in 30 seconds. The AI client supplies the intelligence; mneva supplies the memory. No API key required for the memory layer.
 

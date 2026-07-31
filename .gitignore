@@ -27,3 +27,4 @@ htmlcov/
 
 # OMC harness state
 .omc/
+.gstack/
