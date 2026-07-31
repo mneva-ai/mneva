@@ -43,7 +43,18 @@
   carries a schema version (`PRAGMA user_version`); on open, a database at an
   older version is rebuilt from the Markdown store. This also makes the
   documented invariant "SQLite is a rebuildable index" true in code, where it
-  previously was not.
+  previously was not. Note: because every existing database predates the
+  version stamp, the **first** open after upgrading does a full rescan of
+  `~/.mneva/store/`. It is synchronous, so a large store makes that one launch
+  slower; subsequent opens skip it.
+- **Concurrent startup could fail with "database is locked".**
+  `PRAGMA journal_mode=WAL` ran *before* `busy_timeout` was configured, and
+  SQLite returns `SQLITE_BUSY` for a journal-mode conversion without invoking
+  the busy handler — so two `mneva-mcp` processes (one per AI client) opening a
+  fresh or pre-WAL database at the same moment could race, and one would error
+  out instead of waiting. `busy_timeout` is now set first, and the WAL switch
+  is best-effort: losing that race is harmless, since the winner sets the same
+  mode on the same file and the mode persists on disk.
 
 ### Added
 - **Project harness** — `CLAUDE.md`, `.claude/feature_list.json`, and

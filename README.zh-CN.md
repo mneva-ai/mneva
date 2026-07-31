@@ -222,6 +222,14 @@ uvx mneva search "SQLite"
 uvx mneva replay --tool=claude-code --scope=my-project
 ```
 
+因为 Markdown 才是事实来源，你可以直接用编辑器改 `~/.mneva/store/*.md`，改完让索引跟上：
+
+```sh
+uvx mneva reindex   # 从 Markdown 重建搜索索引
+```
+
+索引是可丢弃的 — 把 `~/.mneva/mneva.sqlite` 删掉再跑 `reindex`，什么都不会丢。
+
 ### 在浏览器网页版 AI 里使用
 
 MCP 这条路覆盖的是桌面 AI 客户端。纯网页版的 AI 聊天界面（claude.ai 网页版、chatgpt.com、gemini.google.com、chat.deepseek.com）没法用 MCP，因为浏览器不允许网页启动本地进程。在 v0.3 的浏览器扩展上线之前，变通办法如下：

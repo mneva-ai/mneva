@@ -363,6 +363,16 @@ uvx mneva search "SQLite"
 uvx mneva replay --tool=claude-code --scope=my-project
 ```
 
+Because the Markdown is the source of truth, you can edit `~/.mneva/store/*.md`
+in any editor and then bring the index back in line:
+
+```sh
+uvx mneva reindex   # rebuild the search index from the Markdown files
+```
+
+The index is disposable — delete `~/.mneva/mneva.sqlite`, run `reindex`, and
+nothing is lost.
+
 ### Using mneva from a browser chat UI
 
 The MCP path covers desktop AI clients. Browser-only AI chat UIs (claude.ai web, chatgpt.com, gemini.google.com, chat.deepseek.com) cannot speak MCP because browsers do not allow web pages to spawn local processes. Until v0.3 ships a browser extension, the workaround is:

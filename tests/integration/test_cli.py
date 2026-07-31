@@ -22,7 +22,16 @@ def test_help_lists_core_commands() -> None:
     runner = CliRunner()
     result = runner.invoke(app, ["--help"])
     assert result.exit_code == 0
-    for cmd in ("init", "capture", "search", "status", "forget", "config", "serve"):
+    for cmd in (
+        "init",
+        "capture",
+        "search",
+        "status",
+        "forget",
+        "config",
+        "serve",
+        "reindex",
+    ):
         assert cmd in result.output
 
 

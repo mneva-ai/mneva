@@ -154,3 +154,39 @@ def test_current_schema_version_is_not_rebuilt_every_open(tmp_mneva_home: Path) 
 
     reopened = Indexer(db)
     assert reopened.status()["count"] == 1
+
+
+def test_failed_rebuild_does_not_stamp_the_schema_version(
+    tmp_mneva_home: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A rebuild that dies part-way must not leave a stamped, partial index.
+
+    This is what BEGIN IMMEDIATE + rollback buys. Without the transaction the
+    DROP and CREATE autocommit on their own, so a failure mid-insert leaves an
+    emptied table behind. If the version had also been stamped, every later
+    open would skip the rebuild and the index would stay silently incomplete
+    forever -- the exact failure mode schema versioning exists to prevent.
+    """
+    import mneva.indexer as indexer_mod
+
+    home = ensure_home()
+    for i in range(5):
+        write_record(_record(f"boom{i}", f"record {i}"), home=home)
+
+    idx = Indexer(home / "mneva.sqlite")
+    assert idx.status()["count"] == 5
+
+    def exploding_iter(*, home: Path):  # type: ignore[no-untyped-def]
+        yield _record("boom0", "record 0")
+        raise OSError("disk gave up mid-rebuild")
+
+    monkeypatch.setattr(indexer_mod, "iter_records", exploding_iter)
+    monkeypatch.setattr(indexer_mod, "_SCHEMA_VERSION", 99)
+
+    with pytest.raises(OSError):
+        idx.rebuild()
+
+    # Version must still be the pre-failure value, so the next open retries.
+    assert int(idx._conn.execute("PRAGMA user_version").fetchone()[0]) != 99
+    # And the partial write must be gone, not half-applied.
+    assert idx.status()["count"] == 5
