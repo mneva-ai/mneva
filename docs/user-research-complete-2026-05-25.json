@@ -1,0 +1,781 @@
+{
+  "metadata": {
+    "title": "Mneva complete user research package",
+    "date": "2026-05-25",
+    "timezone": "America/New_York",
+    "product": "mneva",
+    "scope": [
+      "Hacker News",
+      "Reddit",
+      "non-technical interview candidate shortlist",
+      "non-technical positioning draft",
+      "two-week fresh post refresh"
+    ],
+    "working_assumption": "The strongest near-term research path is to validate non-technical and vibe-coding users first, while preserving a separate engineer-facing product tier."
+  },
+  "product_positioning": {
+    "technical_positioning_en": "Local-first, Markdown-owned memory substrate for developers using multiple AI coding tools.",
+    "technical_positioning_zh": "给多 AI 编码工具共用的本地记忆底座，数据仍然是你自己的 Markdown。",
+    "nontechnical_primary_en": "Your AI forgets your project every time you switch tools. Mneva remembers, so you never explain it twice.",
+    "nontechnical_primary_zh": "换个 AI 工具, 它就忘了你的项目。Mneva 帮你记住, 这样你不用再重讲第二遍。",
+    "nontechnical_alternates": [
+      {
+        "id": "A2",
+        "en": "One memory for all your AI tools. Jump between ChatGPT, Claude and Cursor without starting over.",
+        "zh": "给你所有 AI 工具共用的一份记忆。在 ChatGPT、Claude、Cursor 之间切换, 不用从头再来。"
+      },
+      {
+        "id": "A3",
+        "en": "Stop re-explaining your project to every AI. No code, no setup.",
+        "zh": "别再对每个 AI 重讲一遍你的项目。不用写代码, 不用配置。"
+      }
+    ],
+    "support_points": [
+      {
+        "title": "Pick up where you left off, in any tool",
+        "copy_en": "Switch from ChatGPT to Claude to Cursor and each one already knows your decisions, your constraints, and where you stopped.",
+        "copy_zh": "从 ChatGPT 切到 Claude 再到 Cursor, 每一个都已经知道你定过的决策、你的限制、以及你上次停在哪。"
+      },
+      {
+        "title": "No more notes files you have to babysit",
+        "copy_en": "No long README to maintain, no Notion page to update, no copy-pasting summaries between chats. It just carries over.",
+        "copy_zh": "不用维护长长的说明文档, 不用更新 Notion, 不用在对话之间复制粘贴摘要。它自己就带过去了。"
+      },
+      {
+        "title": "It is yours, and it stays simple",
+        "copy_en": "Your project memory lives on your own computer, in plain files you can open and read. Nothing to configure, nothing leaves your machine.",
+        "copy_zh": "你的项目记忆存在你自己电脑上, 是你能打开看的普通文件。没有要配置的东西, 也没有任何东西离开你的电脑。"
+      }
+    ],
+    "anti_positioning_for_nontechnical_front_door": [
+      "Do not lead with developer, git, MCP, CLI, SQLite, token, benchmark, embeddings, local-first architecture.",
+      "Do not use context substrate, memory layer, agent amnesia as first-fold language.",
+      "Do not lead with benchmark or token-savings for non-technical users.",
+      "Describe the feeling: forgetting, re-explaining, starting over."
+    ],
+    "recommended_landing_page_skeleton": {
+      "headline": "Your AI forgets your project every time you switch tools.",
+      "subhead": "Mneva remembers, so you never explain it twice. No code, no setup.",
+      "bullets": [
+        "Pick up where you left off, in any tool",
+        "No notes files to babysit",
+        "Stays on your computer, in files you can read"
+      ],
+      "primary_cta": "Get early access",
+      "wtp_probe": "If this saved you re-explaining your project every day, what feels fair per month?",
+      "wtp_options": [
+        "Free only",
+        "~$5",
+        "~$10",
+        "~$20",
+        "I'd pay more"
+      ]
+    }
+  },
+  "research_summary": {
+    "main_findings": [
+      "The core pain is real: users repeatedly re-explain project context when switching sessions or tools.",
+      "The most frequently lost context is architecture decisions, debugging history, task state, constraints, preferences, business rules, and roadmap intent.",
+      "The market is already crowded with MCP memory, Claude Code memory, session-log indexers, codebase intelligence layers, and context-file workflows.",
+      "Non-technical and vibe-coding users understand the pain better when described as AI forgetting the project, not as memory substrate or MCP.",
+      "Technical users care about Git-aware scope, stale memory, pruning, token budget, hooks, auditability, and benchmark evidence.",
+      "The strongest differentiation for mneva is Markdown as source of truth plus local index plus cross-tool portability plus reviewable memory."
+    ],
+    "strategic_implication": "Validate the non-technical front door with real conversations, while designing the product core around Git-aware, reviewable, token-budgeted memory so it can survive engineer scrutiny."
+  },
+  "keywords": {
+    "core_keywords": [
+      "AI coding agent memory",
+      "Claude Code memory",
+      "Cursor context loss",
+      "Claude Code Cursor context loss",
+      "persistent memory MCP",
+      "local-first memory MCP",
+      "cross-tool AI memory",
+      "agent context persistence",
+      "MCP memory server",
+      "AI agent memory stale context",
+      "memory.md context bloat",
+      "CLAUDE.md going stale",
+      "AI coding assistant forgets decisions",
+      "project scoped memory",
+      "debugging context across sessions",
+      "team shared AI memory",
+      "repo branch commit memory",
+      "context engineering agent amnesia"
+    ],
+    "search_queries": [
+      "site:news.ycombinator.com \"Claude Code\" \"memory\" \"context\"",
+      "site:news.ycombinator.com \"MCP\" \"memory\" \"coding agents\"",
+      "site:reddit.com/r/ClaudeCode \"context loss\" \"memory\"",
+      "site:reddit.com/r/cursor \"Claude Code\" \"Cursor\" \"context loss\"",
+      "site:reddit.com/r/mcp \"memory layer\" \"AI agents\"",
+      "site:reddit.com/r/ContextEngineering \"agent amnesia\"",
+      "site:reddit.com/r/nocode after:2026-05-11 Claude Cursor Lovable Bolt context AI forgets project",
+      "site:reddit.com/r/vibecoding after:2026-05-11 Claude Cursor Lovable Bolt context forgets project",
+      "site:reddit.com/r/SaaS after:2026-05-11 non technical AI builder Claude Cursor context forgets project",
+      "site:reddit.com/r/ChatGPTCoding after:2026-05-11 ChatGPT coding forgets context non coder project"
+    ]
+  },
+  "personas": [
+    {
+      "name": "Heavy AI coding user",
+      "pain": "Every new session requires re-explaining architecture, conventions, and prior decisions.",
+      "mneva_opportunity": "Session start replay, decision capture, debug lesson capture."
+    },
+    {
+      "name": "Cross-tool user",
+      "pain": "Claude Code, Cursor, Codex, ChatGPT, Windsurf, Lovable, Bolt, and Gemini do not share context.",
+      "mneva_opportunity": "One local project memory read by multiple tools."
+    },
+    {
+      "name": "Non-technical founder or vibe-coder",
+      "pain": "They do not want to manage README, Notion, git, MCP, or token budgets; they just feel the AI forgets the project.",
+      "mneva_opportunity": "Simple product language, no-code setup, project memory that carries between tools."
+    },
+    {
+      "name": "Markdown or Obsidian user",
+      "pain": "They trust plain files but manual context files go stale.",
+      "mneva_opportunity": "Markdown source of truth plus searchable index plus stale review."
+    },
+    {
+      "name": "Privacy-sensitive developer",
+      "pain": "They do not want a cloud memory SaaS holding private project knowledge.",
+      "mneva_opportunity": "Local-first, zero telemetry, user-owned files."
+    },
+    {
+      "name": "Team or multi-machine user",
+      "pain": "Knowledge discovered in one session or machine does not reach another agent or teammate.",
+      "mneva_opportunity": "Shared project/team scopes, handoffs, local sync first, redaction and audit later."
+    }
+  ],
+  "eight_research_questions": [
+    {
+      "id": "q1",
+      "question": "How many AI coding tools do users switch between, and what context do they lose most often?",
+      "signal": "Strong",
+      "answer": "Common combinations include Claude Code + Cursor + Codex, with ChatGPT, Gemini, Windsurf, Lovable, Bolt, OpenCode, Replit Agent, and others added depending on workflow. Lost context includes architecture decisions, code conventions, personal preferences, debugging history, next actions, blockers, changed files, branch or commit state, business rules, and product roadmap intent.",
+      "mneva_implications": [
+        "Scope should include repo, branch, commit/status, and task state, not just project.",
+        "Memory types should include architecture, decision, debugging_lesson, blocker, preference, business_rule, and roadmap_intent."
+      ]
+    },
+    {
+      "id": "q2",
+      "question": "Will users allow agents to write memories automatically, and what needs human confirmation?",
+      "signal": "Strong but split",
+      "answer": "Users want automatic capture because manual handoffs are easy to forget, but they do not want agents polluting permanent truth. Transient session summaries, debug trails, blockers, changed files, test status, and next actions can be automatic. Permanent architecture decisions, business rules, security constraints, team-shared memories, expensive migration conclusions, and user preferences should require review.",
+      "mneva_implications": [
+        "Default to draft or transient for agent writes.",
+        "Add draft -> review -> promote.",
+        "Make permanent memory an explicit user-approved action."
+      ]
+    },
+    {
+      "id": "q3",
+      "question": "Do users trust Markdown files, SQLite databases, or a GUI local app more?",
+      "signal": "Strong",
+      "answer": "Advanced users trust Markdown because it is readable, diffable, greppable, editable, and git-friendly. SQLite is acceptable as a local index or state store if it is rebuildable. GUI interest is mostly around inspection, review, audit, and token visibility rather than replacing files.",
+      "mneva_implications": [
+        "Message Markdown as source of truth.",
+        "Position SQLite as a rebuildable local index.",
+        "Prioritize CLI review/audit/stale before full GUI."
+      ]
+    },
+    {
+      "id": "q4",
+      "question": "What should happen when memory conflicts with current code?",
+      "signal": "Strong",
+      "answer": "Users worry about stale lore. They expect current code to win, memory to be scoped by repo/branch/commit, conflicts to be surfaced rather than auto-merged, old memories to be kept as history but marked superseded, and freshness/expiry/last verified metadata to exist.",
+      "mneva_implications": [
+        "Add source_commit, source_branch, last_verified_at, stale_after, supersedes, confidence.",
+        "Show historical warning on retrieved facts.",
+        "Support manual supersede rather than silent overwrite."
+      ]
+    },
+    {
+      "id": "q5",
+      "question": "How many tokens are users willing to spend at session start?",
+      "signal": "Medium strong",
+      "answer": "Users like small briefs or relevant snippets. Roughly hundreds of tokens to 1,500 tokens feels attractive, under 3K is commonly acceptable, 3K-8K is often the current manual re-context cost, and very large startup context such as 30K+ tokens is viewed as serious overhead.",
+      "mneva_implications": [
+        "Add replay budgets such as 500, 1000, 3000, full.",
+        "Default to selective injection, not full dumps.",
+        "Keep MCP tool descriptions short."
+      ]
+    },
+    {
+      "id": "q6",
+      "question": "Is cross-tool memory truly valuable, or do most users mainly use one tool?",
+      "signal": "Split",
+      "answer": "Cross-tool users exist and feel strong pain, especially across Claude Code, Cursor, Codex, ChatGPT, Gemini, Lovable, and Bolt. Some users argue single-tool workflows plus disciplined specs are enough. The strongest ICP is users with 2+ AI tools, 2+ machines, or long-lived projects.",
+      "mneva_implications": [
+        "Do not oversell cross-tool value to single-tool short-task users.",
+        "For single-tool users, sell searchable history, handoff, reviewable memory, and audit."
+      ]
+    },
+    {
+      "id": "q7",
+      "question": "Is team-shared memory needed, and what must not be shared?",
+      "signal": "Early but clear",
+      "answer": "Teams want to share bug gotchas, deployment notes, architecture decisions, conventions, onboarding knowledge, and agent handoffs. Sensitive content includes secrets, .env, API keys, credentials, customer data, private business information, personal preferences, and unverified agent guesses.",
+      "mneva_implications": [
+        "Do not rush into team SaaS.",
+        "Start with local team scope, allowlist, redaction, and audit.",
+        "Use visibility layers: personal, project, team."
+      ]
+    },
+    {
+      "id": "q8",
+      "question": "What evidence convinces users to install a memory layer?",
+      "signal": "Strong",
+      "answer": "Users want reproducible benchmarks, token savings, re-context time savings, real before/after project cases, a runnable demo, comparisons against Markdown/full dumps, and retrieval quality evidence.",
+      "mneva_implications": [
+        "Build a dogfood case: Claude Code -> Cursor/Codex on one repo.",
+        "Measure token reduction and repeated-explanation reduction.",
+        "Create a 5-minute demo showing install, capture, replay, cross-tool access, and visible Markdown files."
+      ]
+    }
+  ],
+  "needs_matrix": [
+    {
+      "priority": "P0",
+      "need": "Avoid starting from zero each session",
+      "current_mneva_coverage": "capture/search/replay/MCP",
+      "gap": "Default workflow is not obvious enough",
+      "recommended_action": "Add agent workflow snippets and session-start replay patterns"
+    },
+    {
+      "priority": "P0",
+      "need": "Cross-tool memory",
+      "current_mneva_coverage": "MCP multi-client support",
+      "gap": "Positioning is not differentiated enough",
+      "recommended_action": "Lead with one local memory for ChatGPT/Claude/Cursor-style switching for non-technical users, and Markdown-owned local memory for engineers"
+    },
+    {
+      "priority": "P0",
+      "need": "Avoid MEMORY.md / CLAUDE.md bloat",
+      "current_mneva_coverage": "BM25 plus scope/lifespan",
+      "gap": "No token-budgeted replay",
+      "recommended_action": "Add replay --budget and relevance/freshness ranking"
+    },
+    {
+      "priority": "P0",
+      "need": "Avoid stale memory and contradiction",
+      "current_mneva_coverage": "forget and lifespan",
+      "gap": "Missing Git metadata and supersede workflow",
+      "recommended_action": "Add Git-aware metadata and stale/supersede review"
+    },
+    {
+      "priority": "P1",
+      "need": "Automatic capture without polluting long-term truth",
+      "current_mneva_coverage": "MCP capture tool",
+      "gap": "No review queue",
+      "recommended_action": "Add draft/review/promote"
+    },
+    {
+      "priority": "P1",
+      "need": "Auditability and management",
+      "current_mneva_coverage": "Markdown files are inspectable",
+      "gap": "No audit/review/stale CLI",
+      "recommended_action": "Add mneva audit, mneva review, mneva stale, mneva promote"
+    },
+    {
+      "priority": "P1",
+      "need": "Proof that memory helps",
+      "current_mneva_coverage": "Engineering tests",
+      "gap": "No product-effect evidence",
+      "recommended_action": "Create benchmark and dogfood demo"
+    },
+    {
+      "priority": "P2",
+      "need": "Browser chat UI support",
+      "current_mneva_coverage": "Roadmap item",
+      "gap": "Need more pull signal",
+      "recommended_action": "Validate with non-technical users before implementation"
+    },
+    {
+      "priority": "P2",
+      "need": "Team sharing",
+      "current_mneva_coverage": "Local-first single-user core",
+      "gap": "Need visibility, redaction, and audit",
+      "recommended_action": "Start with local/git/Obsidian sync and explicit team scope"
+    }
+  ],
+  "competitor_and_adjacent_signals": [
+    {
+      "name": "Linggen",
+      "signal": "Local-first memory, MCP, Cursor/Zed/Claude, team memory, visual map.",
+      "implication": "mneva must clearly explain local-first boundaries and cross-tool advantage."
+    },
+    {
+      "name": "Hmem",
+      "signal": "SQLite .hmem and hierarchical memory to avoid MEMORY.md full injection.",
+      "implication": "Layered replay and summaries may matter."
+    },
+    {
+      "name": "paradigm-memory",
+      "signal": "SQLite, MCP-native, multi-agent, multi-workspace, audit log, review queue, desktop inspection.",
+      "implication": "Review and audit are now table stakes for technical users."
+    },
+    {
+      "name": "memory_map",
+      "signal": "Recent Claude Code MCP server with key-value memory, searchable conversation history, and lifecycle hooks.",
+      "source": "https://www.reddit.com/r/claudeskills/comments/1thxww3/how_i_stopped_reexplaining_my_repo_to_claude_code/",
+      "implication": "Hooks and session-start behavior are becoming the standard technical pattern."
+    },
+    {
+      "name": "continuity-v2",
+      "signal": "Indexes Claude Code JSONL session logs with SQLite/FTS5 and MCP recall.",
+      "source": "https://www.reddit.com/r/ClaudeAI/comments/1tlu3np/claude_code_has_been_writing_every_session_to/",
+      "implication": "Session logs are a rich memory source, but comments highlight stale retrieval and pruning risks."
+    },
+    {
+      "name": "self-hosted shared MCP server",
+      "signal": "Shared memory, task queue, DMs, handoffs, web UI, multi-agent/multi-machine usage.",
+      "source": "https://www.reddit.com/r/ClaudeAI/comments/1tk2m2x/i_built_a_selfhosted_mcp_server_so_my_claude_code/",
+      "implication": "Team/multi-agent shared memory is real but likely a later-stage product."
+    },
+    {
+      "name": "Repowise-style codebase intelligence",
+      "signal": "Indexes dependency graphs, git intelligence, generated docs, architecture decisions, dashboard.",
+      "source": "https://www.reddit.com/r/developersIndia/comments/1tcqqlf/claudecursor_feel_great_until_the_repo_becomes/",
+      "implication": "Large repo users think of memory as codebase intelligence, not just chat recall."
+    },
+    {
+      "name": "Plain Markdown / handoff workflows",
+      "signal": "Many users use PROJECT.md, CLAUDE.md, AGENTS.md, folder summaries, specs, test docs, and handoff docs.",
+      "implication": "mneva should enhance Markdown rather than replace it."
+    }
+  ],
+  "initial_nontechnical_candidate_shortlist": {
+    "source_file": "D:/AI/Temp/interview-candidates-nontechnical-2026-05-25.md",
+    "note": "Older scrape-based shortlist. Useful for segment hypotheses, but user later requested fresher posts.",
+    "best_clusters": [
+      "r/nocode",
+      "r/SaaS",
+      "r/vibecoding",
+      "r/ChatGPTCoding",
+      "r/ChatGPT"
+    ],
+    "top_candidates": [
+      {
+        "rank": 1,
+        "username": "mert_jh",
+        "subreddit": "SaaS",
+        "post_url": "https://www.reddit.com/r/SaaS/comments/1r6kgv4/",
+        "why": "Non-coder, Claude + Cursor + ChatGPT, $1K MRR, explicit copy-paste workaround.",
+        "contact_url": "https://www.reddit.com/message/compose/?to=mert_jh"
+      },
+      {
+        "rank": 2,
+        "username": "SoftSoftware4087",
+        "subreddit": "nocode",
+        "post_url": "https://www.reddit.com/r/nocode/comments/1rdg29b/",
+        "why": "Explicit non-technical Lovable/Bolt context-loss pain.",
+        "contact_url": "https://www.reddit.com/message/compose/?to=SoftSoftware4087"
+      },
+      {
+        "rank": 3,
+        "username": "Naveja",
+        "subreddit": "nocode",
+        "post_url": "https://www.reddit.com/r/nocode/comments/1tjyaml/",
+        "why": "Zero coding experience, multi-tool pipeline, shipped app.",
+        "contact_url": "https://www.reddit.com/message/compose/?to=Naveja"
+      },
+      {
+        "rank": 4,
+        "username": "KaleidoscopeExtra206",
+        "subreddit": "ChatGPTCoding",
+        "post_url": "https://www.reddit.com/r/ChatGPTCoding/comments/18slcxw/",
+        "why": "Non-coder explicitly says ChatGPT forgets main goal every 8-10 messages.",
+        "contact_url": "https://www.reddit.com/message/compose/?to=KaleidoscopeExtra206"
+      },
+      {
+        "rank": 5,
+        "username": "Content_Bathroom_707",
+        "subreddit": "SaaS",
+        "post_url": "https://www.reddit.com/r/SaaS/comments/1rr040t/",
+        "why": "Designer/non-developer using ChatGPT, Claude, Lovable.",
+        "contact_url": "https://www.reddit.com/message/compose/?to=Content_Bathroom_707"
+      },
+      {
+        "rank": 6,
+        "username": "Thepeebandit",
+        "subreddit": "nocode",
+        "post_url": "https://www.reddit.com/r/nocode/comments/1rywx3o/",
+        "why": "Non-technical founder focused on losing track of why AI made decisions.",
+        "contact_url": "https://www.reddit.com/message/compose/?to=Thepeebandit"
+      }
+    ]
+  },
+  "fresh_two_week_research": {
+    "date_range": {
+      "from": "2026-05-11",
+      "to": "2026-05-25"
+    },
+    "summary": [
+      "Fresh high-signal results are mostly on Reddit, not HN.",
+      "Fresh Reddit posts strongly validate session starts cold, context fragmentation, stale CLAUDE.md, copy-paste loops, large-repo context failure, and benchmark-style tool comparisons.",
+      "Many fresh technical posts are from builders of competing memory/indexing tools, so they are better for market learning than non-technical WTP validation.",
+      "The best fresh outreach targets are users with active pain posts, not necessarily tool builders."
+    ],
+    "fresh_posts": [
+      {
+        "rank": 1,
+        "username": "AdEuphoric1638",
+        "subreddit": "cursor",
+        "age_at_search": "about 5 hours",
+        "title": "How are you handling context loss between Claude Code / Cursor sessions?",
+        "url": "https://www.reddit.com/r/cursor/comments/1tg9acb/how_are_you_handling_context_loss_between_claude/",
+        "contact_url": "https://www.reddit.com/message/compose/?to=AdEuphoric1638",
+        "signal": "Directly asks about Claude Code/Cursor context loss; says CLAUDE.md goes stale and needs constant manual updates.",
+        "priority": "highest"
+      },
+      {
+        "rank": 2,
+        "username": "Purple-Start785",
+        "subreddit": "SaaS",
+        "age_at_search": "about 2 days",
+        "title": "The Biggest problem with AI Coding Isn’t Code Generation - It’s Context Fragmentation",
+        "url": "https://www.reddit.com/r/SaaS/comments/1tjnfzy/the_biggest_problem_with_ai_coding_isnt_code/",
+        "contact_url": "https://www.reddit.com/message/compose/?to=Purple-Start785",
+        "signal": "AI loses macro-level blueprints, architecture why, and roadmap status; user is manually bridging chat history and GitHub.",
+        "priority": "highest"
+      },
+      {
+        "rank": 3,
+        "username": "ohayoogodzaimasu",
+        "subreddit": "vibecoding",
+        "age_at_search": "about 6 hours",
+        "title": "Cursor, Codex, or Claude Code for small project",
+        "url": "https://www.reddit.com/r/vibecoding/comments/1tcyq81/cursor_codex_or_claude_code_for_small_project/",
+        "contact_url": "https://www.reddit.com/message/compose/?to=ohayoogodzaimasu",
+        "signal": "Fresh user comparing Cursor/Codex/Claude Code for small project with budget and context concerns.",
+        "priority": "high"
+      },
+      {
+        "rank": 4,
+        "username": "swmeyer",
+        "subreddit": "SideProject",
+        "age_at_search": "about 15 hours",
+        "title": "I scored 11 AI app builders across 7 dimensions. Claude Code wins on code quality. Lovable wins on speed-to-prototype.",
+        "url": "https://www.reddit.com/r/SideProject/comments/1tki9a4/i_scored_11_ai_app_builders_across_7_dimensions/",
+        "contact_url": "https://www.reddit.com/message/compose/?to=swmeyer",
+        "signal": "Compared 11 AI app builders and explicitly scored context handling and whether tools lose the plot at 10k+ LOC.",
+        "priority": "high"
+      },
+      {
+        "rank": 5,
+        "username": "Icy-Roll-4044",
+        "subreddit": "developersIndia",
+        "age_at_search": "about 13 hours",
+        "title": "Claude/cursor feel great until the repo becomes huge.",
+        "url": "https://www.reddit.com/r/developersIndia/comments/1tcqqlf/claudecursor_feel_great_until_the_repo_becomes/",
+        "contact_url": "https://www.reddit.com/message/compose/?to=Icy-Roll-4044",
+        "signal": "Claude/Cursor lose context badly on large repos, causing random edits, duplicate logic, missing abstractions, unrelated files in context.",
+        "priority": "high"
+      },
+      {
+        "rank": 6,
+        "username": "Independent-Ant-7230",
+        "subreddit": "SaaS",
+        "age_at_search": "about 21 hours",
+        "title": "What micro SaaS would you actually pay for today?",
+        "url": "https://www.reddit.com/r/SaaS/comments/1tll84t/what_micro_saas_would_you_actually_pay_for_today/",
+        "contact_url": "https://www.reddit.com/message/compose/?to=Independent-Ant-7230",
+        "signal": "Explicit WTP signal: AI workflow memory systems that persist project context over time instead of starting fresh constantly.",
+        "priority": "high"
+      },
+      {
+        "rank": 7,
+        "username": "haustorium12",
+        "subreddit": "ClaudeAI",
+        "age_at_search": "about 7 hours",
+        "title": "Claude Code has been writing every session to disk since day one. We indexed it.",
+        "url": "https://www.reddit.com/r/ClaudeAI/comments/1tlu3np/claude_code_has_been_writing_every_session_to/",
+        "contact_url": "https://www.reddit.com/message/compose/?to=haustorium12",
+        "signal": "Technical competitor/research target; indexes Claude Code logs. Comments raise stale retrieval and pruning concerns.",
+        "priority": "market_learning"
+      },
+      {
+        "rank": 8,
+        "username": "_crazy_muffin_",
+        "subreddit": "claudeskills",
+        "age_at_search": "about 11 hours",
+        "title": "How I stopped re-explaining my repo to Claude Code every session",
+        "url": "https://www.reddit.com/r/claudeskills/comments/1thxww3/how_i_stopped_reexplaining_my_repo_to_claude_code/",
+        "contact_url": "https://www.reddit.com/message/compose/?to=_crazy_muffin_",
+        "signal": "Technical competitor/research target; memory_map uses key-value memory, searchable history, and lifecycle hooks.",
+        "priority": "market_learning"
+      },
+      {
+        "rank": 9,
+        "username": "20CharsIsNotEnoug",
+        "subreddit": "ClaudeAI",
+        "age_at_search": "about 2 days",
+        "title": "I built a self-hosted MCP server so my Claude Code sessions stop starting from scratch",
+        "url": "https://www.reddit.com/r/ClaudeAI/comments/1tk2m2x/i_built_a_selfhosted_mcp_server_so_my_claude_code/",
+        "contact_url": "https://www.reddit.com/message/compose/?to=20CharsIsNotEnoug",
+        "signal": "Technical competitor/research target; multi-machine, shared memory, task queue, handoffs, web UI.",
+        "priority": "market_learning"
+      },
+      {
+        "rank": 10,
+        "username": "unknown_author",
+        "subreddit": "SaaS",
+        "age_at_search": "today",
+        "title": "Is this a real SaaS pain or just my own AI workflow problem?",
+        "url": "https://www.reddit.com/r/SaaS/comments/1tnbe0c/is_this_a_real_saas_pain_or_just_my_own_ai/",
+        "contact_url": null,
+        "signal": "Mentions jumping between ChatGPT, Claude, Cursor, Gemini and asks whether developers would pay for a local-first project memory layer.",
+        "priority": "verify_author_before_contact"
+      }
+    ],
+    "fresh_hn_note": "Recent HN search mostly surfaced older memory/context discussions that were crawled recently. No equally strong new HN thread from the last two weeks was found during this refresh."
+  },
+  "recommended_outreach_plan": {
+    "first_batch_size": 5,
+    "do_not_request_calls": true,
+    "goal": "Get short written replies first. Validate pain, workaround, and willingness to pay before pitching.",
+    "first_batch": [
+      "AdEuphoric1638",
+      "Purple-Start785",
+      "ohayoogodzaimasu",
+      "swmeyer",
+      "Independent-Ant-7230"
+    ],
+    "rules": [
+      "Do not send all messages at once; send 3-5 at a time.",
+      "Do not pitch Mneva in the first message.",
+      "Reference their specific post and ask one written question.",
+      "Avoid phone calls or meeting requests.",
+      "Avoid technical jargon with non-technical users.",
+      "If they reply, ask follow-up questions about current workaround, repeated context, and willingness to pay."
+    ],
+    "words_to_avoid_in_nontechnical_outreach": [
+      "MCP",
+      "CLI",
+      "Git",
+      "SQLite",
+      "token",
+      "benchmark",
+      "memory substrate",
+      "developer tool",
+      "embeddings",
+      "local-first architecture"
+    ],
+    "safe_words": [
+      "AI forgets your project",
+      "re-explain",
+      "switching tools",
+      "copy-pasting summaries",
+      "keeping track of decisions",
+      "where you left off"
+    ],
+    "wtp_probe": {
+      "question": "If this saved you from re-explaining your project every day, what would feel fair per month?",
+      "options": [
+        "Free only",
+        "$5",
+        "$10",
+        "$20",
+        "more"
+      ],
+      "follow_up": "What would need to be true for you to actually pay that?"
+    },
+    "tracking_fields": [
+      "username",
+      "subreddit",
+      "post_url",
+      "tools_used",
+      "technical_level",
+      "biggest_context_pain",
+      "current_workaround",
+      "exact_quote",
+      "willingness_to_pay",
+      "must_have_feature",
+      "dealbreaker",
+      "follow_up_allowed"
+    ]
+  },
+  "copy_paste_outreach_templates_recent": [
+    {
+      "username": "AdEuphoric1638",
+      "subject": "Question about Claude/Cursor context",
+      "message": "Hey, I saw your post about handling context loss between Claude Code and Cursor sessions.\n\nThe part that stood out was that CLAUDE.md helps but goes stale and needs constant manual updates.\n\nNo call needed. If you’re open to a quick written reply, what context do you find yourself re-explaining most often when a new session starts?"
+    },
+    {
+      "username": "Purple-Start785",
+      "subject": "Question about context fragmentation",
+      "message": "Hey, I saw your post about AI coding being blocked more by context fragmentation than code generation.\n\nYour line about losing the macro-level blueprint, architecture why, and roadmap status really stood out.\n\nNo call needed. If you’re open to replying here, what do you currently do to keep that architecture/context in sync with what the AI is building?"
+    },
+    {
+      "username": "ohayoogodzaimasu",
+      "subject": "Question about choosing AI coding tools",
+      "message": "Hey, I saw your post asking whether Cursor, Codex, or Claude Code is better for a smaller project.\n\nI’m researching how people choose between AI coding tools, especially when context and budget start to matter.\n\nNo call needed. If you’re open to a quick written reply, what worries you most: cost, code quality, the AI losing context, or having to switch tools?"
+    },
+    {
+      "username": "swmeyer",
+      "subject": "Question about AI builder context handling",
+      "message": "Hey, I saw your post scoring 11 AI app builders across code quality, context handling, debugging, and cost.\n\nThe context handling dimension stood out because that’s the pain I’m researching right now: when tools lose the plot as projects grow.\n\nNo call needed. If you’re open to replying here, what separated the tools that handled context well from the ones that fell apart?"
+    },
+    {
+      "username": "Icy-Roll-4044",
+      "subject": "Question about large repo context loss",
+      "message": "Hey, I saw your post about Claude/Cursor feeling great until the repo gets huge.\n\nThe examples you listed, random edits, duplicate logic, missing abstractions, and unrelated files getting pulled in, are exactly the kind of context failure I’m researching.\n\nNo call needed. If you’re open to a quick written reply, what context do you think the AI most needs before touching a large repo?"
+    },
+    {
+      "username": "Independent-Ant-7230",
+      "subject": "Question about AI workflow memory",
+      "message": "Hey, I saw your comment about micro SaaS ideas, especially AI workflow memory systems that persist project context instead of starting fresh constantly.\n\nI’m researching that exact pain right now.\n\nNo call needed. If you’re open to replying here, what would make that kind of tool useful enough that you’d actually pay for it?"
+    }
+  ],
+  "product_opportunity_ranking": {
+    "P0": [
+      {
+        "name": "Git-aware scope",
+        "details": [
+          "Capture repo path, branch, commit SHA, dirty state, changed files.",
+          "Search and replay should default to current repo/branch context."
+        ]
+      },
+      {
+        "name": "Review queue",
+        "details": [
+          "Agent writes draft/transient by default.",
+          "User approves, edits, rejects, or promotes to permanent."
+        ]
+      },
+      {
+        "name": "Token-budgeted replay",
+        "details": [
+          "Support 500, 1000, 3000, full budgets.",
+          "Rank by relevance, freshness, scope, and lifespan."
+        ]
+      },
+      {
+        "name": "Stale and supersede workflow",
+        "details": [
+          "Add last_verified_at, stale_after, supersedes.",
+          "Warn on old facts and let users mark superseded memories."
+        ]
+      }
+    ],
+    "P1": [
+      {
+        "name": "Memory hygiene CLI",
+        "details": [
+          "mneva stale",
+          "mneva audit",
+          "mneva review",
+          "mneva promote"
+        ]
+      },
+      {
+        "name": "Workflow templates",
+        "details": [
+          "Claude Code / Cursor / Codex start-session search/replay.",
+          "Decision capture.",
+          "Debug lesson capture.",
+          "End-of-session handoff."
+        ]
+      },
+      {
+        "name": "Evidence assets",
+        "details": [
+          "Dogfood demo.",
+          "Benchmark script.",
+          "Token savings comparison.",
+          "Real project before/after."
+        ]
+      }
+    ],
+    "P2": [
+      {
+        "name": "Browser extension",
+        "details": [
+          "Validate demand before building."
+        ]
+      },
+      {
+        "name": "Team sharing",
+        "details": [
+          "Start with local/git/Obsidian sync.",
+          "Add visibility, redaction, and audit before SaaS."
+        ]
+      }
+    ]
+  },
+  "suggested_roadmap": {
+    "v0_3": [
+      "Git-aware metadata",
+      "token-budgeted replay",
+      "draft/review/promote",
+      "stale/supersede basics",
+      "improved Claude Code / Cursor / Codex workflow templates"
+    ],
+    "v0_4": [
+      "audit/review CLI",
+      "Obsidian-friendly review views",
+      "benchmark/demo package",
+      "session transcript distill defaults",
+      "browser extension validation prototype"
+    ],
+    "v1_plus": [
+      "GUI memory inspector",
+      "team/shared scope",
+      "redaction policies",
+      "optional sync or hosted service"
+    ]
+  },
+  "source_documents_created_locally": [
+    "D:/AI/mneva/docs/user-research-hn-reddit-2026-05-25.md",
+    "D:/AI/mneva/docs/user-research-hn-reddit-2026-05-25.json",
+    "D:/AI/mneva/docs/user-research-complete-2026-05-25.json"
+  ],
+  "external_sources": {
+    "hacker_news": [
+      "https://news.ycombinator.com/item?id=46328769",
+      "https://news.ycombinator.com/item?id=47103237",
+      "https://news.ycombinator.com/item?id=46426624",
+      "https://news.ycombinator.com/item?id=46626639",
+      "https://news.ycombinator.com/item?id=47189906",
+      "https://news.ycombinator.com/item?id=45517078",
+      "https://news.ycombinator.com/item?id=47075973"
+    ],
+    "reddit": [
+      "https://www.reddit.com/r/cursor/comments/1tg9acb/how_are_you_handling_context_loss_between_claude/",
+      "https://www.reddit.com/r/SaaS/comments/1tjnfzy/the_biggest_problem_with_ai_coding_isnt_code/",
+      "https://www.reddit.com/r/vibecoding/comments/1tcyq81/cursor_codex_or_claude_code_for_small_project/",
+      "https://www.reddit.com/r/SideProject/comments/1tki9a4/i_scored_11_ai_app_builders_across_7_dimensions/",
+      "https://www.reddit.com/r/developersIndia/comments/1tcqqlf/claudecursor_feel_great_until_the_repo_becomes/",
+      "https://www.reddit.com/r/SaaS/comments/1tll84t/what_micro_saas_would_you_actually_pay_for_today/",
+      "https://www.reddit.com/r/ClaudeAI/comments/1tlu3np/claude_code_has_been_writing_every_session_to/",
+      "https://www.reddit.com/r/claudeskills/comments/1thxww3/how_i_stopped_reexplaining_my_repo_to_claude_code/",
+      "https://www.reddit.com/r/ClaudeAI/comments/1tk2m2x/i_built_a_selfhosted_mcp_server_so_my_claude_code/",
+      "https://www.reddit.com/r/SaaS/comments/1tnbe0c/is_this_a_real_saas_pain_or_just_my_own_ai/",
+      "https://www.reddit.com/r/AI_Agents/comments/1rfe475/cli_that_lets_claude_code_cursor_and_codex_share/",
+      "https://www.reddit.com/r/ClaudeAI/comments/1rfwaxx/claude_code_forgets_everything_between_sessions_i/",
+      "https://www.reddit.com/r/ClaudeCode/comments/1rmi2e6/memory_for_claude_code/",
+      "https://www.reddit.com/r/ClaudeAI/comments/1rfkmj1/new_automemory_feature_in_claude_code_details/",
+      "https://www.reddit.com/r/ClaudeAI/comments/1t6r3k2/mnemo_a_local_semantic_memory_for_claude_code/",
+      "https://www.reddit.com/r/mcp/comments/1rflpbe/built_an_mcp_memory_layer_to_persist_ai_debugging/",
+      "https://www.reddit.com/r/mcp/comments/1shnxs3/your_claude_codex_cursor_doesnt_need_a_better/",
+      "https://www.reddit.com/r/ClaudeAI/comments/1s8ed6o/claude_code_memory_that_fits_in_a_single_sqlite/",
+      "https://www.reddit.com/r/ClaudeAI/comments/1rgoyao/i_built_an_opensource_memory_layer_for_claude/",
+      "https://www.reddit.com/r/ClaudeAI/comments/1tcl813/how_i_keep_my_ais_context_window_under_3k_tokens/",
+      "https://www.reddit.com/r/ClaudeAI/comments/1sa643r/i_built_a_persistent_memory_system_for_claude/",
+      "https://www.reddit.com/r/ClaudeAI/comments/1sm66h8/psa_audited_my_claude_code_setup_30000_tokens_15/",
+      "https://www.reddit.com/r/ClaudeCode/comments/1rg2odm/common_context_across_claude_gemini_codex_etc/",
+      "https://www.reddit.com/r/ClaudeAI/comments/1sd9cpj/claude_ai_and_claude_code_sharing_context/",
+      "https://www.reddit.com/r/ClaudeAI/comments/1s7pig6/built_a_shared_memory_layer_for_claude_code_teams/",
+      "https://www.reddit.com/r/AI_Agents/comments/1sihpbj/we_gave_our_multiagent_workspaces_a_shared_memory/",
+      "https://www.reddit.com/r/ClaudeAI/comments/1rspjb8/my_opensource_mcp_memory_server_got_formally/",
+      "https://www.reddit.com/r/ClaudeAI/comments/1lgudw2/security_claude_code_reads_env_files_by_default/",
+      "https://www.reddit.com/r/ClaudeAI/comments/1szvo7t/open_source_we_built_a_local_code_search_mcp_for/",
+      "https://www.reddit.com/r/ClaudeAI/comments/1sp22el/spent_3_months_building_an_mcp_memory_server_for/",
+      "https://www.reddit.com/r/ClaudeCode/comments/1shp98n/save_tokens_save_more_with_your_claude_code/"
+    ]
+  }
+}

@@ -1,0 +1,22 @@
+# mneva progress log
+# Format: [DATE] SESSION | FEATURE_ID | ACTION | RESULT
+# Append only. Never edit historical entries.
+# Entries before 2026-07-31 are backfilled from git history and docs/, not contemporaneous.
+
+[2026-05-01] backfill | repo-init | Repo created (mneva-ai/mneva) | v0.0.1 placeholder
+[2026-05-10] backfill | plan-1-foundation | M0-M4: CLI + local API, no LLM | v0.1.0 alpha released
+[2026-05-17] backfill | v0.1.1 | gap fixes + dep hygiene + CI matrix | released
+[2026-05-17] backfill | v0.1.2 | Obsidian vault read-write integration | released
+[2026-05-18] backfill | v0.1.3 | `mneva distill` command | released
+[2026-05-22] backfill | v0.2.0 | MCP server (6 tools) + uvx-first install + opt-in diagnose --share | released
+[2026-05-24] backfill | v0.2.1 | `mneva upgrade` + fixed --version drift (version now sourced only from src/mneva/__init__.py) | released
+[2026-05-24] backfill | v0.2.2 | Fixed README MCP config: `uvx mneva-mcp` -> `uvx --from mneva mneva-mcp` | released; LAST COMMIT before dormancy
+[2026-05-25] backfill | user-research | Ran HN/Reddit research (00:50), merged package (13:36), non-technical integrated package (14:03) | 3 docs written to docs/, left UNCOMMITTED for 67 days
+[2026-05-25] backfill | strategy-decision | DECIDED: non-technical users are the beachhead; engineer line demoted to future engine/power-user tier. Git/token/benchmark/CLI excluded from v0.3 | recorded in nontechnical-user-research-integrated-2026-05-25.json
+[2026-05-25] backfill | outreach-batch-1 | Sent 5 cold Reddit DMs (ersinkiymaz / Any_Enthusiasm8346 / FounderArcs / Such_Grace / yanguoyu) | 0 REPLIES. Own success bar was >=2 replies + 3 pain quotes + 1 $5+ WTP. All missed. Copy sent was never recorded.
+[2026-05-25..2026-07-31] backfill | (none) | 67 days dormant, zero commits | -
+
+[2026-07-31] review | project-audit | Deep review via gstack /health + repo/external state check | Engineering 10.0/10 (mypy clean, ruff clean, 172 passed, CI all green, 0 TODO markers). Traction ~0: 1 star, 0 forks, 0 watchers, 0 issues ever. PyPI downloads UNKNOWN (pypistats 429 x3). Core finding: strategy decided 5/25 had zero implementation follow-through, while the shipped surface (14 CLI commands + MCP server) is 100% the audience that decision demoted.
+[2026-07-31] review | strategy-recheck | User reconfirmed non-technical beachhead is still operative; confirmed outreach WAS sent and got 0 replies | Dissent recorded: 0/5 has no statistical power (cold-DM base rate 5-20%, expected replies <1). State is ZERO evidence, not negative evidence. Next step is to fix the validation instrument, not to build product.
+[2026-07-31] review | p0b-repo-hygiene | Migrated google-generativeai (EOL) -> google-genai; rewrote provider to Client API and updated its tests; added a None-response test | 173 passed (+1), ruff clean, mypy clean, EOL FutureWarning gone
+[2026-07-31] review | p0b-repo-hygiene | Created CLAUDE.md + .claude/feature_list.json + .claude/claude-progress.txt; committed the 3 research docs | Harness established; 118KB of strategy assets now under version control

@@ -1,0 +1,97 @@
+{
+  "updated_at": "2026-07-31",
+  "strategy_ref": "docs/nontechnical-user-research-integrated-2026-05-25.json",
+  "strategy_summary": "Non-technical beachhead. Engineer line deferred to a future engine/power-user tier. Validation status is ZERO evidence (one n=5 outreach batch, 0 replies, no statistical power). No product features until the validation experiment returns a verdict.",
+  "features": [
+    {
+      "id": "p0a-rebuild-validation-experiment",
+      "priority": "P0",
+      "status": "pending",
+      "title": "Rebuild the non-technical demand validation experiment",
+      "description": "The 2026-05-25 outreach (5 cold Reddit DMs) returned 0 replies and is uninterpretable: n=5 has no statistical power, the channel was DM, and the copy that was actually sent was never recorded. Rebuild the experiment so it can produce a verdict.",
+      "context": {
+        "channel_change": "Public replies under posts already complaining about the pain, not cold DMs. All 6 candidates in recent_priority_candidates had contact_url = reddit.com/message/compose, confirming the original batch was DM.",
+        "copy_is_a_rewrite_not_a_reuse": "docs/user-research-complete-2026-05-25.json -> copy_paste_outreach_templates_recent is the only written copy in the repo, but it is DM-shaped AND engineer-voiced ('CLAUDE.md goes stale', 'repo gets huge', 'duplicate logic, missing abstractions') and targets a different set of 5 usernames. Tone reference only. A public-reply, non-technical version must be written from scratch.",
+        "sample_size": "30-50 contacts, up from 5. Cold-outreach base reply rate is 5-20%; n=5 has an expected reply count below 1.",
+        "friction": "Add a landing page with email capture so 'leave an email' is the low-friction intent signal, instead of requiring a written reply.",
+        "copy_source": "docs/nontechnical-user-research-integrated-2026-05-25.json -> positioning_for_nontechnical_users (primary_value_prop_en/zh, safe_language, avoid_language)",
+        "followup_script": "same file -> followup_questions_for_replies",
+        "key_constraints": "Every message sent MUST be logged (platform / user / date / copy version / outcome), or the result is uninterpretable again. Reddit anti-spam is a live risk: 30-50 public comments mentioning your own product is a standard auto-removal/shadowban pattern, which would produce another zero-information 0-reply result. Batch and rate-limit; periodically verify comments are still visible from a logged-out browser."
+      },
+      "kill_criteria": {
+        "basis": "30 contacts",
+        "pass": ">=3 substantive replies AND >=2 emails AND >=1 explicit $5+ willingness-to-pay -> non-technical line holds, proceed to p1-nontechnical-usability",
+        "middle": "Replies exist but pass conditions unmet (e.g. 2 replies / 1 email / 0 WTP) -> verdict is 'pain is real, willingness to pay unproven'. Do NOT add more contacts. Run followup_questions_for_replies against everyone who replied and ask price directly. Still no $5+ signal -> treat as falsified.",
+        "falsify": "<2 substantive replies AND 0 emails -> non-technical beachhead assumption fails. Revert to the engineer line (docs/user-research-hn-reddit-2026-05-25.md sections 7-8, which has an existing code base to build on)."
+      },
+      "acceptance_criteria": [
+        "Kill criteria are written down before the first message goes out",
+        "Every contact logged with platform / user / date / copy version / outcome",
+        "New public-reply non-technical copy written and reviewed against avoid_language",
+        "After 30 contacts, one of the three branches is declared and appended to .claude/claude-progress.txt"
+      ],
+      "blocked_on_user": "Outward-facing. Posting to Reddit and publishing a landing page both need explicit user confirmation before execution."
+    },
+    {
+      "id": "p0a-landing-page",
+      "priority": "P0",
+      "status": "pending",
+      "title": "Landing page + email capture (scoped exception to 'no product code')",
+      "description": "The lowest-friction intent signal for the validation experiment. Deliberately carved out as an exception to the no-product-code rule, and the largest work item in P0.",
+      "context": {
+        "copy": "primary_value_prop_en: 'Your AI forgets your project every time you switch tools. Mneva remembers, so you never explain it twice.'",
+        "key_constraints": "Bound by avoid_language (no MCP/CLI/Git/SQLite/token/local-first). Outward-facing and makes public claims in mneva's name.",
+        "scope": "hosting + form + email storage. Nothing else."
+      },
+      "acceptance_criteria": [
+        "Page content confirmed by the user before publishing",
+        "Email capture works end to end",
+        "No term from avoid_language appears on the page"
+      ],
+      "blocked_on_user": "Publishing is outward-facing and requires explicit confirmation."
+    },
+    {
+      "id": "p0b-repo-hygiene",
+      "priority": "P0",
+      "status": "done",
+      "completed_at": "2026-07-31",
+      "title": "Repo hygiene: commit research, build harness, migrate EOL dependency",
+      "description": "Low-cost cleanup so a 67-day dormancy does not cost a full re-exploration again.",
+      "context": {
+        "done": "Committed 3 research docs (118KB) into git; created CLAUDE.md + .claude/feature_list.json + .claude/claude-progress.txt; migrated google-generativeai (EOL) to google-genai; aligned pyproject description with the positioning doc."
+      },
+      "acceptance_criteria": [
+        "pytest green (173 passed)",
+        "ruff check . clean",
+        "mypy src clean",
+        "EOL FutureWarning gone"
+      ]
+    },
+    {
+      "id": "p1-nontechnical-usability",
+      "priority": "P1",
+      "status": "blocked",
+      "blocked_by": "p0a-rebuild-validation-experiment",
+      "title": "Make mneva installable by a non-technical user",
+      "description": "Today a non-technical user cannot install mneva at all: it requires `uvx --from mneva mneva-mcp` plus hand-editing a JSON config file. If the non-technical line is validated, this is the gap to close.",
+      "context": {
+        "options": "graphical installer, or a hosted entry point, or a one-click config writer",
+        "key_constraints": "DO NOT START until p0a-rebuild-validation-experiment passes its kill criteria. Building here before a verdict is betting on zero evidence."
+      },
+      "acceptance_criteria": [
+        "A user who has never opened a terminal can install and use mneva"
+      ]
+    },
+    {
+      "id": "deferred-engineer-line",
+      "priority": "DEFERRED",
+      "status": "deferred",
+      "title": "Engineer-line v0.3 (git-aware scope, token-budgeted replay, review queue, stale/supersede)",
+      "description": "Fully designed and NOT to be built under the current strategy. Kept here so it is not rediscovered from scratch: this is the ready-made fallback if p0a triggers its falsify branch.",
+      "context": {
+        "design_ref": "docs/user-research-hn-reddit-2026-05-25.md sections 7-8",
+        "key_constraints": "Explicitly excluded by the 2026-05-25 strategic guardrail, reconfirmed 2026-07-31."
+      }
+    }
+  ]
+}

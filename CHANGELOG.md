@@ -2,6 +2,29 @@
 
 ## [Unreleased]
 
+### Changed
+- **Migrated off the end-of-life Google SDK.** `google-generativeai` reached EOL
+  upstream ("All support for the `google.generativeai` package has ended") and
+  emitted a `FutureWarning` on every import. The Google provider now uses the
+  current `google-genai` SDK: `genai.Client(api_key=...)` plus
+  `client.models.generate_content(model=..., contents=..., config=types.GenerateContentConfig(...))`,
+  replacing the removed `genai.configure()` / `genai.GenerativeModel()` API.
+  The default model, the `MNEVA_GOOGLE_MODEL` override, and the
+  `complete(prompt, *, max_tokens) -> str` contract are all unchanged. The new
+  SDK types `response.text` as `str | None`, so an empty response now normalizes
+  to `""` rather than propagating `None` — covered by a new test.
+- **Package description** now leads with the user-facing problem instead of
+  internal architecture vocabulary.
+
+### Added
+- **Project harness** — `CLAUDE.md`, `.claude/feature_list.json`, and
+  `.claude/claude-progress.txt`. Records the architecture rules, the current
+  strategy and its guardrail, the prioritized queue, and an append-only progress
+  log, so picking the project back up does not require re-exploring it.
+- **User research committed to version control.** Three research documents from
+  2026-05-25 (118KB, including the strategic decision record) had been sitting
+  untracked in the working tree.
+
 ## [0.2.2] - 2026-05-24
 
 ### Fixed
