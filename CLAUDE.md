@@ -77,7 +77,7 @@ Bump `src/mneva/__init__.py`, update `CHANGELOG.md`, PR into `main`. CI (`.githu
 2. **Documenting `uvx mneva-mcp`.** That fails — `uvx` resolves its argument as a *package*. The correct form is `uvx --from mneva mneva-mcp`. This shipped broken in the README once already.
 3. **Truncating pytest output.** `pytest.ini` sets `-ra -q`, so the `N passed` line is the **last** line. Piping through `tail`/`grep` silently swallows it and makes a green run look empty.
 4. **Treating the SQLite index as durable.** It is rebuilt from Markdown. Never write data that exists only in the index.
-5. **Using `google.generativeai`.** EOL and removed in 0.3.0. The provider now uses `google-genai` (`genai.Client(...)` → `client.models.generate_content(model=…, contents=…, config=types.GenerateContentConfig(…))`).
+5. **Using `google.generativeai`.** EOL upstream; removed in `## [Unreleased]` (post-0.2.2). The provider now uses `google-genai` (`genai.Client(...)` → `client.models.generate_content(model=…, contents=…, config=types.GenerateContentConfig(…))`).
 6. **Proposing engineer-line features** (git-aware scope, token budgets, `mneva audit`) as if they were next up. They are explicitly deferred — see `## Current Strategy`.
 
 ## Token Efficiency
