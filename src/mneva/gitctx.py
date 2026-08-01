@@ -94,6 +94,12 @@ def _run(args: list[str], *, cwd: Path) -> str | None:
             ["git", *args],  # noqa: S607
             cwd=cwd,
             capture_output=True,
+            # stdin MUST be detached. capture_output only redirects stdout and
+            # stderr; stdin stays inherited. mneva-mcp speaks MCP over stdio,
+            # so an inherited stdin hands a git child the live protocol pipe --
+            # it can swallow protocol bytes or block forever waiting on input.
+            # DEVNULL also stops git blocking on a credential or editor prompt.
+            stdin=subprocess.DEVNULL,
             text=True,
             timeout=_TIMEOUT_S,
         )

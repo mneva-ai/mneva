@@ -170,6 +170,22 @@ class Indexer:
         self._conn.commit()
         return count
 
+    def close(self) -> None:
+        """Close the sqlite connection.
+
+        Windows keeps a file locked until every handle is closed, and relying
+        on refcounting to do it is not safe: under coverage (which CI runs) the
+        tracer holds frame references alive, so connections outlive the scope
+        that created them and the database file cannot be deleted or replaced.
+        """
+        self._conn.close()
+
+    def __enter__(self) -> Indexer:
+        return self
+
+    def __exit__(self, *exc: object) -> None:
+        self.close()
+
     @property
     def mode(self) -> str:
         return "sqlite-vec" if self._has_vec else "bm25"

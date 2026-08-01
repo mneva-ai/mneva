@@ -272,3 +272,30 @@ def test_record_to_dict_carries_git_provenance() -> None:
     assert d["repo_path"] == "/home/dev/mneva"
     assert d["branch"] == "main"
     assert d["commit_sha"] == "0" * 40
+
+
+def test_mcp_never_shells_out_to_git_without_an_explicit_repo_path(
+    tmp_mneva_home: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The MCP server must not spawn git unless the client passed repo_path.
+
+    Regression guard for a CI hang. This process speaks MCP over stdio, and
+    `subprocess.run(capture_output=True)` leaves stdin inherited -- so a git
+    child lands on the live protocol pipe and the call never returns. It is
+    also pointless: this process's cwd is the AI client's, not the user's
+    project, so anything detected there is the wrong repository.
+    """
+    import mneva.gitctx as gitctx_mod
+    from mneva.mcp_server import _git_for
+
+    calls: list[object] = []
+
+    def tripwire(*a: object, **kw: object) -> None:
+        calls.append(a)
+        raise AssertionError("git must not be invoked without an explicit repo_path")
+
+    monkeypatch.setattr(gitctx_mod.subprocess, "run", tripwire)
+
+    assert _git_for(None) is None
+    assert _git_for("") is None
+    assert calls == []

@@ -57,14 +57,21 @@ _indexer: Indexer | None = None
 
 
 def _git_for(repo_path: str | None) -> gitctx.GitContext | None:
-    """Resolve git provenance for an MCP call.
+    """Resolve git provenance for an MCP call. Only ever from an explicit path.
 
-    Prefers the path the AI client passed. Falls back to this process's cwd,
-    which is usually the client's directory rather than the user's project --
-    so it is a last resort, not the expected source. Returns None when neither
-    is a git repository.
+    There is deliberately NO fallback to this process's cwd. Two reasons, and
+    either alone is decisive:
+
+    * It would be wrong. This server's cwd belongs to the AI client, not to the
+      user's project, so anything detected there is a different repository --
+      worse than recording nothing.
+    * It would be dangerous. This process speaks MCP over stdio. Shelling out
+      to git on every call puts a child process next to the live protocol
+      pipes; that is how the tool call hangs instead of answering.
     """
-    return gitctx.detect(Path(repo_path) if repo_path else None)
+    if not repo_path:
+        return None
+    return gitctx.detect(Path(repo_path))
 
 
 def _get_indexer() -> Indexer:

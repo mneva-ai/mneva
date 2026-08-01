@@ -115,7 +115,8 @@ def capture(
         raise click.ClickException(
             f"record id collision (very rare). Retry the command. ({e})"
         ) from e
-    Indexer(home / "mneva.sqlite").add(record)
+    with Indexer(home / "mneva.sqlite") as idx:
+        idx.add(record)
     _mirror_to_vault_if_configured(record, home)
     click.echo(record.id)
 
@@ -172,11 +173,11 @@ def search(
     belonging to a *different* repo are hidden. Use --all-repos to see those.
     """
     home = ensure_home()
-    idx = Indexer(home / "mneva.sqlite")
     effective_repo = _effective_repo(repo=repo, all_repos=all_repos)
-    hits = idx.search(
-        query, scope=scope, lifespan=lifespan, repo=effective_repo, k=top_k
-    )
+    with Indexer(home / "mneva.sqlite") as idx:
+        hits = idx.search(
+            query, scope=scope, lifespan=lifespan, repo=effective_repo, k=top_k
+        )
     if not hits:
         click.echo("(no matches)")
         return
@@ -199,8 +200,8 @@ def _effective_repo(*, repo: str | None, all_repos: bool) -> str | None:
 def status() -> None:
     """Report indexed count and active mode (sqlite-vec or bm25)."""
     home = ensure_home()
-    idx = Indexer(home / "mneva.sqlite")
-    s = idx.status()
+    with Indexer(home / "mneva.sqlite") as idx:
+        s = idx.status()
     click.echo(f"home: {home}")
     click.echo(f"mode: {s['mode']}")
     click.echo(f"count: {s['count']}")
@@ -220,7 +221,8 @@ def reindex() -> None:
     this after editing records by hand, restoring files, or upgrading mneva.
     """
     home = ensure_home()
-    count = Indexer(home / "mneva.sqlite").rebuild()
+    with Indexer(home / "mneva.sqlite") as idx:
+        count = idx.rebuild()
     click.echo(f"reindexed: {count} record(s) from {home / 'store'}")
 
 
@@ -231,7 +233,8 @@ def forget(record_id: str, confirm: bool) -> None:
     """Delete a record by id. --confirm required."""
     home = ensure_home()
     existed = forget_record(record_id, home=home)
-    Indexer(home / "mneva.sqlite").remove(record_id)
+    with Indexer(home / "mneva.sqlite") as idx:
+        idx.remove(record_id)
     if not existed:
         raise click.ClickException(f"no such record: {record_id}")
     click.echo(f"forgot: {record_id}")
@@ -314,9 +317,9 @@ def sync_vault_cmd() -> None:
     # Re-index everything we just imported
     from mneva.store import iter_records
 
-    idx = Indexer(home / "mneva.sqlite")
-    for record in iter_records(home=home):
-        idx.add(record)
+    with Indexer(home / "mneva.sqlite") as idx:
+        for record in iter_records(home=home):
+            idx.add(record)
     click.echo(f"imported: {result.imported}, skipped: {result.skipped}")
 
 
