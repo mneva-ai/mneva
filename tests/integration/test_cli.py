@@ -198,15 +198,15 @@ def test_reindex_rebuilds_from_markdown_after_index_loss(tmp_mneva_home: Path) -
         )
         assert result.exit_code == 0
 
-    import gc
-
     from mneva.paths import mneva_home
 
     db = mneva_home() / "mneva.sqlite"
     assert db.exists()
-    # Each CLI command builds its own Indexer and never closes it explicitly.
-    # On Windows the file stays locked until those connections are collected.
-    gc.collect()
+    # No gc.collect() here on purpose. CLI commands close their Indexer through
+    # a context manager, so the file is unlocked deterministically. The earlier
+    # version relied on refcounting, which held under a bare `pytest` run and
+    # broke under `pytest --cov` (the tracer keeps frames, and their
+    # connections, alive) -- which is exactly how CI invokes the suite.
     for suffix in ("", "-wal", "-shm"):
         db.with_name(db.name + suffix).unlink(missing_ok=True)
     assert not db.exists()

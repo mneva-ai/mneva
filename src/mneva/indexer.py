@@ -14,7 +14,27 @@ from mneva.store import Record, iter_records, read_record
 # lower version is dropped and rebuilt from the Markdown store, which is the
 # source of truth. Without this, `CREATE TABLE IF NOT EXISTS` silently keeps
 # the old shape and every new column is missing forever.
-_SCHEMA_VERSION = 1
+_SCHEMA_VERSION = 2
+
+# Every INSERT into `records` goes through these two constants. They were
+# duplicated across add() and rebuild(), which meant a new column could land in
+# one path and not the other -- and since rebuild() runs on `mneva reindex`,
+# that silently blanks the column for the whole index.
+_INSERT_SQL = (
+    "INSERT OR REPLACE INTO records(id, scope, lifespan, tool, body, repo) "
+    "VALUES (?, ?, ?, ?, ?, ?)"
+)
+
+
+def _insert_params(record: Record) -> tuple[Any, ...]:
+    return (
+        record.id,
+        record.scope,
+        record.lifespan,
+        record.tool,
+        record.body,
+        record.repo,
+    )
 
 
 def try_load_sqlite_vec(conn: sqlite3.Connection) -> bool:
@@ -80,7 +100,8 @@ class Indexer:
                 scope     TEXT NOT NULL,
                 lifespan  TEXT NOT NULL,
                 tool      TEXT NOT NULL,
-                body      TEXT NOT NULL
+                body      TEXT NOT NULL,
+                repo      TEXT
             )
             """
         )
@@ -137,11 +158,7 @@ class Indexer:
             self._create_table()
             count = 0
             for record in iter_records(home=self._home):
-                self._conn.execute(
-                    "INSERT OR REPLACE INTO records(id, scope, lifespan, tool, body) "
-                    "VALUES (?, ?, ?, ?, ?)",
-                    (record.id, record.scope, record.lifespan, record.tool, record.body),
-                )
+                self._conn.execute(_INSERT_SQL, _insert_params(record))
                 count += 1
             # PRAGMA user_version does not accept a bound parameter. It lives in
             # the database header and is transactional, so it commits with the
@@ -153,16 +170,28 @@ class Indexer:
         self._conn.commit()
         return count
 
+    def close(self) -> None:
+        """Close the sqlite connection.
+
+        Windows keeps a file locked until every handle is closed, and relying
+        on refcounting to do it is not safe: under coverage (which CI runs) the
+        tracer holds frame references alive, so connections outlive the scope
+        that created them and the database file cannot be deleted or replaced.
+        """
+        self._conn.close()
+
+    def __enter__(self) -> Indexer:
+        return self
+
+    def __exit__(self, *exc: object) -> None:
+        self.close()
+
     @property
     def mode(self) -> str:
         return "sqlite-vec" if self._has_vec else "bm25"
 
     def add(self, record: Record) -> None:
-        self._conn.execute(
-            "INSERT OR REPLACE INTO records(id, scope, lifespan, tool, body) "
-            "VALUES (?, ?, ?, ?, ?)",
-            (record.id, record.scope, record.lifespan, record.tool, record.body),
-        )
+        self._conn.execute(_INSERT_SQL, _insert_params(record))
         self._conn.commit()
 
     def remove(self, record_id: str) -> None:
@@ -175,6 +204,7 @@ class Indexer:
         *,
         scope: str | None = None,
         lifespan: str | None = None,
+        repo: str | None = None,
         k: int = 10,
     ) -> list[Record]:
         clauses: list[str] = []
@@ -185,6 +215,14 @@ class Indexer:
         if lifespan is not None:
             clauses.append("lifespan = ?")
             params.append(lifespan)
+        if repo is not None:
+            # `OR repo IS NULL` is load-bearing, not defensive. Every record
+            # written before v0.3 has repo = NULL, and so does anything captured
+            # outside a git repo. A bare `repo = ?` would make all of them
+            # vanish from default search the moment a user upgrades. Only
+            # records that explicitly belong to a *different* repo are excluded.
+            clauses.append("(repo = ? OR repo IS NULL)")
+            params.append(repo)
         where = f" WHERE {' AND '.join(clauses)}" if clauses else ""
         rows = self._conn.execute(
             f"SELECT id, body FROM records{where}", params  # noqa: S608
@@ -207,4 +245,15 @@ class Indexer:
 
     def status(self) -> dict[str, int | str]:
         count = self._conn.execute("SELECT COUNT(*) FROM records").fetchone()[0]
-        return {"mode": self.mode, "count": int(count)}
+        # Provenance coverage is the only signal that git-aware capture is
+        # actually working. The MCP path depends on the AI client passing
+        # repo_path; if it does not, records land with repo = NULL and the
+        # feature is inert with nothing else to indicate it.
+        with_repo = self._conn.execute(
+            "SELECT COUNT(*) FROM records WHERE repo IS NOT NULL"
+        ).fetchone()[0]
+        return {
+            "mode": self.mode,
+            "count": int(count),
+            "with_repo": int(with_repo),
+        }

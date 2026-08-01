@@ -30,10 +30,12 @@ import json
 import os
 import sys
 from datetime import UTC, datetime
+from pathlib import Path
 from typing import Any
 
 from mcp.server.fastmcp import FastMCP
 
+from mneva import gitctx
 from mneva.indexer import Indexer
 from mneva.paths import ensure_home, mneva_home
 from mneva.replay import VALID_TOOLS, render_replay
@@ -52,6 +54,24 @@ _ATTRIBUTION_LOG = ".mcp-attribution.log"
 _ATTRIBUTION_MAX_BYTES = 1_048_576  # 1 MB cap before rotation
 
 _indexer: Indexer | None = None
+
+
+def _git_for(repo_path: str | None) -> gitctx.GitContext | None:
+    """Resolve git provenance for an MCP call. Only ever from an explicit path.
+
+    There is deliberately NO fallback to this process's cwd. Two reasons, and
+    either alone is decisive:
+
+    * It would be wrong. This server's cwd belongs to the AI client, not to the
+      user's project, so anything detected there is a different repository --
+      worse than recording nothing.
+    * It would be dangerous. This process speaks MCP over stdio. Shelling out
+      to git on every call puts a child process next to the live protocol
+      pipes; that is how the tool call hangs instead of answering.
+    """
+    if not repo_path:
+        return None
+    return gitctx.detect(Path(repo_path))
 
 
 def _get_indexer() -> Indexer:
@@ -104,6 +124,7 @@ def capture_memory(
     body: str,
     lifespan: str = "transient",
     source: str | None = None,
+    repo_path: str | None = None,
 ) -> dict[str, Any]:
     """Capture a memory record into mneva.
 
@@ -112,6 +133,14 @@ def capture_memory(
         body: Free-form text of the memory.
         lifespan: "transient" (default, ephemeral) or "permanent" (long-lived).
         source: Optional short note about where this memory came from.
+        repo_path: Absolute path to the root of the project the user is
+            working in. ALWAYS pass this when the user has a project or
+            workspace open. This server runs as its own process and its
+            working directory is your application's, not the user's project,
+            so it cannot discover the repository on its own. Passing it tags
+            the memory with its repo, branch, and commit, which is what lets
+            the user later retrieve only the memories belonging to this
+            project.
 
     Returns:
         Dict with ``id``, ``summary``, and ``record`` keys. ``summary`` is a
@@ -145,6 +174,7 @@ def capture_memory(
         tool=_client_id(),
         body=body,
         source=source,
+        **gitctx.as_record_fields(_git_for(repo_path)),
     )
     try:
         write_record(record, home=home)
@@ -170,6 +200,7 @@ def search_memory(
     scope: str | None = None,
     lifespan: str | None = None,
     top_k: int = 10,
+    repo_path: str | None = None,
 ) -> dict[str, Any]:
     """Search mneva memories using hybrid BM25 + optional sqlite-vec ranking.
 
@@ -178,6 +209,10 @@ def search_memory(
         scope: Optional filter — restrict to this scope only.
         lifespan: Optional filter — "transient" or "permanent".
         top_k: Maximum number of hits to return (1..50; default 10).
+        repo_path: Absolute path to the root of the project the user is
+            working in. Pass this whenever a project is open: it restricts
+            results to memories from this repository, plus memories that
+            belong to no repository. Omit it to search across everything.
 
     Returns:
         Dict with ``hits`` (list of record dicts) and ``summary`` (human line).
@@ -196,7 +231,14 @@ def search_memory(
             ),
         }
     top_k = max(1, min(top_k, 50))
-    records = _get_indexer().search(query, scope=scope, lifespan=lifespan, k=top_k)
+    git = _git_for(repo_path)
+    records = _get_indexer().search(
+        query,
+        scope=scope,
+        lifespan=lifespan,
+        repo=git.repo if git else None,
+        k=top_k,
+    )
     _log_attribution("search")
     if not records:
         scope_note = f" in scope `{scope}`" if scope else ""

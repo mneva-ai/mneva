@@ -2,7 +2,44 @@
 
 ## [Unreleased]
 
+### Added
+- **Git-aware memories.** Capturing inside a repository now records where the
+  memory came from: `repo`, `repo_path`, `branch`, and `commit_sha` land in the
+  note's YAML frontmatter, so a memory carries its project, branch, and the
+  exact code state it was written against. `mneva search` scopes results to the
+  current repository by default; `--all-repos` widens it and `--repo <id>`
+  targets another one. `mneva capture --no-git` opts out entirely, since
+  `repo_path` reveals local directory layout.
+  - `repo` is derived from the remote URL and normalized
+    (`git@github.com:Org/Repo.git`, `https://github.com/org/repo`, and
+    `ssh://git@github.com/org/repo.git` all become `github.com/org/repo`), so
+    it keeps matching after the repository is cloned to another machine or
+    directory. Repositories with no remote fall back to `local:<dirname>`.
+  - **Memories with no repository stay visible everywhere.** Filtering is
+    `repo = ? OR repo IS NULL`, never a bare equality: everything captured
+    before this release, and anything captured outside a repository, would
+    otherwise vanish from default search.
+  - Git detection never fails a capture. A missing `git` binary, a directory
+    that is not a repository, a repository with no commits, a detached HEAD, or
+    a hanging `git` call all degrade to "no provenance" instead of an error.
+  - **MCP clients must pass `repo_path`.** `capture_memory`, `search_memory`,
+    and `replay_context` take an optional `repo_path`. The MCP server runs as
+    its own process and inherits the AI client's working directory, not the
+    user's project, so it cannot detect the repository by itself. The tool
+    descriptions instruct the client to pass the workspace root.
+  - `mneva status` now reports provenance coverage (`with repo provenance: N /
+    M`) and the current repository. Without it, an AI client that never passes
+    `repo_path` looks identical to one that does.
+
 ### Changed
+- **Record frontmatter now has a single reader and writer.** `store.py` and
+  `vault.py` each kept their own hardcoded field list, so a new field had to be
+  added in three places and any miss silently dropped data — the vault round
+  trip (`capture` → Obsidian → `sync-vault`) would have erased git provenance
+  from the canonical record. Both directions now go through
+  `store.record_frontmatter` / `store.record_from_frontmatter`.
+- Optional fields are omitted from frontmatter rather than written as `null`,
+  keeping notes readable in Obsidian.
 - **Migrated off the end-of-life Google SDK.** `google-generativeai` reached EOL
   upstream ("All support for the `google.generativeai` package has ended") and
   emitted a `FutureWarning` on every import. The Google provider now uses the

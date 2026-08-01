@@ -41,6 +41,7 @@ def render_replay(
     tool: str,
     scope: str | None = None,
     home: Path | None = None,
+    repo: str | None = None,
 ) -> str:
     """Render the context replay block for *tool*, optionally filtered by *scope*.
 
@@ -56,10 +57,14 @@ def render_replay(
     template_body = _strip_frontmatter(_load_template(tool))
 
     # Collect permanent records, optionally filtered by scope
+    # Same repo-OR-NULL rule as Indexer.search: a memory with no repo belongs
+    # to every context, and only memories owned by a *different* repo are cut.
     records = [
         r
         for r in iter_records(home=resolved_home)
-        if r.lifespan == "permanent" and (scope is None or r.scope == scope)
+        if r.lifespan == "permanent"
+        and (scope is None or r.scope == scope)
+        and (repo is None or r.repo is None or r.repo == repo)
     ]
 
     parts: list[str] = [template_body.rstrip()]

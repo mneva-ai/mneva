@@ -8,6 +8,10 @@ on:
 jobs:
   test:
     runs-on: ${{ matrix.os }}
+    # The suite takes ~3 minutes. Without a cap, a hung test sits on a runner
+    # until the 6-hour default expires and the logs are never published, so the
+    # one thing you need in order to diagnose it is exactly what you lose.
+    timeout-minutes: 15
     strategy:
       fail-fast: false
       matrix:

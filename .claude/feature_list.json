@@ -43,7 +43,7 @@
     {
       "id": "p1-05-unified-schema-pass",
       "priority": "P1",
-      "status": "pending",
+      "status": "done",
       "blocked_by": "p1-0-index-migration-path",
       "title": "Design all three Record field groups in one pass",
       "description": "Features 1, 2, and 3 each add fields to Record. Designing them together avoids repeating the Record + to_dict() + frontmatter + index column + migration work three times.",
@@ -53,29 +53,34 @@
         "backward_compat": "read_record must tolerate missing fields. Copy the existing optional-read pattern for `source` at store.py:66.",
         "DECIDED_2026_07_31_git_fields": "Store ONLY stable git provenance: repo_path, branch, commit_sha. DROP `dirty` and `changed_files` -- both are volatile (stale the moment they are written), and changed_files can be long enough to bloat frontmatter, which directly undercuts the Obsidian-readability selling point of the new positioning. commit_sha already answers 'which code state did this memory correspond to'; recompute diffs from git when needed.",
         "REVISIT_batching_rationale": "This entry originally argued for batching all three field groups into one schema change because migrations were expensive. p1-0 made migrations cheap (bump _SCHEMA_VERSION, rebuild() handles the rest), and every bump lands inside unreleased v0.3 so users only ever see one rescan. Prefer adding each field group WITH the feature that uses it, rather than landing unused columns ahead of their logic.",
-        "naming_note": "For p1-3, do NOT name the review field `status` with a `permanent` value -- `lifespan` already uses `permanent` and the two would be confused. Use `review: draft|approved`, defaulting to `approved` so pre-existing records are not all hidden from search."
+        "naming_note": "For p1-3, do NOT name the review field `status` with a `permanent` value -- `lifespan` already uses `permanent` and the two would be confused. Use `review: draft|approved`, defaulting to `approved` so pre-existing records are not all hidden from search.",
+        "outcome": "Only the git provenance group landed, per the revised rationale. Staleness and review-state fields will come with p1-2 / p1-3."
       },
       "acceptance_criteria": [
         "One Record change covering all three groups, not three separate migrations"
-      ]
+      ],
+      "completed_at": "2026-07-31"
     },
     {
       "id": "p1-1-git-aware-metadata",
       "priority": "P1",
-      "status": "pending",
+      "status": "done",
       "blocked_by": "p1-05-unified-schema-pass",
       "title": "Git-aware metadata -- the strongest differentiator",
       "description": "memmy's memory is one global personal SQLite. mneva's memory can follow the repo and branch. This is the structural advantage; build it first.",
       "context": {
         "behavior": "capture records git provenance automatically; search/replay default to filtering by current repo + branch",
         "files": "new src/mneva/gitctx.py (extraction, must degrade gracefully outside a git repo), src/mneva/indexer.py (columns + search WHERE), src/mneva/cli.py, src/mneva/mcp_server.py, src/mneva/api.py (builds an Indexer in four places, api.py:52-90)",
-        "key_constraints": "Filter in the SQL WHERE clause, never after retrieval -- post-filtering breaks top_k."
+        "key_constraints": "Filter in the SQL WHERE clause, never after retrieval -- post-filtering breaks top_k.",
+        "outcome": "Fields: repo (normalized remote URL, the filter key) + repo_path + branch + commit_sha. New src/mneva/gitctx.py. Filter is `repo = ? OR repo IS NULL` so pre-v0.3 and non-repo records stay visible. CLI --repo/--all-repos/--no-git; MCP tools take repo_path; status reports provenance coverage. 206 passed (+27). Three guards verified discriminating by reintroducing each bug.",
+        "also_fixed": "store.py and vault.py kept separate hardcoded frontmatter field lists -- the vault round trip (capture -> Obsidian -> sync-vault) would have ERASED provenance from the canonical record. Both now share store.record_frontmatter / record_from_frontmatter."
       },
       "acceptance_criteria": [
         "Capturing inside a git repo records repo/branch/commit/dirty state",
         "Capturing outside a git repo still works",
         "search/replay scope to the current repo+branch by default and can be overridden"
-      ]
+      ],
+      "completed_at": "2026-07-31"
     },
     {
       "id": "p1-2-stale-supersede",
@@ -117,7 +122,8 @@
       "description": "The new positioning leads with Obsidian, and _mirror_to_vault_if_configured (cli.py:111) mirrors records into the vault. New frontmatter fields flow there automatically; design how they look deliberately rather than discovering it later.",
       "context": {
         "files": "src/mneva/vault.py (131 lines)",
-        "why": "Git provenance visible inside Obsidian -- which repo, which branch, which commit, whether it is stale -- is the most direct demonstration of Markdown-as-truth."
+        "why": "Git provenance visible inside Obsidian -- which repo, which branch, which commit, whether it is stale -- is the most direct demonstration of Markdown-as-truth.",
+        "note_2026_07_31": "Field *preservation* through the vault round trip is already done in p1-1. What remains here is presentation quality only -- how the frontmatter reads in Obsidian."
       },
       "acceptance_criteria": [
         "Capture a memory with git provenance, open the vault in real Obsidian, frontmatter is readable and looks intentional"

@@ -20,9 +20,10 @@ from __future__ import annotations
 
 import hashlib
 import json
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from pathlib import Path
 
+from mneva import gitctx
 from mneva.indexer import Indexer
 from mneva.providers import Provider, ProviderError
 from mneva.store import Record, make_record_id, write_record
@@ -235,6 +236,10 @@ def distill(
     if not text.strip():
         raise ValueError(f"distill: transcript {source} is empty")
 
+    # distill runs in the user's project directory, so the records it produces
+    # deserve the same provenance a direct capture would get.
+    git = gitctx.detect()
+
     chunks = chunk_text(text)
     seen_hashes: set[str] = set()
     written: list[Record] = []
@@ -246,7 +251,19 @@ def distill(
         candidates = _parse_response(raw, scope=scope, source=source.name)[
             :max_records_per_chunk
         ]
-        for rec in candidates:
+        for candidate in candidates:
+            # Spelled out rather than **-expanded so the field types stay checked.
+            rec = (
+                candidate
+                if git is None
+                else replace(
+                    candidate,
+                    repo=git.repo,
+                    repo_path=git.repo_path,
+                    branch=git.branch,
+                    commit_sha=git.commit_sha,
+                )
+            )
             content_hash = _content_hash(rec.body)
             if content_hash in seen_hashes:
                 skipped_dups += 1

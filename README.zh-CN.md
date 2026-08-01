@@ -230,6 +230,30 @@ uvx mneva reindex   # 从 Markdown 重建搜索索引
 
 索引是可丢弃的 — 把 `~/.mneva/mneva.sqlite` 删掉再跑 `reindex`，什么都不会丢。
 
+### 跟着 repo 走的记忆
+
+在 git 仓库里捕获时，记忆会把来源一起记下来 —— 仓库、分支、commit，就写在笔记的 frontmatter 里：
+
+```yaml
+scope: my-project
+lifespan: permanent
+repo: github.com/mneva-ai/mneva
+branch: main
+commit_sha: cd6d7af1c3a2982810799d2f023a028fc361c6dc
+```
+
+`mneva search` 默认只搜你当前所在的这个仓库：
+
+```sh
+uvx mneva search "SQLite"                 # 当前仓库（外加不属于任何仓库的记忆）
+uvx mneva search "SQLite" --all-repos     # 全部
+uvx mneva capture --scope p --no-git "…"  # 完全不记录来源
+```
+
+`repo` 取自 remote URL 并做了归一化，所以把项目 clone 到别的机器或别的目录后仍然匹配得上。**不属于任何仓库的记忆永远不会被藏起来**，被过滤掉的只有明确属于**别的**仓库的记忆。
+
+这些都不是必需的：没有 git、不是仓库、没有 remote，都只是退化成「没有来源信息」，捕获照常工作。
+
 ### 在浏览器网页版 AI 里使用
 
 MCP 这条路覆盖的是桌面 AI 客户端。纯网页版的 AI 聊天界面（claude.ai 网页版、chatgpt.com、gemini.google.com、chat.deepseek.com）没法用 MCP，因为浏览器不允许网页启动本地进程。在 v0.3 的浏览器扩展上线之前，变通办法如下：
