@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.3.1] - 2026-10-16
+
 ### Added
 - **Agents read your profile without being asked.** The MCP server now sends
   instructions at initialize: once per conversation, before the first
