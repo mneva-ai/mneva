@@ -165,6 +165,24 @@
       ]
     },
     {
+      "id": "p1-browser-extension",
+      "priority": "P1",
+      "status": "pending",
+      "title": "Browser extension: new web chats start with the profile",
+      "description": "Founder approved 2026-10-16: paste delivery to ChatGPT/Claude/Doubao/Gemini web is too manual. MV3 extension inserts the current brief into the empty composer of a new chat, reading it through Chrome native messaging registered by `mneva setup`. Alt+Shift+M inserts on any other site. Full design: .claude/specs/p1-browser-extension.spec.md.",
+      "context": {
+        "files": "src/mneva/native_host.py (new), src/mneva/setup.py, src/mneva/extension/ (new, shipped in the wheel)",
+        "existing_pattern": "brief.render_brief for the text; setup.server_argv for install detection",
+        "key_constraints": "Native host: binary stdio (msvcrt O_BINARY on Windows), import only mneva.brief, stdout carries frames only, exit on EOF. allowed_origins holds the dev ID and later the store ID. Selectors verified 2026-10-16 except Doubao (region-banned from the founder's network)."
+      },
+      "acceptance_criteria": [
+        "Native host protocol tests through a real subprocess pipe, including malformed and oversized frames",
+        "setup registers Chrome, Edge and Chromium hosts idempotently; --dry-run writes nothing",
+        "Content script inserts once on a new chat and never into a composer with text, checked on the three live sites before packaging",
+        "One dogfood week on the founder's Chrome logged in the re-explain log"
+      ]
+    },
+    {
       "id": "p1-setup",
       "priority": "P1",
       "status": "done",

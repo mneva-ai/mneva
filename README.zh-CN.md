@@ -331,7 +331,7 @@ mneva 处于 **alpha 阶段**。v0.2 交付了 MCP 层以及 uvx 优先的安装
 - [X] **v0.1.x** — 漏洞修复、Obsidian 仓库读写集成、`mneva distill`、CI 矩阵前向防御
 - [X] **v0.2** — MCP 服务器（`mneva-mcp` 命令 + 6 个 FastMCP 工具）、`uvx` 优先安装、跨进程安全的 WAL 并发、可选的 `mneva diagnose --share` 可观测性
 - [X] **v0.3**：跟着 git 走的记忆（仓库、分支、提交）、给不支持 MCP 的工具用的 `mneva brief`、一条命令接入 Claude Code 和 Codex 的 `mneva setup`
-- [ ] **以后**：浏览器扩展（Chrome / Firefox / Edge，Manifest V3），让那些无法启动 MCP 子进程的网页聊天界面（chatgpt.com、claude.ai 网页版、gemini.google.com、DeepSeek）也能用上 mneva。启动条件：≥10 个真实用户 + ≥3 个通过 `mneva diagnose --share` 提出的明确请求。
+- [ ] **下一步**：浏览器扩展（Chrome 和 Edge，Manifest V3）。在 chatgpt.com、claude.ai、gemini.google.com、doubao.com 开新对话时自动带上你最新的档案，通过 `mneva setup` 注册的本地通道从你自己的电脑读取。不用开服务，不用密钥，不上传任何东西。
 - [ ] **v1+** — 面向非技术用户的原生图形化安装程序；可选的托管版 `mneva.app` SaaS，用于手机/多设备同步。
 
 ---
