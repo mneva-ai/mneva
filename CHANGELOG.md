@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.3.3] - 2026-10-16
+
 ### Changed
 - **Stale-copy reminders need no tool name.** `mneva brief --copy` now
   records every copy by itself, one entry per budget, so a 1500-char copy for
