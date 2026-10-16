@@ -7,7 +7,7 @@ from pathlib import Path
 import click
 
 from mneva import __version__, gitctx
-from mneva.brief import brief_command
+from mneva.brief import brief_command, stale_notice
 from mneva.config import ConfigError, load_config, save_config
 from mneva.indexer import Indexer
 from mneva.paths import ensure_home
@@ -233,6 +233,7 @@ def status() -> None:
     click.echo(f"with repo provenance: {s['with_repo']} / {s['count']}")
     git = gitctx.detect()
     click.echo(f"current repo: {git.repo if git else '(not a git repo)'}")
+    click.echo(stale_notice(home) or "profile copies: up to date")
 
 
 @app.command()
