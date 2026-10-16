@@ -3,6 +3,15 @@
 ## [Unreleased]
 
 ### Added
+- **`mneva brief`: a paste-ready profile for tools without MCP.** Records with
+  scope `profile` and lifespan `permanent` form your personal profile; `brief`
+  packs them into a character budget (`--max-chars`, default 4000; use 1500
+  for ChatGPT custom instructions) for Doubao, Gemini, a video tool's prompt
+  box, or anything else you paste into. Whole records only: a record that
+  does not fit is skipped and named, never cut mid-sentence. The profile
+  ignores `repo`, so it travels to every tool. `--copy` puts it on the
+  clipboard; on Windows this writes through the Win32 API, because `clip.exe`
+  either keeps a BOM as a visible character or misreads short Chinese text.
 - **Git-aware memories.** Capturing inside a repository now records where the
   memory came from: `repo`, `repo_path`, `branch`, and `commit_sha` land in the
   note's YAML frontmatter, so a memory carries its project, branch, and the
@@ -72,6 +81,10 @@
   files are the source of truth; the index is disposable.
 
 ### Fixed
+- **`mneva capture -` crashed on Chinese input on Windows.** stdin was decoded
+  in the console code page, turning a UTF-8 file into lone surrogates. stdin
+  is now read as UTF-8 (a BOM is accepted); input that is not UTF-8 is refused
+  with a clear message instead of being stored as garbage.
 - **New index columns were silently dropped on existing databases.**
   `Indexer._init_schema()` used `CREATE TABLE IF NOT EXISTS` with no version
   check, so any schema change was a no-op against a database that already

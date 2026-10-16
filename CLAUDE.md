@@ -34,13 +34,15 @@ Read these three, in order, then start. **Do not pre-explore the codebase.**
 
 **Decided 2026-07-31.** History: 5/25 chose a non-technical beachhead → **7/31 reversed** after the `MemTensor/memmy-agent` competitive analysis. Full reasoning in `.claude/claude-progress.txt`. Do not re-propose the non-technical line without reading that entry first.
 
+**Amended 2026-10-15 (extends 7/31, does not reverse it).** Same Markdown-owned memory, wider reach: one personal profile carried across every AI tool a heavy AI user runs. Claude Code / Codex are the hub, mneva's MCP supplies the profile, video and image tools are reached through their own MCPs (mneva integrates none of them). Target widens from developers to anyone who works through CLI agents daily, coder or not. The founder is the target user, so validation is dogfooding (`p0-dogfood-profile`), not outreach. Consumer-app work (desktop app, landing page, Reddit outreach) stays out. 2026-10-16: goal is all memory switchable to any mainstream tool; Claude web and ChatGPT need a public HTTPS MCP URL, so the plan is a user-run tunnel plus token (`p1-remote-connector`). Say "no mneva cloud, no account", not "zero cloud". Research, memmy teardown and plan: `docs/market-research-2026-10-15/` (local notes, deliberately kept out of the public repo; summary in the progress log).
+
 **Positioning:**
 
 > Your AI memory is your own Markdown files. It follows the repo, goes into git, opens in Obsidian, gets reviewed in a PR. No account, no cloud.
 
-- **Target user**: developers who use more than one AI coding tool, Obsidian users, privacy-sensitive developers. Not non-technical users.
+- **Target user**: people who work through more than one AI tool every day via CLI agents (Claude Code, Codex), developers or not; Obsidian users; privacy-sensitive users. Not consumer-app users who never touch an agent.
 - **The five differentiators** (everything we build should sharpen at least one): Markdown is the source of truth; zero account / zero cloud; Obsidian two-way sync; deliberately scoped to the memory layer only; usable as a Python library.
-- **Main line**: the engineer roadmap in `docs/user-research-hn-reddit-2026-05-25.md` §7–8 — git-aware metadata, stale/supersede, draft→review→promote, token-budgeted replay.
+- **Main line** (order since 2026-10-15): dogfood profile, draft/review/promote, history import from Claude Code and Codex, profile records, task-sized brief (`get_profile(task)` / `mneva brief`), managed block in CLAUDE.md/AGENTS.md. Stale/supersede is now P2. Order lives in `.claude/feature_list.json`.
 - **In user-facing copy, lead with**: Markdown, git-native, no account, reviewable, Obsidian, local. These were on the old avoid-list; that list is void.
 
 **Why the reversal** (so it is not re-litigated): `memmy-agent` (created 2026-07-16, 355 stars in 15 days, MemTensor team) already shipped a better version of the non-technical plan — desktop app, free trial credits, one-click install, automatic history import from 6 agents, a four-layer memory engine. mneva's feature surface is a strict subset except Obsidian. All five differentiators above matter **only** to engineers, which is exactly who the 5/25 decision demoted. The reversal is not "non-technical demand was falsified" — that question still has zero evidence — it is that the competitive landscape made that line unwinnable while making this one defensible. memmy structurally cannot copy Markdown-as-truth: its four-layer engine requires a structured DB.
@@ -86,6 +88,7 @@ Bump `src/mneva/__init__.py`, update `CHANGELOG.md`, PR into `main`. CI (`.githu
 6. **Re-proposing the non-technical beachhead** (desktop app, landing page, Reddit outreach) as if 5/25 were still in force. It was reversed on 7/31 — see `## Current Strategy` and the progress log.
 7. **Adding a column to `Indexer` and assuming it lands.** `_init_schema()` uses `CREATE TABLE IF NOT EXISTS`, so on an existing database a new column is a **silent no-op**. There is no `ALTER TABLE` and, as of this writing, no rebuild path. Any new indexed field needs a schema version + `rebuild()` from `store.iter_records()`.
 8. **Post-filtering search results.** `Indexer.search()` filters in SQL *before* BM25 ranking. Filtering after retrieval breaks `top_k` — you ask for k and get fewer.
+9. **Trusting a local green run on stale dependencies.** CI installs the newest versions `pyproject.toml` allows; local site-packages lag. On 2026-10-16 click 8.5 broke mypy in CI while local click 8.3.3 passed. Before pushing, run mypy + the CI pytest command in a fresh venv outside the repo (`python -m venv <scratch>/venv && <scratch>/venv/Scripts/pip install -e ".[dev]"`). Also: `gh pr checks --watch` exits 0 at once if no checks are registered yet, so wait for them to appear first.
 
 ## Token Efficiency
 
