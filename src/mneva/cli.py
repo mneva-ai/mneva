@@ -415,7 +415,9 @@ def synthesize(scope: str, backend: str | None) -> None:
         click.echo("\n--- paste shortlist (one item per line, end with '.' on its own line) ---")
         lines: list[str] = []
         while True:
-            line = click.get_text_stream("stdin").readline()
+            # click.get_text_stream is deprecated in click 8.5 (removed in 9.0)
+            # and mypy types the deprecated export as `object`.
+            line = sys.stdin.readline()
             if not line or line.strip() == ".":
                 break
             lines.append(line.rstrip("\n"))
