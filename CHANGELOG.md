@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.3.2] - 2026-10-16
+
 ### Added
 - **Reminders when a pasted profile goes stale.** `mneva brief --for <tool>`
   (e.g. `--for chatgpt`) records which brief that tool received and with
