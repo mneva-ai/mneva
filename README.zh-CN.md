@@ -153,7 +153,15 @@
 
 ### 接入你的 AI 助手（主推路径）
 
-挑一个你最常用的 AI 客户端，把下面的片段粘进它的 MCP 配置里，然后重启客户端。mneva-mcp 第一次启动时会自动创建 `~/.mneva/` — 不需要先跑 `mneva init`。
+**Claude Code 或 Codex：一条命令。**
+
+```bash
+uvx mneva setup
+```
+
+它会把 mneva 接进 PATH 里找到的每个智能体命令行（`claude`、`codex`），在 `~/.mneva/profile-template.md` 写一份个人档案模板，并告诉你下一步做什么。可以重复运行，加 `--dry-run` 只显示要执行的命令，不真正执行。
+
+其他客户端：挑一个你最常用的，把下面的片段粘进它的 MCP 配置里，然后重启客户端。mneva-mcp 第一次启动时会自动创建 `~/.mneva/` — 不需要先跑 `mneva init`。
 
 > **第一次启动慢，之后秒开。** 第一次运行会下载 mneva 和它的依赖（几秒钟）并缓存起来。如果你的客户端在第一次尝试时提示服务器慢或失败，重启一次客户端即可——之后会直接从缓存秒连。想预热的话，可以先在终端里跑一次 `uvx --from mneva mneva-mcp`，看到它启动后按 Ctrl-C 停掉。
 
@@ -256,7 +264,7 @@ uvx mneva capture --scope p --no-git "…"  # 完全不记录来源
 
 ### 在浏览器网页版 AI 里使用
 
-MCP 这条路覆盖的是桌面 AI 客户端。纯网页版的 AI 聊天界面（claude.ai 网页版、chatgpt.com、gemini.google.com、chat.deepseek.com）没法用 MCP，因为浏览器不允许网页启动本地进程。在 v0.3 的浏览器扩展上线之前，变通办法如下：
+MCP 这条路覆盖的是桌面 AI 客户端。纯网页版的 AI 聊天界面（claude.ai 网页版、chatgpt.com、gemini.google.com、chat.deepseek.com）没法用 MCP，因为浏览器不允许网页启动本地进程。变通办法如下：
 
 | 你的 AI                                | v0.2 原生支持                    | 变通办法                                                |
 | -------------------------------------- | -------------------------------- | ------------------------------------------------------- |
@@ -272,6 +280,8 @@ MCP 这条路覆盖的是桌面 AI 客户端。纯网页版的 AI 聊天界面�
 1. 在聊天里出现一个值得记的决定后，跑 `uvx mneva capture --scope myproj "..."`。
 2. 在向新的 AI 提后续问题之前，跑 `uvx mneva search "话题"`。
 3. 把终端里匹配到的记录复制进新的聊天，作为上下文。
+
+**一次粘贴带上你的档案：** 把你是谁、怎么工作存成 `--scope profile --lifespan permanent` 的记录，然后运行 `uvx mneva brief --copy`，粘贴进任何聊天。ChatGPT 的自定义指令框加上 `--max-chars 1500`。
 
 ### 其他安装方式
 
@@ -320,7 +330,8 @@ mneva 处于 **alpha 阶段**。v0.2 交付了 MCP 层以及 uvx 优先的安装
 - [X] **v0.1.0** — CLI + 存储 + BM25/sqlite-vec 索引 + 回放模板 + HTTP API + 四服务商 BYOK
 - [X] **v0.1.x** — 漏洞修复、Obsidian 仓库读写集成、`mneva distill`、CI 矩阵前向防御
 - [X] **v0.2** — MCP 服务器（`mneva-mcp` 命令 + 6 个 FastMCP 工具）、`uvx` 优先安装、跨进程安全的 WAL 并发、可选的 `mneva diagnose --share` 可观测性
-- [ ] **v0.3** — 浏览器扩展（Chrome / Firefox / Edge，Manifest V3），让那些无法启动 MCP 子进程的网页聊天界面（chatgpt.com、claude.ai 网页版、gemini.google.com、DeepSeek）也能用上 mneva。启动条件：≥10 个真实用户 + ≥3 个通过 `mneva diagnose --share` 提出的明确请求。
+- [X] **v0.3**：跟着 git 走的记忆（仓库、分支、提交）、给不支持 MCP 的工具用的 `mneva brief`、一条命令接入 Claude Code 和 Codex 的 `mneva setup`
+- [ ] **以后**：浏览器扩展（Chrome / Firefox / Edge，Manifest V3），让那些无法启动 MCP 子进程的网页聊天界面（chatgpt.com、claude.ai 网页版、gemini.google.com、DeepSeek）也能用上 mneva。启动条件：≥10 个真实用户 + ≥3 个通过 `mneva diagnose --share` 提出的明确请求。
 - [ ] **v1+** — 面向非技术用户的原生图形化安装程序；可选的托管版 `mneva.app` SaaS，用于手机/多设备同步。
 
 ---

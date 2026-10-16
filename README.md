@@ -294,7 +294,15 @@ Records are plain Markdown with YAML frontmatter under `~/.mneva/store/`. You ca
 
 ### Wire mneva into your AI agent (the headline path)
 
-Pick the AI client you use most. Paste the snippet into its MCP config and restart the client. The first time mneva-mcp launches it creates `~/.mneva/` automatically — no `mneva init` required.
+**Claude Code or Codex: one command.**
+
+```bash
+uvx mneva setup
+```
+
+It registers mneva with every agent CLI it finds on your PATH (`claude`, `codex`), writes a profile template to `~/.mneva/profile-template.md`, and prints the next steps. It is safe to re-run, and `--dry-run` shows the commands without running them.
+
+For any other client, pick the one you use most. Paste the snippet into its MCP config and restart the client. The first time mneva-mcp launches it creates `~/.mneva/` automatically — no `mneva init` required.
 
 > **First launch is slow, then instant.** The first run downloads mneva and its dependencies (a few seconds) and caches them. If your client flags the server as slow or failed on the very first try, restart the client once — it connects from cache immediately. To pre-warm, run `uvx --from mneva mneva-mcp` once in a terminal and press Ctrl-C after it starts.
 
@@ -404,7 +412,7 @@ Nothing here is required: no git, no repo, no remote. Each one just degrades to
 
 ### Using mneva from a browser chat UI
 
-The MCP path covers desktop AI clients. Browser-only AI chat UIs (claude.ai web, chatgpt.com, gemini.google.com, chat.deepseek.com) cannot speak MCP because browsers do not allow web pages to spawn local processes. Until v0.3 ships a browser extension, the workaround is:
+The MCP path covers desktop AI clients. Browser-only AI chat UIs (claude.ai web, chatgpt.com, gemini.google.com, chat.deepseek.com) cannot speak MCP because browsers do not allow web pages to spawn local processes. The workaround is:
 
 | Your AI                                | v0.2 native support              | Workaround                                              |
 | -------------------------------------- | -------------------------------- | ------------------------------------------------------- |
@@ -420,6 +428,8 @@ The MCP path covers desktop AI clients. Browser-only AI chat UIs (claude.ai web,
 1. `uvx mneva capture --scope myproj "..."` after an interesting decision in chat.
 2. `uvx mneva search "topic"` before asking a new AI a follow-up.
 3. Copy matching records from terminal output into the new chat as context.
+
+**Your profile in one paste:** save who you are and how you work as records with `--scope profile --lifespan permanent`, then run `uvx mneva brief --copy` and paste into any chat. For ChatGPT's custom instructions box, add `--max-chars 1500`.
 
 ### Alternative installs
 
@@ -468,7 +478,8 @@ mneva is in **alpha**. v0.2 ships the MCP layer plus uvx-first install. Mileston
 - [X] **v0.1.0** — CLI + store + BM25/sqlite-vec index + replay templates + HTTP API + four-provider BYOK
 - [X] **v0.1.x** — Gap fixes, Obsidian vault read-write integration, `mneva distill`, CI matrix forward-defense
 - [X] **v0.2** — MCP server (`mneva-mcp` console script + 6 FastMCP tools), `uvx`-first install, WAL concurrency for cross-process safety, opt-in `mneva diagnose --share` observability
-- [ ] **v0.3** — Browser extension (Chrome / Firefox / Edge, Manifest V3) so chat UIs that cannot spawn MCP subprocesses (chatgpt.com, claude.ai web, gemini.google.com, DeepSeek) still see mneva. Entry condition: ≥10 real users + ≥3 explicit asks via `mneva diagnose --share`.
+- [X] **v0.3**: git-aware memories (repo, branch, commit), `mneva brief` for tools without MCP, `mneva setup` to connect Claude Code and Codex in one command
+- [ ] **Later**: Browser extension (Chrome / Firefox / Edge, Manifest V3) so chat UIs that cannot spawn MCP subprocesses (chatgpt.com, claude.ai web, gemini.google.com, DeepSeek) still see mneva. Entry condition: ≥10 real users + ≥3 explicit asks via `mneva diagnose --share`.
 - [ ] **v1+** — Native GUI installer for non-technical users; optional hosted `mneva.app` SaaS for phone / multi-device sync.
 
 ---

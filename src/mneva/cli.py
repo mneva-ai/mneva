@@ -12,6 +12,7 @@ from mneva.config import ConfigError, load_config, save_config
 from mneva.indexer import Indexer
 from mneva.paths import ensure_home
 from mneva.providers import ProviderError, get_provider
+from mneva.setup import setup_command
 from mneva.store import Record, forget_record, make_record_id, write_record
 from mneva.synth import digest_to_bootstrap, synthesize_2stage
 
@@ -361,6 +362,7 @@ def replay(tool: str, scope: str | None) -> None:
 
 
 app.add_command(brief_command)
+app.add_command(setup_command)
 
 
 def _port_in_use(port: int) -> bool:

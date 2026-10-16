@@ -165,6 +165,25 @@
       ]
     },
     {
+      "id": "p1-setup",
+      "priority": "P1",
+      "status": "in_progress",
+      "title": "`mneva setup`: one command after pip install",
+      "description": "Founder chose path A on 2026-10-16: make mneva usable right after install for people who already use Claude Code / Codex. setup initializes ~/.mneva, registers the MCP server with every installed agent CLI, writes a profile template, and prints next steps. Ships in v0.3.0.",
+      "context": {
+        "files": "src/mneva/setup.py (new), one add_command line in src/mneva/cli.py (already over 500 lines, must not grow)",
+        "existing_pattern": "src/mneva/upgrade.py: pure planning function + thin command; detect_install_method() picks the server argv",
+        "key_constraints": "Find CLIs with shutil.which and pass the full path (Windows CreateProcess does not resolve .cmd). Idempotency by exit code of `claude mcp get mneva` / `codex mcp get mneva`, never by parsing output. uvx installs register `uvx --from mneva mneva-mcp` (Common Mistake #2). Never write into ~/.claude/CLAUDE.md here: that is p1-emit-agent-instructions."
+      },
+      "acceptance_criteria": [
+        "Registers mneva with Claude Code (user scope) and Codex when their CLIs are on PATH; skips missing ones with a message",
+        "Running setup twice changes nothing the second time",
+        "--dry-run prints the commands and runs none",
+        "Writes ~/.mneva/profile-template.md only if absent",
+        "A failing client registration is reported and does not stop the other client"
+      ]
+    },
+    {
       "id": "p1-emit-agent-instructions",
       "priority": "P1",
       "status": "pending",
