@@ -13,7 +13,7 @@ from mneva.brief import (
     copy_to_clipboard,
     record_copy,
     render_brief,
-    stale_targets,
+    stale_copies,
 )
 from mneva.store import Record, write_record
 
@@ -75,46 +75,58 @@ def test_brief_scope_override(tmp_mneva_home: Path) -> None:
     assert "BRAND-NOTES" in result.text
 
 
-def _copy_for(home: Path, target: str, max_chars: int) -> None:
+def _copy(home: Path, max_chars: int) -> None:
     text = render_brief(home=home, max_chars=max_chars).text
-    record_copy(target, text=text, max_chars=max_chars, scope=PROFILE_SCOPE, home=home)
+    record_copy(text=text, max_chars=max_chars, scope=PROFILE_SCOPE, home=home)
 
 
 def test_copied_brief_goes_stale_when_the_profile_changes(tmp_mneva_home: Path) -> None:
     _write(tmp_mneva_home, "e1", "first")
-    _copy_for(tmp_mneva_home, "chatgpt", 4000)
-    assert stale_targets(home=tmp_mneva_home) == []
+    _copy(tmp_mneva_home, 4000)
+    assert stale_copies(home=tmp_mneva_home) == []
 
     _write(tmp_mneva_home, "e2", "second")
 
-    assert stale_targets(home=tmp_mneva_home) == ["chatgpt"]
+    assert stale_copies(home=tmp_mneva_home) == [(PROFILE_SCOPE, 4000)]
+
+
+def test_each_budget_is_tracked_without_naming_the_tool(tmp_mneva_home: Path) -> None:
+    # A 1500-char copy (ChatGPT) and a full copy (anything else) are two
+    # different pastes; both must be remembered with no extra input.
+    _write(tmp_mneva_home, "h1", "first")
+    _copy(tmp_mneva_home, 1500)
+    _copy(tmp_mneva_home, 4000)
+
+    _write(tmp_mneva_home, "h2", "second")
+
+    assert stale_copies(home=tmp_mneva_home) == [(PROFILE_SCOPE, 1500), (PROFILE_SCOPE, 4000)]
 
 
 def test_change_that_never_fit_the_budget_is_not_stale(tmp_mneva_home: Path) -> None:
-    # The pasted text is what matters: a record skipped for that tool's
-    # budget did not reach it, so changing it changes nothing there.
+    # The pasted text is what matters: a record skipped for that budget
+    # never reached the tool, so changing it changes nothing there.
     _write(tmp_mneva_home, "f1", "short")
-    _copy_for(tmp_mneva_home, "chatgpt", 200)
+    _copy(tmp_mneva_home, 200)
 
     _write(tmp_mneva_home, "f2", "x" * 500)
 
-    assert stale_targets(home=tmp_mneva_home) == []
+    assert stale_copies(home=tmp_mneva_home) == []
 
 
 def test_change_in_another_scope_is_not_stale(tmp_mneva_home: Path) -> None:
     _write(tmp_mneva_home, "g1", "me")
-    _copy_for(tmp_mneva_home, "doubao", 4000)
+    _copy(tmp_mneva_home, 4000)
 
     _write(tmp_mneva_home, "g2", "work note", scope="work")
 
-    assert stale_targets(home=tmp_mneva_home) == []
+    assert stale_copies(home=tmp_mneva_home) == []
 
 
 def test_unreadable_copy_log_counts_as_no_copies(tmp_mneva_home: Path) -> None:
     # A reminder must never break a capture.
     (tmp_mneva_home / brief.COPIES_FILE).write_text("{not json", encoding="utf-8")
 
-    assert stale_targets(home=tmp_mneva_home) == []
+    assert stale_copies(home=tmp_mneva_home) == []
 
 
 def test_copy_on_windows_uses_win32_api_not_clip(monkeypatch: pytest.MonkeyPatch) -> None:

@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+### Changed
+- **Stale-copy reminders need no tool name.** `mneva brief --copy` now
+  records every copy by itself, one entry per budget, so a 1500-char copy for
+  ChatGPT and a full copy elsewhere are both tracked with no extra input. The
+  `--for` option added in 0.3.2 is removed: asking users to name each tool was
+  friction the reminder existed to avoid. The reminder now says the profile
+  changed since the last copy and prints the exact command(s) to copy again.
+  Printing without `--copy` is not tracked.
+
 ## [0.3.2] - 2026-10-16
 
 ### Added

@@ -281,7 +281,7 @@ MCP 这条路覆盖的是桌面 AI 客户端。纯网页版的 AI 聊天界面�
 2. 在向新的 AI 提后续问题之前，跑 `uvx mneva search "话题"`。
 3. 把终端里匹配到的记录复制进新的聊天，作为上下文。
 
-**一次粘贴带上你的档案：** 把你是谁、怎么工作存成 `--scope profile --lifespan permanent` 的记录，然后运行 `uvx mneva brief --copy --for <工具名>`，粘贴进那个工具的"关于你"设置（ChatGPT 的自定义指令第一次加上 `--max-chars 1500`，之后会自动记住）。档案改了以后，mneva 会告诉你哪些工具里还是旧版本。
+**一次粘贴带上你的档案：** 把你是谁、怎么工作存成 `--scope profile --lifespan permanent` 的记录，然后运行 `uvx mneva brief --copy`，粘贴进工具的"关于你"设置（ChatGPT 的自定义指令加上 `--max-chars 1500`）。mneva 会记住每次复制，档案改了以后会提醒你重新粘贴。
 
 ### 其他安装方式
 

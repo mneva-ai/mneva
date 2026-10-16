@@ -149,9 +149,9 @@ Next steps:
      One record per section lets a short brief drop a whole section
      instead of cutting one in half.
   3. Check it: mneva brief
-     For tools without MCP: mneva brief --copy --for chatgpt (or doubao, gemini),
-     then paste into that tool's "about you" setting. mneva reminds you when
-     a pasted copy goes out of date.
+     For tools without MCP: mneva brief --copy, then paste into that tool's
+     "about you" setting (ChatGPT: add --max-chars 1500). mneva reminds you
+     when your profile changes after a copy.
   4. Restart Claude Code or Codex. mneva tells them to read your profile
      at the start of each conversation; if one skips it, say "read my mneva profile".
 """

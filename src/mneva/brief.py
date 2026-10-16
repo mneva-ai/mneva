@@ -11,7 +11,6 @@ from __future__ import annotations
 import hashlib
 import json
 import os
-import re
 import shutil
 import subprocess
 import sys
@@ -35,10 +34,10 @@ HEADER = "About me (from my mneva profile). Use this background when relevant; n
 _SEPARATOR = "\n\n"
 _CLIPBOARD_TIMEOUT_SECONDS = 10
 
-# Which brief each paste-only tool last received. Bookkeeping, not memory:
-# deleting it only loses the reminders, never a record.
+# What each `brief --copy` last put on the clipboard, one entry per scope and
+# budget, so no tool name is needed. Bookkeeping, not memory: deleting it
+# only loses the reminders, never a record.
 COPIES_FILE = "brief-copies.json"
-_TARGET_PATTERN = re.compile(r"^[a-z0-9][a-z0-9-]{0,31}$")
 
 
 @dataclass(frozen=True)
@@ -100,13 +99,11 @@ def _load_copies(home: Path) -> dict[str, dict[str, object]]:
     return data if isinstance(data, dict) else {}
 
 
-def record_copy(
-    target: str, *, text: str, max_chars: int, scope: str, home: Path | None = None
-) -> None:
-    """Remember that *target* now holds *text*, rendered with these settings."""
+def record_copy(*, text: str, max_chars: int, scope: str, home: Path | None = None) -> None:
+    """Remember that *text*, rendered with these settings, was copied out."""
     resolved_home = home if home is not None else ensure_home()
     copies = _load_copies(resolved_home)
-    copies[target] = {
+    copies[f"{scope}:{max_chars}"] = {
         "fingerprint": _fingerprint(text),
         "max_chars": max_chars,
         "scope": scope,
@@ -117,15 +114,15 @@ def record_copy(
     )
 
 
-def stale_targets(home: Path | None = None) -> list[str]:
-    """Tools whose pasted brief no longer matches what they would get now.
+def stale_copies(home: Path | None = None) -> list[tuple[str, int]]:
+    """(scope, budget) of every copy that no longer matches the profile.
 
     Compares the re-rendered text, not the records, so a change to a record
-    that never fit that tool's budget does not count.
+    that never fit that budget does not count.
     """
     resolved_home = home if home is not None else mneva_home()
-    stale = []
-    for target, entry in sorted(_load_copies(resolved_home).items()):
+    stale = set()
+    for entry in _load_copies(resolved_home).values():
         try:
             max_chars = int(str(entry["max_chars"]))
             scope = str(entry["scope"])
@@ -134,18 +131,28 @@ def stale_targets(home: Path | None = None) -> list[str]:
             continue
         current = render_brief(max_chars=max_chars, scope=scope, home=resolved_home).text
         if _fingerprint(current) != fingerprint:
-            stale.append(target)
-    return stale
+            stale.add((scope, max_chars))
+    return sorted(stale)
+
+
+def _copy_command(scope: str, max_chars: int) -> str:
+    command = "mneva brief --copy"
+    if max_chars != DEFAULT_MAX_CHARS:
+        command += f" --max-chars {max_chars}"
+    if scope != PROFILE_SCOPE:
+        command += f" --scope {scope}"
+    return command
 
 
 def stale_notice(home: Path | None = None) -> str | None:
-    """One line naming the tools that need a fresh paste, or None."""
-    stale = stale_targets(home)
+    """One line saying a pasted profile is out of date and how to refresh it."""
+    stale = stale_copies(home)
     if not stale:
         return None
+    commands = "; ".join(_copy_command(scope, max_chars) for scope, max_chars in stale)
     return (
-        f"Profile copies out of date in: {', '.join(stale)}. "
-        "Re-copy each with: mneva brief --copy --for <name>"
+        "Your profile changed since you last copied it, so the pasted copy is "
+        f"out of date. Copy and paste it again: {commands}"
     )
 
 
@@ -223,34 +230,21 @@ def _copy_windows(text: str) -> None:
 @click.command("brief")
 @click.option(
     "--max-chars",
-    default=None,
+    default=DEFAULT_MAX_CHARS,
+    show_default=True,
     type=click.IntRange(min=1),
-    help=(
-        f"Character budget [default: {DEFAULT_MAX_CHARS}, or the last budget used "
-        "with --for]. Use 1500 for ChatGPT custom instructions."
-    ),
+    help="Character budget. Use 1500 for ChatGPT custom instructions.",
 )
 @click.option("--scope", default=PROFILE_SCOPE, show_default=True, help="Which records form the brief.")
-@click.option("--copy", "copy_", is_flag=True, help="Copy to the clipboard instead of printing.")
 @click.option(
-    "--for",
-    "target",
-    default=None,
-    help="Name of the tool you paste into (e.g. chatgpt, doubao). mneva then "
-    "reminds you when that tool's copy goes out of date.",
+    "--copy",
+    "copy_",
+    is_flag=True,
+    help="Copy to the clipboard instead of printing. mneva remembers the copy and "
+    "tells you when your profile changes after it.",
 )
-def brief_command(max_chars: int | None, scope: str, copy_: bool, target: str | None) -> None:
+def brief_command(max_chars: int, scope: str, copy_: bool) -> None:
     """Print a paste-ready brief of your profile for tools without MCP."""
-    if target is not None:
-        target = target.strip().lower()
-        if not _TARGET_PATTERN.match(target):
-            raise click.BadParameter(
-                "use letters, digits and dashes, e.g. chatgpt", param_hint="--for"
-            )
-        if max_chars is None:
-            previous = _load_copies(mneva_home()).get(target, {}).get("max_chars")
-            max_chars = previous if isinstance(previous, int) else None
-    max_chars = max_chars or DEFAULT_MAX_CHARS
     result = render_brief(max_chars=max_chars, scope=scope)
     if result.skipped:
         click.echo(
@@ -271,10 +265,9 @@ def brief_command(max_chars: int | None, scope: str, copy_: bool, target: str | 
         except ClipboardError as e:
             raise click.ClickException(f"{e}. Run without --copy to print instead.") from e
         click.echo(f"copied {len(result.text)} chars ({len(result.included)} records)", err=True)
+        record_copy(text=result.text, max_chars=max_chars, scope=scope)
     else:
         click.echo(result.text)
-    if target is not None:
-        record_copy(target, text=result.text, max_chars=max_chars, scope=scope)
     notice = stale_notice()
     if notice:
         click.echo(notice, err=True)
