@@ -167,7 +167,7 @@
     {
       "id": "p1-setup",
       "priority": "P1",
-      "status": "in_progress",
+      "status": "done",
       "title": "`mneva setup`: one command after pip install",
       "description": "Founder chose path A on 2026-10-16: make mneva usable right after install for people who already use Claude Code / Codex. setup initializes ~/.mneva, registers the MCP server with every installed agent CLI, writes a profile template, and prints next steps. Ships in v0.3.0.",
       "context": {
