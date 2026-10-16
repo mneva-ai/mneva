@@ -76,7 +76,7 @@ Used by gstack `/health`. Dead-code / shell / gbrain dimensions do not apply to 
 
 ## Shipping
 
-Bump `src/mneva/__init__.py`, update `CHANGELOG.md`, PR into `main`. CI (`.github/workflows/ci.yml`) plus `install-verify.yml` must be green. Releases are tagged `vX.Y.Z`.
+Bump `src/mneva/__init__.py`, update `CHANGELOG.md`, PR into `main`. CI (`.github/workflows/ci.yml`) plus `install-verify.yml` must be green. After merge, push tag `vX.Y.Z` from `main`: `.github/workflows/release.yml` checks the tag against `__version__`, builds, and publishes to PyPI by trusted publishing (no token). Then `gh release create` with notes. Manual fallback: `uvx --from "twine>=7" twine upload` (twine 6 rejects metadata 2.5).
 
 ## Common Mistakes to Avoid
 
