@@ -88,6 +88,7 @@ Bump `src/mneva/__init__.py`, update `CHANGELOG.md`, PR into `main`. CI (`.githu
 6. **Re-proposing the non-technical beachhead** (desktop app, landing page, Reddit outreach) as if 5/25 were still in force. It was reversed on 7/31 — see `## Current Strategy` and the progress log.
 7. **Adding a column to `Indexer` and assuming it lands.** `_init_schema()` uses `CREATE TABLE IF NOT EXISTS`, so on an existing database a new column is a **silent no-op**. There is no `ALTER TABLE` and, as of this writing, no rebuild path. Any new indexed field needs a schema version + `rebuild()` from `store.iter_records()`.
 8. **Post-filtering search results.** `Indexer.search()` filters in SQL *before* BM25 ranking. Filtering after retrieval breaks `top_k` — you ask for k and get fewer.
+9. **Trusting a local green run on stale dependencies.** CI installs the newest versions `pyproject.toml` allows; local site-packages lag. On 2026-10-16 click 8.5 broke mypy in CI while local click 8.3.3 passed. Before pushing, run mypy + the CI pytest command in a fresh venv outside the repo (`python -m venv <scratch>/venv && <scratch>/venv/Scripts/pip install -e ".[dev]"`). Also: `gh pr checks --watch` exits 0 at once if no checks are registered yet, so wait for them to appear first.
 
 ## Token Efficiency
 
