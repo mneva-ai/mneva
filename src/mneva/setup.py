@@ -150,9 +150,8 @@ Next steps:
      instead of cutting one in half.
   3. Check it: mneva brief
      For tools without MCP (ChatGPT, Gemini, Doubao): mneva brief --copy, then paste.
-  4. Agents only read mneva when asked. To make Claude Code do it without
-     asking, add this line to ~/.claude/CLAUDE.md:
-     "When my background matters, call mneva's replay_context with scope profile."
+  4. Restart Claude Code or Codex. mneva tells them to read your profile
+     at the start of each conversation; if one skips it, say "read my mneva profile".
 """
 
 

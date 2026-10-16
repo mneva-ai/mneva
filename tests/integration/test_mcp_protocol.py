@@ -55,6 +55,19 @@ async def test_initialize_and_list_tools(tmp_path: Path) -> None:
         assert _EXPECTED_TOOLS.issubset(tool_names)
 
 
+async def test_initialize_tells_the_client_to_read_the_profile(tmp_path: Path) -> None:
+    # Clients put server instructions in the model's context, so an agent
+    # reads the profile without the user asking every time.
+    async with (
+        stdio_client(_server_params(tmp_path / ".mneva-itest")) as (read, write),
+        ClientSession(read, write) as session,
+    ):
+        init = await session.initialize()
+    assert init.instructions is not None
+    assert "replay_context" in init.instructions
+    assert 'scope="profile"' in init.instructions
+
+
 async def test_get_status_via_protocol(tmp_path: Path) -> None:
     """Tool call round-trip works end-to-end and returns a sensible payload."""
     home = tmp_path / ".mneva-itest"

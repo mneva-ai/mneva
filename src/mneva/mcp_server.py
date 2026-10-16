@@ -47,7 +47,19 @@ from mneva.store import (
     write_record,
 )
 
-mcp: FastMCP = FastMCP("mneva")
+# Clients put these instructions in the model's context at session start.
+# Without them an agent only reads the profile when the user asks every time,
+# which is the re-explaining mneva exists to remove.
+_INSTRUCTIONS = (
+    "mneva holds the user's own long-term memory as Markdown files. "
+    'Once per conversation, before your first substantive answer, call replay_context with scope="profile" '
+    "and use what it returns as background on who the user is and how they want to work. "
+    "Do not ask first, and do not repeat it back. If it is empty, carry on. "
+    "Use search_memory when you need something more specific. "
+    "Call capture_memory only when the user asks you to remember something."
+)
+
+mcp: FastMCP = FastMCP("mneva", instructions=_INSTRUCTIONS)
 
 _VALID_LIFESPANS: frozenset[str] = frozenset({"transient", "permanent"})
 _ATTRIBUTION_LOG = ".mcp-attribution.log"

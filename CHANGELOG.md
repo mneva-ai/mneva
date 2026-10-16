@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+### Added
+- **Agents read your profile without being asked.** The MCP server now sends
+  instructions at initialize: once per conversation, before the first
+  substantive answer, call `replay_context` with `scope="profile"`, and call
+  `capture_memory` only when the user asks. Clients such as Claude Code put
+  server instructions in the model's context, so the per-session "read my
+  mneva profile" step goes away. `mneva setup` no longer suggests editing
+  `~/.claude/CLAUDE.md` for this.
+
 ## [0.3.0] - 2026-10-16
 
 ### Added
