@@ -58,6 +58,28 @@ def test_dry_run_writes_nothing(tmp_mneva_home: Path, fake_registry: dict[str, s
     assert not (tmp_mneva_home / "native-host").exists()
 
 
+def test_extension_is_copied_to_a_stable_folder_and_kept_in_sync(tmp_mneva_home: Path) -> None:
+    path, changed = native_host.install_extension()
+
+    assert path == tmp_mneva_home / "extension" and changed
+    shipped = sorted(p.name for p in native_host.EXTENSION_DIR.iterdir() if p.is_file())
+    assert sorted(p.name for p in path.iterdir()) == shipped
+    assert native_host.install_extension() == (path, False)
+
+    (path / "old.js").write_text("left over from a previous version", encoding="utf-8")
+    (path / "content.js").write_text("edited", encoding="utf-8")
+
+    assert native_host.install_extension()[1] is True
+    assert sorted(p.name for p in path.iterdir()) == shipped
+    assert (path / "content.js").read_bytes() == (native_host.EXTENSION_DIR / "content.js").read_bytes()
+
+
+def test_extension_dry_run_copies_nothing(tmp_mneva_home: Path) -> None:
+    path, changed = native_host.install_extension(dry_run=True)
+
+    assert changed and not path.exists()
+
+
 def test_linux_registers_only_installed_browsers(
     tmp_mneva_home: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

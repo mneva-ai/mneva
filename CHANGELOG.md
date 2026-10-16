@@ -21,8 +21,12 @@
   the length prefix), and rejects malformed or oversized frames.
 - **`mneva setup` registers the host** for Chrome, Edge and Chromium (Windows
   registry under HKCU; manifest directories on macOS and Linux, only for
-  browsers that are installed) and prints the extension folder for "Load
-  unpacked". Idempotent; `--dry-run` writes nothing. A failure here is reported
+  browsers that are installed). It copies the extension to
+  `~/.mneva/extension/` and prints that folder for "Load unpacked": the package
+  folder would break, since uvx runs from a cache that gets pruned and upgrades
+  replace files under a loaded extension. When an upgrade changes the copy,
+  setup says to click reload on the extension card. Idempotent; `--dry-run`
+  writes nothing. A failure here is reported
   and does not stop the agent registrations.
 
 ## [0.3.3] - 2026-10-16

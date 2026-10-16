@@ -151,7 +151,24 @@ def _write_template(*, dry_run: bool) -> Path:
     return template
 
 
-def _next_steps(template: Path) -> str:
+def _install_extension(*, dry_run: bool) -> Path:
+    existed = (mneva_home() / "extension").is_dir()
+    path, changed = native_host.install_extension(dry_run=dry_run)
+    if not changed:
+        click.echo(f"Browser extension: {path} is up to date")
+    elif dry_run:
+        click.echo(f"Browser extension: would copy to {path}")
+    elif existed:
+        click.echo(
+            f"Browser extension: updated {path}. Click the reload icon on the mneva "
+            "card in chrome://extensions to use the new version."
+        )
+    else:
+        click.echo(f"Browser extension: copied to {path}")
+    return path
+
+
+def _next_steps(template: Path, extension: Path) -> str:
     return f"""
 Next steps:
   1. Fill in {template}.
@@ -167,7 +184,7 @@ Next steps:
      at the start of each conversation; if one skips it, say "read my mneva profile".
   5. Browser (ChatGPT, Claude, Gemini, Doubao on the web): open
      chrome://extensions, turn on Developer mode, click "Load unpacked" and
-     pick {native_host.EXTENSION_DIR}
+     pick {extension}
      New chats then start with your profile. Needed once, until the extension
      is in the Chrome Web Store.
 """
@@ -193,7 +210,8 @@ def setup_command(dry_run: bool) -> None:
     # the state of the other.
     results = [_register(client, server, dry_run=dry_run) for client in CLIENTS]
     results.append(_register_browser_bridge(dry_run=dry_run))
+    extension = _install_extension(dry_run=dry_run)
     template = _write_template(dry_run=dry_run)
-    click.echo(_next_steps(template))
+    click.echo(_next_steps(template, extension))
     if not all(results):
         raise click.ClickException("some agents could not be registered; see above")

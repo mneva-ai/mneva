@@ -173,7 +173,9 @@
       "context": {
         "files": "src/mneva/native_host.py (new), src/mneva/setup.py, src/mneva/extension/ (new, shipped in the wheel)",
         "existing_pattern": "brief.render_brief for the text; setup.server_argv for install detection",
-        "key_constraints": "Native host: binary stdio (msvcrt O_BINARY on Windows), import only mneva.brief, stdout carries frames only, exit on EOF. allowed_origins holds the dev ID and later the store ID. Selectors verified 2026-10-16 except Doubao (region-banned from the founder's network)."
+        "key_constraints": "Native host: binary stdio (msvcrt O_BINARY on Windows), import only mneva.brief, stdout carries frames only, exit on EOF. allowed_origins holds the dev ID and later the store ID. Selectors verified 2026-10-16 except Doubao (region-banned from the founder's network).",
+        "progress_2026_10_16": "Merged in #28; setup copies the extension to ~/.mneva/extension (stable Load unpacked path). Founder dogfood started. Not yet exercised: Alt+Shift+M shortcut path, popup (status + toggles; toggle is read only on URL change), doubao.com.",
+        "release_gate": "No PyPI 0.4.0 until the founder's real Chrome shows the profile in new chats and the shortcut and popup are checked once."
       },
       "acceptance_criteria": [
         "Native host protocol tests through a real subprocess pipe, including malformed and oversized frames",

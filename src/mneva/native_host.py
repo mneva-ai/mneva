@@ -194,6 +194,28 @@ def _write_if_changed(path: Path, content: bytes, *, dry_run: bool) -> bool:
     return True
 
 
+def install_extension(*, dry_run: bool = False) -> tuple[Path, bool]:
+    """Copy the extension to ~/.mneva/extension and return (path, changed).
+
+    "Load unpacked" keeps pointing at whatever folder it was given. The
+    package folder is wrong for that: uvx runs from a cache that gets pruned,
+    and upgrades replace the files under a loaded extension. A copy in the
+    data root stays put and changes only when setup refreshes it.
+    """
+    target = mneva_home() / "extension"
+    shipped = {p.name: p for p in EXTENSION_DIR.iterdir() if p.is_file()}
+    changed = False
+    for name, source in sorted(shipped.items()):
+        changed |= _write_if_changed(target / name, source.read_bytes(), dry_run=dry_run)
+    if target.is_dir():
+        for leftover in target.iterdir():
+            if leftover.is_file() and leftover.name not in shipped:
+                changed = True
+                if not dry_run:
+                    leftover.unlink()
+    return target, changed
+
+
 def register(launcher_argv: list[str], *, dry_run: bool = False) -> str:
     """Register the host with Chrome, Edge and Chromium for this user.
 
