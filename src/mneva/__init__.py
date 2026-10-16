@@ -1,6 +1,6 @@
 """Mneva — persistent agent context substrate."""
 
-__version__ = "0.2.2"
+__version__ = "0.3.0"
 
 
 def main() -> None:

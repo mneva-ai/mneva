@@ -2,7 +2,21 @@
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-10-16
+
 ### Added
+- **`mneva setup`: one command after install.** Registers mneva's MCP server
+  with every agent CLI it finds on PATH (Claude Code at user scope, Codex),
+  through each client's own `mcp add` command, with `MNEVA_MCP_CLIENT` set so
+  memories record which agent wrote them. It also writes
+  `~/.mneva/profile-template.md` and prints the next steps. Re-running changes
+  nothing: a client that already has an `mneva` server is left alone, and an
+  existing template is never overwritten. `--dry-run` prints the commands
+  without running them. A uvx run registers `uvx --from mneva mneva-mcp`;
+  every other install registers the running interpreter with
+  `-m mneva.mcp_server`, which works even when `mneva-mcp` is not on the
+  agent's PATH. A client whose registration fails is reported and does not
+  stop the others.
 - **`mneva brief`: a paste-ready profile for tools without MCP.** Records with
   scope `profile` and lifespan `permanent` form your personal profile; `brief`
   packs them into a character budget (`--max-chars`, default 4000; use 1500
