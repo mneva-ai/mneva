@@ -69,7 +69,9 @@ def test_setup_registers_the_browser_bridge_and_says_how_to_load_the_extension(
     assert result.exit_code == 0, result.output
     assert "Browser bridge: registered" in result.output
     assert "Load unpacked" in result.output
-    assert str(setup.native_host.EXTENSION_DIR) in result.output
+    # A stable copy, not the package folder (uvx caches get pruned).
+    assert str(tmp_mneva_home / "extension") in result.output
+    assert (tmp_mneva_home / "extension" / "manifest.json").exists()
 
 
 def test_failing_browser_bridge_does_not_stop_the_agents(
