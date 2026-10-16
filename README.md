@@ -479,7 +479,7 @@ mneva is in **alpha**. v0.2 ships the MCP layer plus uvx-first install. Mileston
 - [X] **v0.1.x** — Gap fixes, Obsidian vault read-write integration, `mneva distill`, CI matrix forward-defense
 - [X] **v0.2** — MCP server (`mneva-mcp` console script + 6 FastMCP tools), `uvx`-first install, WAL concurrency for cross-process safety, opt-in `mneva diagnose --share` observability
 - [X] **v0.3**: git-aware memories (repo, branch, commit), `mneva brief` for tools without MCP, `mneva setup` to connect Claude Code and Codex in one command
-- [ ] **Later**: Browser extension (Chrome / Firefox / Edge, Manifest V3) so chat UIs that cannot spawn MCP subprocesses (chatgpt.com, claude.ai web, gemini.google.com, DeepSeek) still see mneva. Entry condition: ≥10 real users + ≥3 explicit asks via `mneva diagnose --share`.
+- [ ] **Next**: Browser extension (Chrome and Edge, Manifest V3). New chats on chatgpt.com, claude.ai, gemini.google.com and doubao.com start with your current profile, read from your own machine through native messaging that `mneva setup` registers. No server, no token, nothing uploaded.
 - [ ] **v1+** — Native GUI installer for non-technical users; optional hosted `mneva.app` SaaS for phone / multi-device sync.
 
 ---
