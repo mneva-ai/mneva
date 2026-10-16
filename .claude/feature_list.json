@@ -178,7 +178,7 @@
       "acceptance_criteria": [
         "Registers mneva with Claude Code (user scope) and Codex when their CLIs are on PATH; skips missing ones with a message",
         "Running setup twice changes nothing the second time",
-        "--dry-run prints the commands and runs none",
+        "--dry-run prints the commands and changes nothing (only the read-only `mcp get` checks run)",
         "Writes ~/.mneva/profile-template.md only if absent",
         "A failing client registration is reported and does not stop the other client"
       ]
