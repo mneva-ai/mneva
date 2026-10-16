@@ -44,27 +44,34 @@ def test_brief_reports_skipped_records(tmp_mneva_home: Path) -> None:
     assert "y" * 10 not in result.output
 
 
-def test_brief_for_remembers_the_budget_and_status_flags_stale_copies(
+def test_copy_is_tracked_automatically_and_status_says_how_to_refresh(
     tmp_mneva_home: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    copied: list[str] = []
-    monkeypatch.setattr(brief, "copy_to_clipboard", copied.append)
+    monkeypatch.setattr(brief, "copy_to_clipboard", lambda _: None)
     _profile(tmp_mneva_home, "p1", "short")
     runner = CliRunner()
-    runner.invoke(app, ["brief", "--copy", "--for", "chatgpt", "--max-chars", "200"])
+    runner.invoke(app, ["brief", "--copy"])
+    runner.invoke(app, ["brief", "--copy", "--max-chars", "1500"])
     assert "out of date" not in runner.invoke(app, ["status"]).output
 
     _profile(tmp_mneva_home, "p2", "NEW-FACT")
     status = runner.invoke(app, ["status"]).output
-    assert "out of date" in status and "chatgpt" in status
 
-    _profile(tmp_mneva_home, "p3", "y" * 500)
-    result = runner.invoke(app, ["brief", "--copy", "--for", "chatgpt"])
+    assert "out of date" in status
+    assert "mneva brief --copy --max-chars 1500" in status
+    assert status.count("mneva brief --copy") == 2  # the default copy too
 
-    assert result.exit_code == 0, result.output
-    assert "NEW-FACT" in copied[-1]
-    assert "y" * 10 not in copied[-1]  # still the 200-char budget
+    runner.invoke(app, ["brief", "--copy"])
+    runner.invoke(app, ["brief", "--copy", "--max-chars", "1500"])
     assert "out of date" not in runner.invoke(app, ["status"]).output
+
+
+def test_printing_without_copy_is_not_tracked(tmp_mneva_home: Path) -> None:
+    _profile(tmp_mneva_home, "p1", "short")
+    CliRunner().invoke(app, ["brief"])
+    _profile(tmp_mneva_home, "p2", "more")
+
+    assert "out of date" not in CliRunner().invoke(app, ["status"]).output
 
 
 def test_brief_copy_puts_text_on_clipboard_not_stdout(

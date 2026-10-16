@@ -429,7 +429,7 @@ The MCP path covers desktop AI clients. Browser-only AI chat UIs (claude.ai web,
 2. `uvx mneva search "topic"` before asking a new AI a follow-up.
 3. Copy matching records from terminal output into the new chat as context.
 
-**Your profile in one paste:** save who you are and how you work as records with `--scope profile --lifespan permanent`, then run `uvx mneva brief --copy --for <tool>` and paste it into that tool's "about you" setting (for ChatGPT's custom instructions, add `--max-chars 1500` the first time; it is remembered). When your profile changes, mneva tells you which tools still hold the old copy.
+**Your profile in one paste:** save who you are and how you work as records with `--scope profile --lifespan permanent`, then run `uvx mneva brief --copy` and paste it into the tool's "about you" setting (for ChatGPT's custom instructions, add `--max-chars 1500`). mneva remembers every copy and tells you when your profile changes after it.
 
 ### Alternative installs
 

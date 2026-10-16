@@ -48,19 +48,19 @@ def test_capture_memory_happy_path(tmp_mneva_home: Path) -> None:
     assert (tmp_mneva_home / "store" / f"{result['id']}.md").exists()
 
 
-def test_capture_profile_names_tools_holding_an_old_copy(tmp_mneva_home: Path) -> None:
+def test_capture_profile_says_a_pasted_copy_is_out_of_date(tmp_mneva_home: Path) -> None:
     # Profiles are mostly edited through the agent, so the reminder to
     # re-paste into web tools belongs in the capture reply.
     from mneva.brief import PROFILE_SCOPE, record_copy, render_brief
 
     capture_memory(scope=PROFILE_SCOPE, body="I make videos.", lifespan="permanent")
     text = render_brief(home=tmp_mneva_home, max_chars=4000).text
-    record_copy("doubao", text=text, max_chars=4000, scope=PROFILE_SCOPE, home=tmp_mneva_home)
+    record_copy(text=text, max_chars=4000, scope=PROFILE_SCOPE, home=tmp_mneva_home)
 
     result = capture_memory(scope=PROFILE_SCOPE, body="I write in Chinese.", lifespan="permanent")
 
-    assert "doubao" in result["summary"]
-    assert "mneva brief --copy --for" in result["summary"]
+    assert "out of date" in result["summary"]
+    assert "mneva brief --copy" in result["summary"]
 
 
 def test_capture_memory_refuses_empty_body(tmp_mneva_home: Path) -> None:
