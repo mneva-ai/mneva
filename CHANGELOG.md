@@ -2,6 +2,29 @@
 
 ## [Unreleased]
 
+### Added
+- **Browser extension: new web chats start with your profile.** A Manifest V3
+  extension (Chrome, Edge) ships inside the package at `mneva/extension/`.
+  When you open a new conversation on chatgpt.com, claude.ai,
+  gemini.google.com or doubao.com and the composer is empty, it inserts your
+  current profile brief; you type your question underneath. It never touches a
+  composer that already has text or an existing conversation, follows
+  single-page "New chat" navigation, and can be switched off per site in its
+  popup. Alt+Shift+M inserts the profile into the focused field on any other
+  site. Selectors for ChatGPT, Claude and Gemini were checked on the live sites
+  on 2026-10-16; Doubao falls back to the largest visible text field and is
+  unverified.
+- **Native messaging host (`mneva-native-host`).** The extension reads the
+  brief through Chrome native messaging, so there is no server to run, no
+  token, and nothing leaves the machine. The host answers only `ping` and
+  `get_brief`, never writes, uses binary stdio (Windows text mode would corrupt
+  the length prefix), and rejects malformed or oversized frames.
+- **`mneva setup` registers the host** for Chrome, Edge and Chromium (Windows
+  registry under HKCU; manifest directories on macOS and Linux, only for
+  browsers that are installed) and prints the extension folder for "Load
+  unpacked". Idempotent; `--dry-run` writes nothing. A failure here is reported
+  and does not stop the agent registrations.
+
 ## [0.3.3] - 2026-10-16
 
 ### Changed

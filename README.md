@@ -429,6 +429,8 @@ The MCP path covers desktop AI clients. Browser-only AI chat UIs (claude.ai web,
 2. `uvx mneva search "topic"` before asking a new AI a follow-up.
 3. Copy matching records from terminal output into the new chat as context.
 
+**Browser extension (Chrome, Edge):** after `mneva setup`, open `chrome://extensions`, turn on Developer mode, click "Load unpacked" and pick the folder `setup` prints. New chats on ChatGPT, Claude, Gemini and Doubao then start with your current profile, read from your own machine through native messaging (no server, no token, nothing uploaded). Alt+Shift+M inserts it on any other site. The popup switches it off per site.
+
 **Your profile in one paste:** save who you are and how you work as records with `--scope profile --lifespan permanent`, then run `uvx mneva brief --copy` and paste it into the tool's "about you" setting (for ChatGPT's custom instructions, add `--max-chars 1500`). mneva remembers every copy and tells you when your profile changes after it.
 
 ### Alternative installs

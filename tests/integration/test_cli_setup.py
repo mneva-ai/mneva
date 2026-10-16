@@ -54,7 +54,37 @@ def agents(monkeypatch: pytest.MonkeyPatch) -> FakeAgents:
     fake = FakeAgents()
     monkeypatch.setattr(setup.shutil, "which", fake.which)
     monkeypatch.setattr(setup.subprocess, "run", fake.run)
+    # Never write the real browser registry from tests.
+    monkeypatch.setattr(
+        setup.native_host, "register", lambda argv, dry_run=False: "Browser bridge: registered"
+    )
     return fake
+
+
+def test_setup_registers_the_browser_bridge_and_says_how_to_load_the_extension(
+    tmp_mneva_home: Path, agents: FakeAgents
+) -> None:
+    result = CliRunner().invoke(app, ["setup"])
+
+    assert result.exit_code == 0, result.output
+    assert "Browser bridge: registered" in result.output
+    assert "Load unpacked" in result.output
+    assert str(setup.native_host.EXTENSION_DIR) in result.output
+
+
+def test_failing_browser_bridge_does_not_stop_the_agents(
+    tmp_mneva_home: Path, agents: FakeAgents, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    def locked(argv: list[str], dry_run: bool = False) -> str:
+        raise PermissionError("registry is locked")
+
+    monkeypatch.setattr(setup.native_host, "register", locked)
+
+    result = CliRunner().invoke(app, ["setup"])
+
+    assert result.exit_code != 0
+    assert "Browser bridge: failed (registry is locked)" in result.output
+    assert "Codex: added" in result.output
 
 
 def test_setup_registers_every_installed_agent(tmp_mneva_home: Path, agents: FakeAgents) -> None:
