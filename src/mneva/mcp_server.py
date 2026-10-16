@@ -36,6 +36,7 @@ from typing import Any
 from mcp.server.fastmcp import FastMCP
 
 from mneva import gitctx
+from mneva.brief import PROFILE_SCOPE, stale_notice
 from mneva.indexer import Indexer
 from mneva.paths import ensure_home, mneva_home
 from mneva.replay import VALID_TOOLS, render_replay
@@ -199,9 +200,15 @@ def capture_memory(
         }
     _get_indexer().add(record)
     _log_attribution("capture")
+    summary = f"Captured ({lifespan}, scope={scope}): {_truncate(body)}"
+    # Tools without MCP hold a pasted copy; tell the user which ones it just
+    # made stale, here where profile edits usually happen.
+    notice = stale_notice(home) if scope == PROFILE_SCOPE else None
+    if notice:
+        summary = f"{summary} {notice}"
     return {
         "id": record.id,
-        "summary": f"Captured ({lifespan}, scope={scope}): {_truncate(body)}",
+        "summary": summary,
         "record": record.to_dict(),
     }
 

@@ -2,6 +2,18 @@
 
 ## [Unreleased]
 
+### Added
+- **Reminders when a pasted profile goes stale.** `mneva brief --for <tool>`
+  (e.g. `--for chatgpt`) records which brief that tool received and with
+  which budget; later runs for the same tool reuse the budget, so
+  `--max-chars 1500` only has to be typed once. When the profile changes,
+  the tools now holding an old copy are named in three places: the reply to
+  an MCP `capture_memory` with scope `profile` (where profile edits usually
+  happen), `mneva status`, and every `mneva brief` run. Only a change to the
+  text a tool actually received counts: editing a record that never fit that
+  tool's budget does not. The bookkeeping lives in
+  `~/.mneva/brief-copies.json`; deleting it loses only the reminders.
+
 ## [0.3.1] - 2026-10-16
 
 ### Added
