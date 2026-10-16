@@ -1,9 +1,10 @@
 """setup.py — the one command to run after `pip install mneva`.
 
 Registers mneva's MCP server with every agent CLI it finds (Claude Code,
-Codex) and writes a profile template. Each client is registered through its
-own `mcp add` command rather than by editing its config file, so mneva never
-has to track those file formats.
+Codex), registers the native messaging host the browser extension reads the
+profile through, and writes a profile template. Each agent is registered
+through its own `mcp add` command rather than by editing its config file, so
+mneva never has to track those file formats.
 
 Safe to re-run: a client that already has an `mneva` server is left alone,
 and an existing template is never overwritten.
@@ -18,6 +19,7 @@ from pathlib import Path
 
 import click
 
+from mneva import native_host
 from mneva.paths import ensure_home, mneva_home
 from mneva.upgrade import UVX, detect_install_method
 
@@ -67,15 +69,24 @@ CODEX = AgentClient("Codex", "codex", "codex", ("mcp", "add"), "--env")
 CLIENTS = (CLAUDE_CODE, CODEX)
 
 
-def server_argv(method: str | None = None) -> list[str]:
-    """The command an agent should run to start mneva's MCP server."""
+def _launch_argv(module: str, script: str, method: str | None) -> list[str]:
     if (method or detect_install_method()) == UVX:
         # uvx runs from a disposable cache dir, so sys.executable is not a
-        # stable path. `--from` is required: bare `uvx mneva-mcp` fails.
-        return ["uvx", "--from", "mneva", "mneva-mcp"]
-    # The running interpreter works even when the mneva-mcp script is not on
-    # the agent's PATH (editable installs, Windows user-site installs).
-    return [sys.executable, "-m", "mneva.mcp_server"]
+        # stable path. `--from` is required: bare `uvx <script>` fails.
+        return ["uvx", "--from", "mneva", script]
+    # The running interpreter works even when the script is not on the
+    # caller's PATH (editable installs, Windows user-site installs).
+    return [sys.executable, "-m", module]
+
+
+def server_argv(method: str | None = None) -> list[str]:
+    """The command an agent should run to start mneva's MCP server."""
+    return _launch_argv("mneva.mcp_server", "mneva-mcp", method)
+
+
+def native_host_argv(method: str | None = None) -> list[str]:
+    """The command a browser should run to start the extension's host."""
+    return _launch_argv("mneva.native_host", "mneva-native-host", method)
 
 
 def add_argv(client: AgentClient, exe_path: str, server: list[str]) -> list[str]:
@@ -154,7 +165,21 @@ Next steps:
      when your profile changes after a copy.
   4. Restart Claude Code or Codex. mneva tells them to read your profile
      at the start of each conversation; if one skips it, say "read my mneva profile".
+  5. Browser (ChatGPT, Claude, Gemini, Doubao on the web): open
+     chrome://extensions, turn on Developer mode, click "Load unpacked" and
+     pick {native_host.EXTENSION_DIR}
+     New chats then start with your profile. Needed once, until the extension
+     is in the Chrome Web Store.
 """
+
+
+def _register_browser_bridge(*, dry_run: bool) -> bool:
+    try:
+        click.echo(native_host.register(native_host_argv(), dry_run=dry_run))
+    except OSError as e:
+        click.echo(f"Browser bridge: failed ({e})")
+        return False
+    return True
 
 
 @click.command("setup")
@@ -162,11 +187,12 @@ Next steps:
     "--dry-run", is_flag=True, help="Show what setup would do without changing anything."
 )
 def setup_command(dry_run: bool) -> None:
-    """Connect mneva to Claude Code and Codex, and create a profile template."""
+    """Connect mneva to Claude Code, Codex and your browser, and create a profile template."""
     server = server_argv()
     # Evaluate every client before failing, so one broken CLI does not hide
     # the state of the other.
     results = [_register(client, server, dry_run=dry_run) for client in CLIENTS]
+    results.append(_register_browser_bridge(dry_run=dry_run))
     template = _write_template(dry_run=dry_run)
     click.echo(_next_steps(template))
     if not all(results):

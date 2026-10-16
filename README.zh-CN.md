@@ -281,6 +281,8 @@ MCP 这条路覆盖的是桌面 AI 客户端。纯网页版的 AI 聊天界面�
 2. 在向新的 AI 提后续问题之前，跑 `uvx mneva search "话题"`。
 3. 把终端里匹配到的记录复制进新的聊天，作为上下文。
 
+**浏览器扩展（Chrome、Edge）：** 运行 `mneva setup` 后，打开 `chrome://extensions`，打开"开发者模式"，点"加载已解压的扩展程序"，选 `setup` 输出的那个文件夹。之后在 ChatGPT、Claude、Gemini、豆包开新对话，会自动带上你最新的档案，档案从你自己的电脑读取（不用开服务，不用密钥，不上传任何东西）。在其他网站按 Alt+Shift+M 插入。扩展弹窗里可以按网站关闭。
+
 **一次粘贴带上你的档案：** 把你是谁、怎么工作存成 `--scope profile --lifespan permanent` 的记录，然后运行 `uvx mneva brief --copy`，粘贴进工具的"关于你"设置（ChatGPT 的自定义指令加上 `--max-chars 1500`）。mneva 会记住每次复制，档案改了以后会提醒你重新粘贴。
 
 ### 其他安装方式

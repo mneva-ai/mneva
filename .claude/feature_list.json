@@ -167,7 +167,7 @@
     {
       "id": "p1-browser-extension",
       "priority": "P1",
-      "status": "pending",
+      "status": "in_progress",
       "title": "Browser extension: new web chats start with the profile",
       "description": "Founder approved 2026-10-16: paste delivery to ChatGPT/Claude/Doubao/Gemini web is too manual. MV3 extension inserts the current brief into the empty composer of a new chat, reading it through Chrome native messaging registered by `mneva setup`. Alt+Shift+M inserts on any other site. Full design: .claude/specs/p1-browser-extension.spec.md.",
       "context": {

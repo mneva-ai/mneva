@@ -14,6 +14,11 @@ def test_server_argv_uses_running_interpreter_for_installed_mneva() -> None:
     assert server_argv(PIPX) == [sys.executable, "-m", "mneva.mcp_server"]
 
 
+def test_native_host_argv_follows_the_same_install_detection() -> None:
+    assert setup.native_host_argv(PIP) == [sys.executable, "-m", "mneva.native_host"]
+    assert setup.native_host_argv(UVX) == ["uvx", "--from", "mneva", "mneva-native-host"]
+
+
 def test_server_argv_for_uvx_names_the_package() -> None:
     # uvx's environment is a disposable cache dir; bare `uvx mneva-mcp`
     # resolves mneva-mcp as a package and fails.
