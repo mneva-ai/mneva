@@ -7,6 +7,7 @@ from pathlib import Path
 import click
 
 from mneva import __version__, gitctx
+from mneva.brief import brief_command
 from mneva.config import ConfigError, load_config, save_config
 from mneva.indexer import Indexer
 from mneva.paths import ensure_home
@@ -90,7 +91,7 @@ def capture(
 ) -> None:
     """Capture a record. BODY may be a positional string or '-' for stdin."""
     if body == "-":
-        body = sys.stdin.read()
+        body = _read_stdin_utf8()
     elif body is None:
         raise click.ClickException("body required: pass as positional argument or '-' for stdin")
     if not body.strip():
@@ -119,6 +120,26 @@ def capture(
         idx.add(record)
     _mirror_to_vault_if_configured(record, home)
     click.echo(record.id)
+
+
+def _read_stdin_utf8() -> str:
+    """Read stdin as UTF-8 regardless of the console code page.
+
+    `sys.stdin.read()` on Windows decodes in the console code page, which
+    turned a UTF-8 Chinese file into lone surrogates and crashed capture.
+    Guessing another encoding would silently store garbage, so non-UTF-8
+    input is refused instead.
+    """
+    try:
+        raw = sys.stdin.buffer.read()
+    except AttributeError as e:  # stdin is None (pythonw) or a text-only stream
+        raise click.ClickException("stdin is not readable; pass the text as an argument.") from e
+    try:
+        return raw.decode("utf-8-sig")
+    except UnicodeDecodeError as e:
+        raise click.ClickException(
+            "stdin is not UTF-8. Save the file as UTF-8, or pass the text as an argument."
+        ) from e
 
 
 def _mirror_to_vault_if_configured(record: Record, home: Path) -> None:
@@ -337,6 +358,9 @@ def replay(tool: str, scope: str | None) -> None:
 
     result = render_replay(tool=tool, scope=scope)
     click.echo(result)
+
+
+app.add_command(brief_command)
 
 
 def _port_in_use(port: int) -> bool:

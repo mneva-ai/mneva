@@ -1,7 +1,7 @@
 {
-  "updated_at": "2026-07-31",
-  "strategy_ref": "CLAUDE.md -> ## Current Strategy; full reasoning in .claude/claude-progress.txt (2026-07-31 strategy-reversal entry)",
-  "strategy_summary": "Markdown/privacy/Obsidian engineer line. Positioning: your AI memory is your own Markdown files -- follows the repo, goes into git, opens in Obsidian, reviewed in a PR, no account, no cloud. Reversed the 2026-05-25 non-technical beachhead on 2026-07-31 after the memmy-agent competitive analysis.",
+  "updated_at": "2026-10-16",
+  "strategy_ref": "CLAUDE.md -> ## Current Strategy (2026-10-15 amendment); research + plan in docs/market-research-2026-10-15/",
+  "strategy_summary": "AMENDED 2026-10-15: one personal profile, owned as Markdown, carried across every AI tool a heavy AI user runs (Claude Code, Codex, chat apps, and via their MCPs, video/image tools). Target widened from developers to anyone who works through CLI agents daily. Founder is the target user; validation is dogfooding, not outreach. Markdown-as-truth, no account, reviewable, Obsidian all kept from the 2026-07-31 line.",
   "roadmap_design_ref": "docs/user-research-hn-reddit-2026-05-25.md sections 7-8",
   "features": [
     {
@@ -83,34 +83,131 @@
       "completed_at": "2026-07-31"
     },
     {
-      "id": "p1-2-stale-supersede",
-      "priority": "P1",
-      "status": "pending",
-      "blocked_by": "p1-1-git-aware-metadata",
-      "title": "Stale / supersede",
-      "description": "Every competitor talks about memory going stale, but mneva has git and can tell precisely what changed. That is the version nobody else can build.",
+      "id": "p0-dogfood-profile",
+      "priority": "P0",
+      "status": "in_progress",
+      "title": "Dogfood: founder uses one mneva profile across Claude Code, Codex and a video MCP for two weeks",
+      "description": "Validation for the 2026-10-15 direction. The founder is the target user, so validation is real daily use, not outreach. Hand-write the first profile Markdown before any new code so the format is shaped by real use.",
       "context": {
-        "key_constraints": "On conflict, surface it -- do NOT auto-merge. Explicitly required by the research doc. Stale records get down-ranked or flagged at retrieval (indexer.py)."
+        "demo": "In Claude Code: 'make a 15s video for my product' via Runway or Higgsfield MCP, brand/audience/style read from mneva, nothing re-explained.",
+        "baselines_to_beat": "(1) one Markdown file symlinked into ~/.claude/CLAUDE.md and ~/.codex/AGENTS.md; (2) memmy, which already imports Claude Code/Codex history but stores memory in a 40-table SQLite the user cannot read.",
+        "progress_2026_10_16": "Phase A built. Profile draft v0.1 generated from 413 Claude Code prompts (2026-09-14..10-16) awaiting founder review; NOT yet captured into the real store. mneva MCP registered in Claude Code (user scope). Re-explain log not started."
       },
       "acceptance_criteria": [
-        "A memory whose commit context has moved on is detectable",
-        "Conflicts prompt rather than silently merging"
+        "A re-explain log is kept for 14 days: each time background had to be restated to an AI tool, one line",
+        "Re-explain count in week 2 is clearly below week 1",
+        "At least one real video task completed end to end with zero background restated",
+        "Kill condition: if after 14 days the symlinked-file baseline is just as good, stop the expansion and return to the 7/31 engineer line"
       ]
     },
     {
       "id": "p1-3-draft-review-promote",
       "priority": "P1",
       "status": "pending",
-      "blocked_by": "p1-2-stale-supersede",
+      "blocked_by": null,
       "title": "Draft / review / promote",
       "description": "Agent writes land as draft; the user approves before anything becomes permanent truth. Fits the reviewable positioning and was the core ask in the 5/25 research.",
       "context": {
-        "files": "src/mneva/cli.py (new `mneva review` / `mneva promote`), src/mneva/mcp_server.py (capture_memory defaults to draft), src/mneva/indexer.py (drafts excluded from search by default)"
+        "files": "src/mneva/cli.py (new `mneva review` / `mneva promote`), src/mneva/mcp_server.py (capture_memory defaults to draft), src/mneva/indexer.py (drafts excluded from search by default)",
+        "note_2026_10_15": "Moved to the front: auto-extracted profile entries must land as drafts and be approved before agents read them. No longer blocked on p1-2. Field naming decided in p1-05 still applies (review: draft|approved, default approved)."
       },
       "acceptance_criteria": [
         "MCP capture_memory writes draft by default",
         "Drafts do not appear in default search results",
         "review/promote/reject round-trip works from the CLI"
+      ]
+    },
+    {
+      "id": "p1-history-import",
+      "priority": "P1",
+      "status": "pending",
+      "title": "Import memories back from Claude Code history and official chat exports (ChatGPT first, then Claude)",
+      "description": "Return path of 'switch all memory to any tool': memories formed inside other tools flow back by importing their official exports. Order: Claude Code local history, ChatGPT export ZIP (tree-structured JSON mapping), Claude export. Doubao and Gemini export formats are unverified.",
+      "context": {
+        "existing_pattern": "src/mneva/distill.py",
+        "key_constraints": "Local files only, no upload. Every imported entry lands as review: draft. Session file locations and formats must be verified on disk, not assumed.",
+        "note_2026_10_16": "Founder's tools: Claude web+app, ChatGPT web, Doubao web, Gemini app, Claude Code, Runway, ChatCut, Seedance. Phase D in docs/market-research-2026-10-15/next-step-plan.md."
+      },
+      "acceptance_criteria": [
+        "Import never writes an approved record",
+        "Re-running import does not duplicate entries"
+      ]
+    },
+    {
+      "id": "p1-profile-kind",
+      "priority": "P1",
+      "status": "pending",
+      "title": "Profile records: who I am, preferences, brand/style, ongoing work",
+      "description": "A way to mark records as part of the personal profile, distinct from repo-scoped memories. Whether this is a new kind or a lifespan value is decided in design review.",
+      "context": {
+        "single_point": "store.record_frontmatter / record_from_frontmatter and Record.to_dict()",
+        "key_constraints": "Profile records have no repo (repo IS NULL), so they stay visible from every repository under the existing filter."
+      },
+      "acceptance_criteria": [
+        "Profile records round-trip through Markdown, vault sync and reindex"
+      ]
+    },
+    {
+      "id": "p1-brief",
+      "priority": "P1",
+      "status": "in_progress",
+      "title": "get_profile(task) MCP tool + `mneva brief --target <tool>`",
+      "description": "Task-sized slice of memory. --target applies each paste-only tool's length limit and format (Doubao, Gemini import-memory, ChatCut, Runway web) and copies to clipboard. Phase A: this alone covers every tool on the founder's list at summary level.",
+      "context": {
+        "files": "src/mneva/mcp_server.py, src/mneva/cli.py, src/mneva/replay.py",
+        "progress_2026_10_16": "`mneva brief` shipped (src/mneva/brief.py): --max-chars (default 4000), --scope, --copy. --target dropped: only ChatGPT's 1500 limit is known; inventing per-vendor limits would be fabrication. get_profile(task) MCP tool still pending (phase B).",
+        "known_gap": "Records come out in id order (random hash), so under a tight budget WHICH sections survive is arbitrary. Needs an order/priority field, decide in p1-profile-kind."
+      },
+      "acceptance_criteria": [
+        "Output respects a token budget",
+        "Only approved records are returned",
+        "MCP result carries a human-readable summary key"
+      ]
+    },
+    {
+      "id": "p1-emit-agent-instructions",
+      "priority": "P1",
+      "status": "pending",
+      "title": "Maintain a managed profile block in CLAUDE.md / AGENTS.md",
+      "description": "Covers the symlink baseline: agents that read instruction files get the profile without MCP.",
+      "context": {
+        "key_constraints": "Touch only the text between mneva's own begin/end markers; never rewrite the rest of the user's file. Opt-in."
+      },
+      "acceptance_criteria": [
+        "Content outside the markers is byte-identical after emit",
+        "Running emit twice is a no-op"
+      ]
+    },
+    {
+      "id": "p1-remote-connector",
+      "priority": "P1",
+      "status": "pending",
+      "title": "Remote MCP endpoint for Claude web/app and ChatGPT via a user-run tunnel",
+      "description": "Claude.ai custom connectors and ChatGPT developer-mode connectors only accept a public HTTPS MCP URL. Serve MCP over streamable HTTP locally, require a token, and let the user expose it with their own tunnel (cloudflared or similar). No mneva-hosted relay, so still no account.",
+      "context": {
+        "existing_pattern": "src/mneva/api.py (mneva serve), src/mneva/mcp_server.py",
+        "key_constraints": "Exposes personal memory on the public internet while the tunnel runs: auth is mandatory, default off, run gstack /cso before shipping. ChatGPT Plus connectors may be read-only; reading memory is enough, write-back comes from p1-history-import. Claude Free allows one custom connector. Copy must say 'no mneva cloud, no account', not 'zero cloud'."
+      },
+      "acceptance_criteria": [
+        "Endpoint refuses requests without the token",
+        "Claude web and ChatGPT can both call get_profile through the tunnel",
+        "Nothing listens on a public interface unless the user starts it explicitly"
+      ]
+    },
+    {
+      "id": "p1-2-stale-supersede",
+      "priority": "P2",
+      "status": "pending",
+      "blocked_by": "p1-1-git-aware-metadata",
+      "title": "Stale / supersede",
+      "description": "Every competitor talks about memory going stale, but mneva has git and can tell precisely what changed. That is the version nobody else can build.",
+      "context": {
+        "key_constraints": "On conflict, surface it -- do NOT auto-merge. Explicitly required by the research doc. Stale records get down-ranked or flagged at retrieval (indexer.py).",
+        "note_2026_10_15": "Demoted: profile entries are curated by review, so staleness matters less than for repo memories."
+      },
+      "acceptance_criteria": [
+        "A memory whose commit context has moved on is detectable",
+        "Conflicts prompt rather than silently merging"
       ]
     },
     {
@@ -138,7 +235,8 @@
       "description": "--budget 500|1000|3000|full. No full-context dump by default; rank by relevance + freshness + lifespan.",
       "context": {
         "files": "src/mneva/replay.py (79 lines, currently the simplest module), src/mneva/cli.py replay command",
-        "key_constraints": "Weakest differentiator (everyone is building this), so it goes last -- but it is the direct answer to the highest-frequency complaint, context bloat."
+        "key_constraints": "Weakest differentiator (everyone is building this), so it goes last -- but it is the direct answer to the highest-frequency complaint, context bloat.",
+        "note_2026_10_15": "Becomes the mechanism behind p1-brief (task-sized profile brief). Build it as part of that entry."
       },
       "acceptance_criteria": [
         "replay respects the budget and degrades gracefully when memories exceed it"
