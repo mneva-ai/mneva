@@ -53,24 +53,41 @@ def browser(tmp_path: Path, tmp_mneva_home: Path) -> Iterator[Any]:
         context.close()
 
 
-def _composer_text(context: Any, url: str, prefilled: str = "") -> str:
+HIDDEN_FIRST_PAGE = """<!doctype html><html><body>
+<form><div class="ProseMirror" contenteditable="true" style="display:none"></div></form>
+<form><div class="ProseMirror" id="visible" contenteditable="true" style="width:600px;height:80px"></div></form>
+</body></html>"""
+
+
+def _composer_text(
+    context: Any, url: str, prefilled: str = "", page_html: str = "", selector: str = ".ProseMirror"
+) -> str:
     page = context.new_page()
+    body = page_html or COMPOSER_PAGE.format(text=prefilled)
     page.route(
         "https://chatgpt.com/**",
-        lambda route: route.fulfill(
-            content_type="text/html", body=COMPOSER_PAGE.format(text=prefilled)
-        ),
+        lambda route: route.fulfill(content_type="text/html", body=body),
     )
     page.goto(url)
     # Absence is the expected outcome in two of the tests, so a timeout is fine.
     with contextlib.suppress(Exception):
         page.wait_for_function(
-            "() => document.querySelector('.ProseMirror').innerText.includes('E2E-PROFILE')",
+            f"() => document.querySelector('{selector}').innerText.includes('E2E-PROFILE')",
             timeout=WAIT_MS,
         )
-    text: str = page.inner_text(".ProseMirror")
+    text: str = page.inner_text(selector)
     page.close()
     return text
+
+
+def test_hidden_composer_ahead_of_the_visible_one_is_skipped(browser: Any) -> None:
+    # Found in real ChatGPT on 2026-10-16: after "New chat" a zero-size copy
+    # of the composer precedes the visible one, and the profile never arrived.
+    text = _composer_text(
+        browser, "https://chatgpt.com/", page_html=HIDDEN_FIRST_PAGE, selector="#visible"
+    )
+
+    assert text.count("E2E-PROFILE-我") == 1
 
 
 def test_new_chat_gets_the_profile_through_native_messaging(browser: Any) -> None:
