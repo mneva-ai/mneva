@@ -429,7 +429,7 @@ The MCP path covers desktop AI clients. Browser-only AI chat UIs (claude.ai web,
 2. `uvx mneva search "topic"` before asking a new AI a follow-up.
 3. Copy matching records from terminal output into the new chat as context.
 
-**Browser extension (Chrome, Edge):** after `mneva setup`, open `chrome://extensions`, turn on Developer mode, click "Load unpacked" and pick the folder `setup` prints. New chats on ChatGPT, Claude, Gemini and Doubao then start with your current profile, read from your own machine through native messaging (no server, no token, nothing uploaded). Alt+Shift+M inserts it on any other site. The popup switches it off per site.
+**Browser extension (Chrome, Edge):** after `mneva setup`, open `chrome://extensions`, turn on Developer mode, click "Load unpacked" and pick the folder `setup` prints. New chats on ChatGPT, Claude, Gemini, Grok and Doubao then start with your current profile, read from your own machine through native messaging (no server, no token, nothing uploaded). Alt+Shift+M inserts it on any other site. The popup switches it off per site.
 
 **Your profile in one paste:** save who you are and how you work as records with `--scope profile --lifespan permanent`, then run `uvx mneva brief --copy` and paste it into the tool's "about you" setting (for ChatGPT's custom instructions, add `--max-chars 1500`). mneva remembers every copy and tells you when your profile changes after it.
 
@@ -481,7 +481,8 @@ mneva is in **alpha**. v0.2 ships the MCP layer plus uvx-first install. Mileston
 - [X] **v0.1.x** — Gap fixes, Obsidian vault read-write integration, `mneva distill`, CI matrix forward-defense
 - [X] **v0.2** — MCP server (`mneva-mcp` console script + 6 FastMCP tools), `uvx`-first install, WAL concurrency for cross-process safety, opt-in `mneva diagnose --share` observability
 - [X] **v0.3**: git-aware memories (repo, branch, commit), `mneva brief` for tools without MCP, `mneva setup` to connect Claude Code and Codex in one command
-- [ ] **Next**: Browser extension (Chrome and Edge, Manifest V3). New chats on chatgpt.com, claude.ai, gemini.google.com and doubao.com start with your current profile, read from your own machine through native messaging that `mneva setup` registers. No server, no token, nothing uploaded.
+- [X] **v0.4**: Browser extension (Chrome and Edge, Manifest V3). New chats on chatgpt.com, claude.ai, gemini.google.com, grok.com and doubao.com start with your current profile, read from your own machine through native messaging that `mneva setup` registers. No server, no token, nothing uploaded.
+- [ ] **Next**: Chrome Web Store listing, so installing the extension is one click instead of "Load unpacked".
 - [ ] **v1+** — Native GUI installer for non-technical users; optional hosted `mneva.app` SaaS for phone / multi-device sync.
 
 ---

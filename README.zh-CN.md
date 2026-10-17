@@ -281,7 +281,7 @@ MCP 这条路覆盖的是桌面 AI 客户端。纯网页版的 AI 聊天界面�
 2. 在向新的 AI 提后续问题之前，跑 `uvx mneva search "话题"`。
 3. 把终端里匹配到的记录复制进新的聊天，作为上下文。
 
-**浏览器扩展（Chrome、Edge）：** 运行 `mneva setup` 后，打开 `chrome://extensions`，打开"开发者模式"，点"加载已解压的扩展程序"，选 `setup` 输出的那个文件夹。之后在 ChatGPT、Claude、Gemini、豆包开新对话，会自动带上你最新的档案，档案从你自己的电脑读取（不用开服务，不用密钥，不上传任何东西）。在其他网站按 Alt+Shift+M 插入。扩展弹窗里可以按网站关闭。
+**浏览器扩展（Chrome、Edge）：** 运行 `mneva setup` 后，打开 `chrome://extensions`，打开"开发者模式"，点"加载已解压的扩展程序"，选 `setup` 输出的那个文件夹。之后在 ChatGPT、Claude、Gemini、Grok、豆包开新对话，会自动带上你最新的档案，档案从你自己的电脑读取（不用开服务，不用密钥，不上传任何东西）。在其他网站按 Alt+Shift+M 插入。扩展弹窗里可以按网站关闭。
 
 **一次粘贴带上你的档案：** 把你是谁、怎么工作存成 `--scope profile --lifespan permanent` 的记录，然后运行 `uvx mneva brief --copy`，粘贴进工具的"关于你"设置（ChatGPT 的自定义指令加上 `--max-chars 1500`）。mneva 会记住每次复制，档案改了以后会提醒你重新粘贴。
 
@@ -333,7 +333,8 @@ mneva 处于 **alpha 阶段**。v0.2 交付了 MCP 层以及 uvx 优先的安装
 - [X] **v0.1.x** — 漏洞修复、Obsidian 仓库读写集成、`mneva distill`、CI 矩阵前向防御
 - [X] **v0.2** — MCP 服务器（`mneva-mcp` 命令 + 6 个 FastMCP 工具）、`uvx` 优先安装、跨进程安全的 WAL 并发、可选的 `mneva diagnose --share` 可观测性
 - [X] **v0.3**：跟着 git 走的记忆（仓库、分支、提交）、给不支持 MCP 的工具用的 `mneva brief`、一条命令接入 Claude Code 和 Codex 的 `mneva setup`
-- [ ] **下一步**：浏览器扩展（Chrome 和 Edge，Manifest V3）。在 chatgpt.com、claude.ai、gemini.google.com、doubao.com 开新对话时自动带上你最新的档案，通过 `mneva setup` 注册的本地通道从你自己的电脑读取。不用开服务，不用密钥，不上传任何东西。
+- [X] **v0.4**：浏览器扩展（Chrome 和 Edge，Manifest V3）。在 chatgpt.com、claude.ai、gemini.google.com、grok.com、doubao.com 开新对话时自动带上你最新的档案，通过 `mneva setup` 注册的本地通道从你自己的电脑读取。不用开服务，不用密钥，不上传任何东西。
+- [ ] **下一步**：上架 Chrome 应用商店，装扩展从"加载已解压的扩展程序"变成点一下安装。
 - [ ] **v1+** — 面向非技术用户的原生图形化安装程序；可选的托管版 `mneva.app` SaaS，用于手机/多设备同步。
 
 ---
