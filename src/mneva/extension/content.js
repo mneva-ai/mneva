@@ -23,6 +23,7 @@
   };
   const WAIT_FOR_COMPOSER_MS = 10000;
   const POLL_MS = 500;
+  const RECHECK_MS = 1500;
 
   const site = SITES[location.hostname];
   if (!site) return;
@@ -40,8 +41,9 @@
 
   function findComposer() {
     if (!site.composer) return largestTextField();
-    const el = document.querySelector(site.composer);
-    return el && visible(el) ? el : null;
+    // ChatGPT keeps a hidden zero-size copy of the composer in the page after
+    // "New chat", ahead of the visible one, so take the first visible match.
+    return [...document.querySelectorAll(site.composer)].find(visible) || null;
   }
 
   function isEmpty(el) {
@@ -49,14 +51,21 @@
     return text.trim() === "";
   }
 
+  const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
   async function waitForComposer() {
     const deadline = Date.now() + WAIT_FOR_COMPOSER_MS;
     while (Date.now() < deadline) {
       const el = findComposer();
       if (el) return el;
-      await new Promise((resolve) => setTimeout(resolve, POLL_MS));
+      await sleep(POLL_MS);
     }
     return null;
+  }
+
+  function insert(composer, text) {
+    composer.focus();
+    document.execCommand("insertText", false, `${text}\n\n`);
   }
 
   async function siteDisabled() {
@@ -76,8 +85,14 @@
     const reply = await chrome.runtime.sendMessage({ type: "get_brief" });
     // The user may have started typing or left while we waited.
     if (!reply || !reply.ok || location.href !== href || !isEmpty(composer)) return;
-    composer.focus();
-    document.execCommand("insertText", false, `${reply.text}\n\n`);
+    insert(composer, reply.text);
+    // An app can swap the composer element right after navigating; check
+    // once that the text is in the composer the user actually sees.
+    await sleep(RECHECK_MS);
+    const current = findComposer();
+    if (current && current !== composer && location.href === href && isEmpty(current)) {
+      insert(current, reply.text);
+    }
   }
 
   // These sites are single-page apps: "New chat" changes the URL without a
