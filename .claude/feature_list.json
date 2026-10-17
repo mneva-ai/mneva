@@ -175,7 +175,7 @@
         "existing_pattern": "brief.render_brief for the text; setup.server_argv for install detection",
         "key_constraints": "Native host: binary stdio (msvcrt O_BINARY on Windows), import only mneva.brief, stdout carries frames only, exit on EOF. allowed_origins holds the dev ID and later the store ID. Selectors verified 2026-10-16 except Doubao (region-banned from the founder's network).",
         "progress_2026_10_16": "Merged in #28; setup copies the extension to ~/.mneva/extension (stable Load unpacked path). Founder dogfood started. Not yet exercised: Alt+Shift+M shortcut path, popup (status + toggles; toggle is read only on URL change), doubao.com.",
-        "release_gate": "No PyPI 0.4.0 until the founder's real Chrome shows the profile in new chats and the shortcut and popup are checked once."
+        "release_gate": "Met 2026-10-16: founder installed the unpacked extension; new chats on ChatGPT, Claude and Gemini showed the profile once each (also after New chat from an existing chat, after the hidden-composer fix #30); founder confirmed popup status and Alt+Shift+M. Released as 0.4.0."
       },
       "acceptance_criteria": [
         "Native host protocol tests through a real subprocess pipe, including malformed and oversized frames",

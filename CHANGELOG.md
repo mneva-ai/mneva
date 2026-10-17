@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-10-16
+
 ### Added
 - **Browser extension: new web chats start with your profile.** A Manifest V3
   extension (Chrome, Edge) ships inside the package at `mneva/extension/`.
