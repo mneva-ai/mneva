@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.4.1] - 2026-10-17
+
 ### Added
 - **Grok in the browser extension.** New chats on grok.com start with your
   profile too, and Grok has its own switch in the popup. Grok first renders a
