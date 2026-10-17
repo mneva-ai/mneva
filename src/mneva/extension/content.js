@@ -1,5 +1,5 @@
 // Puts the mneva profile into the empty composer of a new conversation.
-// Selectors verified on 2026-10-16; Doubao is unverified and falls back to
+// Selectors verified on 2026-10-16 (Grok on 2026-10-17); Doubao is unverified and falls back to
 // the largest visible text field.
 (() => {
   const SITES = {
@@ -15,6 +15,12 @@
     "gemini.google.com": {
       composer: 'rich-textarea .ql-editor[contenteditable="true"]',
       isNewChat: (url) => /^\/app\/?$/.test(url.pathname),
+    },
+    "grok.com": {
+      // A plain textarea first, swapped for a ProseMirror editor once the
+      // app loads; the recheck after inserting covers the swap.
+      composer: 'form .ProseMirror[contenteditable="true"], form textarea',
+      isNewChat: (url) => url.pathname === "/",
     },
     "www.doubao.com": {
       composer: null,

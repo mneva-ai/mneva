@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+### Added
+- **Grok in the browser extension.** New chats on grok.com start with your
+  profile too, and Grok has its own switch in the popup. Grok first renders a
+  plain textarea and swaps in a ProseMirror editor once the app loads; the
+  adapter matches both and the post-insert recheck covers the swap. Checked
+  on the live site on 2026-10-17.
+
 ## [0.4.0] - 2026-10-16
 
 ### Added

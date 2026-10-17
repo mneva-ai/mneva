@@ -2,6 +2,7 @@ const SITES = {
   "chatgpt.com": "ChatGPT",
   "claude.ai": "Claude",
   "gemini.google.com": "Gemini",
+  "grok.com": "Grok",
   "www.doubao.com": "Doubao",
 };
 

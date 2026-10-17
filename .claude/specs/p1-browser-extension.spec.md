@@ -68,6 +68,7 @@ Site adapters (selectors verified 2026-10-16 except Doubao):
 | chatgpt.com | `/` or `/g/<id>` (not `/c/<id>`) | `form .ProseMirror[contenteditable="true"]` |
 | claude.ai | `/new` | `[data-testid="chat-input"]` |
 | gemini.google.com | `/app` exactly | `rich-textarea .ql-editor[contenteditable="true"]` |
+| grok.com (added 2026-10-17) | `/` | `form .ProseMirror[contenteditable="true"], form textarea` (textarea before the app loads) |
 | www.doubao.com | `/chat/` without an id (unverified) | largest visible `textarea` or `[contenteditable="true"]` (unverified) |
 
 Insert rule: on page load and on each SPA URL change, if the URL is a new chat, the site is enabled, the composer exists (wait up to 10 s) and is empty, insert once for that URL. Never insert into a composer that already has text.
