@@ -160,8 +160,9 @@ def _install_extension(*, dry_run: bool) -> Path:
         click.echo(f"Browser extension: would copy to {path}")
     elif existed:
         click.echo(
-            f"Browser extension: updated {path}. Click the reload icon on the mneva "
-            "card in chrome://extensions to use the new version."
+            f"Browser extension: updated {path}. It reloads itself the next time it "
+            "reads your profile. One loaded before mneva 0.4.2 cannot: click its "
+            "reload icon in chrome://extensions once."
         )
     else:
         click.echo(f"Browser extension: copied to {path}")
@@ -203,7 +204,10 @@ def _register_browser_bridge(*, dry_run: bool) -> bool:
 @click.option(
     "--dry-run", is_flag=True, help="Show what setup would do without changing anything."
 )
-def setup_command(dry_run: bool) -> None:
+# `mneva upgrade` runs setup again to refresh the extension copy and the host
+# launcher; the first-run guide is noise at that point.
+@click.option("--after-upgrade", is_flag=True, hidden=True)
+def setup_command(dry_run: bool, after_upgrade: bool) -> None:
     """Connect mneva to Claude Code, Codex and your browser, and create a profile template."""
     server = server_argv()
     # Evaluate every client before failing, so one broken CLI does not hide
@@ -212,6 +216,7 @@ def setup_command(dry_run: bool) -> None:
     results.append(_register_browser_bridge(dry_run=dry_run))
     extension = _install_extension(dry_run=dry_run)
     template = _write_template(dry_run=dry_run)
-    click.echo(_next_steps(template, extension))
+    if not after_upgrade:
+        click.echo(_next_steps(template, extension))
     if not all(results):
         raise click.ClickException("some agents could not be registered; see above")

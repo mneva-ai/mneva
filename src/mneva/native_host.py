@@ -4,6 +4,8 @@ Chrome and Edge start this process on demand when the extension asks for the
 profile, and talk to it over stdio: each message is a 4-byte little-endian
 length followed by that many bytes of UTF-8 JSON. It answers two requests,
 `ping` and `get_brief`, and nothing else; it never writes to the store.
+Every reply also carries the version of the extension copy `mneva setup`
+installed, so an extension running older files can tell it should reload.
 
 Every rule below is a silent total failure if broken, because the browser
 just sees a dead host:
@@ -99,7 +101,25 @@ def _bad_request(message: str) -> dict[str, Any]:
     return {"ok": False, "error": "bad_request", "message": message}
 
 
+def installed_extension_version() -> str | None:
+    """Version of the copy in the data root, the folder the browser loaded."""
+    try:
+        manifest = json.loads((mneva_home() / "extension" / "manifest.json").read_text("utf-8"))
+    except (OSError, ValueError):
+        return None
+    version = manifest.get("version") if isinstance(manifest, dict) else None
+    return version if isinstance(version, str) else None
+
+
 def handle(message: Any) -> dict[str, Any]:
+    reply = _answer(message)
+    version = installed_extension_version()
+    if version is not None:
+        reply["extension_version"] = version
+    return reply
+
+
+def _answer(message: Any) -> dict[str, Any]:
     if not isinstance(message, dict):
         return _bad_request("expected a JSON object")
     kind = message.get("type")

@@ -2,6 +2,22 @@
 
 ## [Unreleased]
 
+## [0.4.2] - 2026-10-17
+
+### Changed
+- **`mneva upgrade` is one step.** After updating the package it runs
+  `mneva setup --after-upgrade` in a new process, so the new version refreshes
+  the browser extension copy and the native host launcher. uvx users, who have
+  nothing to update, still get the refresh.
+- **The browser extension reloads itself after an upgrade** (extension 0.3.0).
+  The native host now reports the version of the extension copy in the data
+  root; when it differs from the running version, the extension reloads once
+  (at most once per version, so a copy loaded from another folder cannot loop)
+  and puts its content script back into AI tabs that are already open. This
+  adds `host_permissions` for exactly the five sites the content script
+  already runs on. Extensions loaded before this release still need one manual
+  reload click.
+
 ## [0.4.1] - 2026-10-17
 
 ### Added

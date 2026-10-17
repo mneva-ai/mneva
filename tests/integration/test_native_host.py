@@ -98,3 +98,21 @@ def test_max_chars_is_clamped(tmp_mneva_home: Path) -> None:
 
     # Clamped to the minimum: nothing fits, which is reported, not a crash.
     assert replies[0]["ok"] is False
+
+
+def test_replies_carry_the_version_of_the_loaded_extension_copy(tmp_mneva_home: Path) -> None:
+    # The extension compares this with its own version and reloads on a
+    # mismatch, so it must come from the copy setup refreshes, not the package.
+    copy = tmp_mneva_home / "extension"
+    copy.mkdir()
+    (copy / "manifest.json").write_text(json.dumps({"version": "9.8.7"}), encoding="utf-8")
+
+    replies, _ = _talk(tmp_mneva_home, _frame({"type": "ping"}) + _frame({"type": "get_brief"}))
+
+    assert [r["extension_version"] for r in replies] == ["9.8.7", "9.8.7"]
+
+
+def test_no_extension_copy_means_no_extension_version(tmp_mneva_home: Path) -> None:
+    replies, _ = _talk(tmp_mneva_home, _frame({"type": "ping"}))
+
+    assert "extension_version" not in replies[0]

@@ -104,7 +104,12 @@
   // These sites are single-page apps: "New chat" changes the URL without a
   // page load, so watch the URL instead of relying on the initial run.
   let lastHref = null;
-  setInterval(() => {
+  const timer = setInterval(() => {
+    // After the extension reloads, this copy is cut off from it for good.
+    if (!chrome.runtime?.id) {
+      clearInterval(timer);
+      return;
+    }
     if (location.href !== lastHref) {
       lastHref = location.href;
       handledHref = null;
