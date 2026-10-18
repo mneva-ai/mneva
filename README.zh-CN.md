@@ -297,7 +297,7 @@ MCP 这条路覆盖的是桌面 AI 客户端。纯网页版的 AI 聊天界面�
 mneva upgrade
 ```
 
-`mneva upgrade` 会自动识别你当初是怎么装的 mneva（`pipx` / `uv tool` / `uvx` / `pip`），然后跑对应的更新命令，这样你就不用记自己用的是哪种方式了。加上 `--dry-run` 可以只打印命令、不真正执行。如果你是用 `uvx --from mneva mneva-mcp` 跑 MCP 服务器的，uvx 每次运行本来就会拉取最新发布版，所以没有需要“更新”的东西。
+`mneva upgrade` 会自动识别你当初是怎么装的 mneva（`pipx` / `uv tool` / `uvx` / `pip`），然后跑对应的更新命令，这样你就不用记自己用的是哪种方式了。更新完它会用新版本再跑一遍 `mneva setup`，刷新浏览器扩展的那份文件；扩展发现版本变了会自己重新加载，已经打开的 AI 网页也会接着生效。加上 `--dry-run` 可以只打印命令、不真正执行。如果你是用 `uvx --from mneva mneva-mcp` 跑 MCP 服务器的，uvx 每次运行本来就会拉取最新发布版，所以没有需要“更新”的东西。
 
 ### 进阶 — 自带密钥（BYOK）的 LLM 功能
 

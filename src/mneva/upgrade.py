@@ -12,6 +12,10 @@ and harmless to suggest otherwise. The detection and command-planning halves are
 split into pure functions so they can be unit-tested without spawning a
 subprocess.
 
+After the package update, the command runs ``mneva setup --after-upgrade`` in a
+new process, so the new version refreshes what setup installed (the browser
+extension copy, the native host launcher) and the user has one step, not three.
+
   sys.prefix ──▶ detect_install_method ──▶ method ──▶ plan_for ──▶ UpgradePlan
                        │                                              │
                        ▼                                              ▼
@@ -23,8 +27,11 @@ subprocess.
 
 from __future__ import annotations
 
+import subprocess
 import sys
 from dataclasses import dataclass
+
+import click
 
 # Install methods we can distinguish.
 PIPX = "pipx"
@@ -95,3 +102,48 @@ def plan_for(method: str) -> UpgradePlan:
         [sys.executable, "-m", "pip", "install", "--upgrade", "mneva"],
         "Running: pip install --upgrade mneva",
     )
+
+
+def setup_refresh_argv() -> list[str]:
+    """Run setup in a new process: this one still runs the replaced version."""
+    return [sys.executable, "-m", "mneva.cli", "setup", "--after-upgrade"]
+
+
+@click.command("upgrade")
+@click.option(
+    "--dry-run",
+    is_flag=True,
+    default=False,
+    help="Show how mneva would update without running anything.",
+)
+def upgrade_command(dry_run: bool) -> None:
+    """Update mneva to the latest published version.
+
+    Detects how mneva was installed (pipx, uv tool, uvx, or pip) and runs the
+    matching upgrade command, so you don't have to remember which one you used.
+    Then refreshes what `mneva setup` installed. Use --dry-run to see the
+    commands first.
+    """
+    plan = plan_for(detect_install_method())
+    click.echo(plan.message)
+    if dry_run:
+        if plan.command is not None:
+            click.echo(f"(dry-run) would run: {' '.join(plan.command)}")
+        click.echo("(dry-run) would then run: mneva setup --after-upgrade")
+        return
+    if plan.command is not None:
+        try:
+            result = subprocess.run(plan.command, check=False)  # noqa: S603
+        except FileNotFoundError as e:
+            raise click.ClickException(
+                f"could not find '{plan.command[0]}' on PATH. "
+                f"Update manually with: {' '.join(plan.command)}"
+            ) from e
+        if result.returncode != 0:
+            raise click.ClickException(f"upgrade command exited with status {result.returncode}")
+    # Even with nothing to update (uvx), the extension copy may predate this version.
+    if subprocess.run(setup_refresh_argv(), check=False).returncode != 0:  # noqa: S603
+        raise click.ClickException(
+            "mneva was updated, but refreshing its setup failed (see above). Run: mneva setup"
+        )
+    click.echo("mneva upgrade complete. Run `mneva --version` to confirm.")

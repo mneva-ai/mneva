@@ -95,6 +95,22 @@ def test_plan_pip_uses_current_interpreter() -> None:
 
 # --- CLI: mneva upgrade ---------------------------------------------------
 
+SETUP = [sys.executable, "-m", "mneva.cli", "setup", "--after-upgrade"]
+
+
+def _recording_run(
+    monkeypatch: pytest.MonkeyPatch, returncodes: dict[str, int] | None = None
+) -> list[list[str]]:
+    calls: list[list[str]] = []
+
+    def _fake_run(cmd: list[str], **_k: object) -> subprocess.CompletedProcess[bytes]:
+        calls.append(cmd)
+        code = (returncodes or {}).get("setup" if cmd == SETUP else "upgrade", 0)
+        return subprocess.CompletedProcess(cmd, returncode=code)
+
+    monkeypatch.setattr(subprocess, "run", _fake_run)
+    return calls
+
 
 def test_upgrade_dry_run_does_not_execute(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(upgrade_mod, "detect_install_method", lambda: PIP)
@@ -106,45 +122,54 @@ def test_upgrade_dry_run_does_not_execute(monkeypatch: pytest.MonkeyPatch) -> No
     result = CliRunner().invoke(app, ["upgrade", "--dry-run"])
     assert result.exit_code == 0
     assert "would run:" in result.output
+    assert "mneva setup" in result.output
 
 
-def test_upgrade_uvx_is_a_noop(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr(upgrade_mod, "detect_install_method", lambda: UVX)
-
-    def _boom(*_a: object, **_k: object) -> None:
-        raise AssertionError("uvx path must not spawn a subprocess")
-
-    monkeypatch.setattr(subprocess, "run", _boom)
-    result = CliRunner().invoke(app, ["upgrade"])
-    assert result.exit_code == 0
-    assert "uvx" in result.output
-
-
-def test_upgrade_runs_command_on_success(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_upgrade_then_refreshes_setup_in_a_new_process(monkeypatch: pytest.MonkeyPatch) -> None:
+    # A new process, because this one still runs the version being replaced.
     monkeypatch.setattr(upgrade_mod, "detect_install_method", lambda: PIPX)
-    calls: list[list[str]] = []
+    calls = _recording_run(monkeypatch)
 
-    def _fake_run(cmd: list[str], **_k: object) -> subprocess.CompletedProcess[bytes]:
-        calls.append(cmd)
-        return subprocess.CompletedProcess(cmd, returncode=0)
-
-    monkeypatch.setattr(subprocess, "run", _fake_run)
     result = CliRunner().invoke(app, ["upgrade"])
+
     assert result.exit_code == 0
-    assert calls == [["pipx", "upgrade", "mneva"]]
+    assert calls == [["pipx", "upgrade", "mneva"], SETUP]
     assert "complete" in result.output
 
 
-def test_upgrade_nonzero_exit_raises(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr(upgrade_mod, "detect_install_method", lambda: PIPX)
+def test_upgrade_uvx_only_refreshes_setup(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(upgrade_mod, "detect_install_method", lambda: UVX)
+    calls = _recording_run(monkeypatch)
 
-    def _fake_run(cmd: list[str], **_k: object) -> subprocess.CompletedProcess[bytes]:
-        return subprocess.CompletedProcess(cmd, returncode=1)
-
-    monkeypatch.setattr(subprocess, "run", _fake_run)
     result = CliRunner().invoke(app, ["upgrade"])
+
+    assert result.exit_code == 0
+    assert "uvx" in result.output
+    assert calls == [SETUP]
+
+
+def test_upgrade_nonzero_exit_raises_and_skips_setup(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(upgrade_mod, "detect_install_method", lambda: PIPX)
+    calls = _recording_run(monkeypatch, {"upgrade": 1})
+
+    result = CliRunner().invoke(app, ["upgrade"])
+
     assert result.exit_code != 0
     assert "status 1" in result.output
+    assert calls == [["pipx", "upgrade", "mneva"]]
+
+
+def test_failed_setup_refresh_says_the_upgrade_itself_worked(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(upgrade_mod, "detect_install_method", lambda: PIPX)
+    _recording_run(monkeypatch, {"setup": 1})
+
+    result = CliRunner().invoke(app, ["upgrade"])
+
+    assert result.exit_code != 0
+    assert "mneva was updated" in result.output
+    assert "mneva setup" in result.output
 
 
 def test_upgrade_missing_tool_raises(monkeypatch: pytest.MonkeyPatch) -> None:

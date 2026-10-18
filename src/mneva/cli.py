@@ -15,6 +15,7 @@ from mneva.providers import ProviderError, get_provider
 from mneva.setup import setup_command
 from mneva.store import Record, forget_record, make_record_id, write_record
 from mneva.synth import digest_to_bootstrap, synthesize_2stage
+from mneva.upgrade import upgrade_command
 
 # Force UTF-8 stdout on Windows; default cp1252 crashes on LLM Unicode output.
 if sys.platform == "win32":
@@ -364,6 +365,7 @@ def replay(tool: str, scope: str | None) -> None:
 
 app.add_command(brief_command)
 app.add_command(setup_command)
+app.add_command(upgrade_command)
 
 
 def _port_in_use(port: int) -> bool:
@@ -580,43 +582,6 @@ def diagnose(share: bool) -> None:
     from mneva.diagnose import render_diagnose
 
     click.echo(render_diagnose(share=share), nl=False)
-
-
-@app.command()
-@click.option(
-    "--dry-run",
-    is_flag=True,
-    default=False,
-    help="Show how mneva would update without running anything.",
-)
-def upgrade(dry_run: bool) -> None:
-    """Update mneva to the latest published version.
-
-    Detects how mneva was installed (pipx, uv tool, uvx, or pip) and runs the
-    matching upgrade command, so you don't have to remember which one you used.
-    Use --dry-run to see the command first.
-    """
-    import subprocess
-
-    from mneva.upgrade import detect_install_method, plan_for
-
-    plan = plan_for(detect_install_method())
-    click.echo(plan.message)
-    if plan.command is None:
-        return
-    if dry_run:
-        click.echo(f"(dry-run) would run: {' '.join(plan.command)}")
-        return
-    try:
-        result = subprocess.run(plan.command, check=False)  # noqa: S603
-    except FileNotFoundError as e:
-        raise click.ClickException(
-            f"could not find '{plan.command[0]}' on PATH. "
-            f"Update manually with: {' '.join(plan.command)}"
-        ) from e
-    if result.returncode != 0:
-        raise click.ClickException(f"upgrade command exited with status {result.returncode}")
-    click.echo("mneva upgrade complete. Run `mneva --version` to confirm.")
 
 
 if __name__ == "__main__":

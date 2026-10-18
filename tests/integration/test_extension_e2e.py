@@ -10,7 +10,9 @@ to the host it starts, so the brief comes from a throwaway profile.
 from __future__ import annotations
 
 import contextlib
+import json
 import os
+import shutil
 from collections.abc import Iterator
 from pathlib import Path
 from typing import Any
@@ -34,13 +36,30 @@ WAIT_MS = 6000
 
 
 @pytest.fixture
-def browser(tmp_path: Path, tmp_mneva_home: Path) -> Iterator[Any]:
+def extension_dir(request: pytest.FixtureRequest, tmp_path: Path, tmp_mneva_home: Path) -> Path:
+    if getattr(request, "param", None) != "outdated":
+        return native_host.EXTENSION_DIR
+    # The browser runs one copy while `mneva setup` has put a newer one where
+    # the host reports from.
+    loaded = tmp_path / "loaded-extension"
+    shutil.copytree(native_host.EXTENSION_DIR, loaded)
+    newer = tmp_mneva_home / "extension"
+    shutil.copytree(native_host.EXTENSION_DIR, newer)
+    manifest = json.loads((newer / "manifest.json").read_text(encoding="utf-8"))
+    (newer / "manifest.json").write_text(
+        json.dumps({**manifest, "version": "99.0.0"}), encoding="utf-8"
+    )
+    return loaded
+
+
+@pytest.fixture
+def browser(tmp_path: Path, tmp_mneva_home: Path, extension_dir: Path) -> Iterator[Any]:
     sync_api = pytest.importorskip("playwright.sync_api")
     write_record(
         Record(id="e2e1", scope="profile", lifespan="permanent", tool="cli", body="E2E-PROFILE-我"),
         home=tmp_mneva_home,
     )
-    ext = str(native_host.EXTENSION_DIR)
+    ext = str(extension_dir)
     with sync_api.sync_playwright() as p:
         context = p.chromium.launch_persistent_context(
             str(tmp_path / "chrome-profile"),
@@ -49,6 +68,15 @@ def browser(tmp_path: Path, tmp_mneva_home: Path) -> Iterator[Any]:
             args=[f"--disable-extensions-except={ext}", f"--load-extension={ext}"],
             env={**os.environ, "MNEVA_HOME": str(tmp_mneva_home)},
         )
+        # As for a real "Load unpacked" user. Without it Chromium disables a
+        # command-line extension the moment it reloads itself.
+        settings = context.new_page()
+        settings.goto("chrome://extensions")
+        settings.evaluate(
+            "() => new Promise(done => chrome.developerPrivate"
+            ".updateProfileConfiguration({inDeveloperMode: true}, done))"
+        )
+        settings.close()
         yield context
         context.close()
 
@@ -104,3 +132,52 @@ def test_composer_with_text_is_left_alone(browser: Any) -> None:
     text = _composer_text(browser, "https://chatgpt.com/", prefilled="my own question")
 
     assert text == "my own question"
+
+
+def _service_worker(context: Any) -> Any:
+    if context.service_workers:
+        return context.service_workers[0]
+    return context.wait_for_event("serviceworker", timeout=WAIT_MS)
+
+
+@pytest.mark.parametrize("extension_dir", ["outdated"], indirect=True)
+def test_outdated_extension_reloads_once_and_open_tabs_keep_working(browser: Any) -> None:
+    page = browser.new_page()
+    page.route(
+        "https://chatgpt.com/**",
+        lambda route: route.fulfill(content_type="text/html", body=COMPOSER_PAGE.format(text="")),
+    )
+    page.goto("https://chatgpt.com/")
+    page.wait_for_function(
+        "() => document.querySelector('.ProseMirror').innerText.includes('E2E-PROFILE')",
+        timeout=WAIT_MS,
+    )
+    old_worker = _service_worker(browser)
+    # The brief arrived, so the reply carried 99.0.0 and a reload follows.
+    for _ in range(WAIT_MS // 250):
+        if browser.service_workers and browser.service_workers[0] is not old_worker:
+            break
+        page.wait_for_timeout(250)
+    worker = _service_worker(browser)
+    assert worker is not old_worker, "the extension did not reload"
+    assert worker.evaluate("chrome.storage.local.get('reloadedFor')") == {"reloadedFor": "99.0.0"}
+
+    # Same tab, "New chat" without a page load: the reloaded extension must
+    # still put the profile in.
+    page.evaluate(
+        """() => {
+            history.pushState({}, "", "/c/old-chat");
+            setTimeout(() => {
+                document.querySelector('.ProseMirror').innerText = "";
+                history.pushState({}, "", "/");
+            }, 1200);
+        }"""
+    )
+    page.wait_for_function(
+        "() => location.pathname === '/'"
+        " && document.querySelector('.ProseMirror').innerText.includes('E2E-PROFILE')",
+        timeout=WAIT_MS,
+    )
+    # The loaded copy still is not 99.0.0, and it must not reload again.
+    page.wait_for_timeout(3000)
+    assert browser.service_workers == [worker]

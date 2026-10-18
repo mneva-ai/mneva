@@ -1,10 +1,17 @@
 {
   "manifest_version": 3,
   "name": "mneva",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Start every new AI chat with your own mneva profile, read from your computer.",
   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAoc24FObrDWNfetweVsiKKm7aeSZ9dTdmf2JxEhr+v/n0AVG6cxKf7VD+gbSvS3LJlkylwhKlCGa5U+w34NwsbCH8JiXaHsabojyiHSEWFOG9JvgXDZfuhgbeLEOHDovrQPd6/VWl7ojD6KZUmqWahn1yo1Vg8mdYOtDAeeItl+bs8/6LkFqsUGZaYBw7cy9EgXCczno38alUXbJ50A9vfPH/niupsNbQUWKb88DLBq91qaxijm02m8RDe60ILeV3VBYTChlGVBifIt0zfwLqkCUuo7W2m+saOy0mhhG9k3rnSY0DQQO3biP5jK6gLvqo1V5OlrA5Msgg6F4PNEt0ZwIDAQAB",
   "permissions": ["nativeMessaging", "storage", "activeTab", "scripting"],
+  "host_permissions": [
+    "https://chatgpt.com/*",
+    "https://claude.ai/*",
+    "https://gemini.google.com/*",
+    "https://grok.com/*",
+    "https://www.doubao.com/*"
+  ],
   "background": {"service_worker": "background.js"},
   "content_scripts": [
     {

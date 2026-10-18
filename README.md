@@ -445,7 +445,7 @@ The MCP path covers desktop AI clients. Browser-only AI chat UIs (claude.ai web,
 mneva upgrade
 ```
 
-`mneva upgrade` detects how mneva was installed (`pipx` / `uv tool` / `uvx` / `pip`) and runs the matching update command, so you don't have to remember which one you used. Pass `--dry-run` to print the command without running it. If you run the MCP server via `uvx --from mneva mneva-mcp`, uvx already fetches the latest published version on each run, so there is nothing to upgrade.
+`mneva upgrade` detects how mneva was installed (`pipx` / `uv tool` / `uvx` / `pip`) and runs the matching update command, so you don't have to remember which one you used. It then reruns `mneva setup` with the new version, which refreshes the browser extension copy; the extension notices and reloads itself, including in AI tabs that are already open. Pass `--dry-run` to print the commands without running them. If you run the MCP server via `uvx --from mneva mneva-mcp`, uvx already fetches the latest published version on each run, so there is nothing to upgrade.
 
 ### Advanced — BYOK LLM features
 

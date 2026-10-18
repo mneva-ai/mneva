@@ -155,3 +155,18 @@ def test_one_failing_agent_does_not_stop_the_other(
     assert "Claude Code: failed" in result.output
     assert "config file is locked" in result.output
     assert "Codex: added" in result.output
+
+
+def test_setup_after_upgrade_refreshes_without_the_first_run_guide(
+    tmp_mneva_home: Path, agents: FakeAgents
+) -> None:
+    CliRunner().invoke(app, ["setup"])
+    (tmp_mneva_home / "extension" / "content.js").write_text("old", encoding="utf-8")
+
+    result = CliRunner().invoke(app, ["setup", "--after-upgrade"])
+
+    assert result.exit_code == 0, result.output
+    assert "Next steps" not in result.output
+    # The extension picks up the refreshed copy by itself.
+    assert "reloads itself" in result.output
+    assert (tmp_mneva_home / "extension" / "content.js").read_text(encoding="utf-8") != "old"
