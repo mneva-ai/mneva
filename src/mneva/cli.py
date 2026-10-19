@@ -10,12 +10,14 @@ from mneva import __version__, gitctx
 from mneva.brief import brief_command, stale_notice
 from mneva.config import ConfigError, load_config, save_config
 from mneva.indexer import Indexer
+from mneva.learn import learn_command
 from mneva.paths import ensure_home
 from mneva.providers import ProviderError, get_provider
 from mneva.setup import setup_command
 from mneva.store import Record, forget_record, make_record_id, write_record
 from mneva.synth import digest_to_bootstrap, synthesize_2stage
 from mneva.upgrade import upgrade_command
+from mneva.vault import mirror_if_configured
 
 # Force UTF-8 stdout on Windows; default cp1252 crashes on LLM Unicode output.
 if sys.platform == "win32":
@@ -120,7 +122,7 @@ def capture(
         ) from e
     with Indexer(home / "mneva.sqlite") as idx:
         idx.add(record)
-    _mirror_to_vault_if_configured(record, home)
+    mirror_if_configured(record, home)
     click.echo(record.id)
 
 
@@ -142,31 +144,6 @@ def _read_stdin_utf8() -> str:
         raise click.ClickException(
             "stdin is not UTF-8. Save the file as UTF-8, or pass the text as an argument."
         ) from e
-
-
-def _mirror_to_vault_if_configured(record: Record, home: Path) -> None:
-    """Best-effort vault mirror for `capture`. Never raises.
-
-    If the user has not run `mneva init` or has not set a vault, this is
-    a no-op. If the vault is configured but the write fails (missing
-    `.obsidian/`, permissions, iCloud lock), we print a warning to stderr
-    and continue. Capture must never fail because of vault.
-    """
-    if not (home / "config.json").exists():
-        return
-    try:
-        cfg = load_config(home)
-    except ConfigError:
-        return
-    if not cfg.vault_path:
-        return
-    from mneva.vault import VaultError, write_to_vault
-
-    try:
-        target = write_to_vault(record, Path(cfg.vault_path))
-        click.echo(f"  -> vault: {target}", err=True)
-    except (VaultError, OSError) as exc:
-        click.echo(f"  warning: vault write failed: {exc}", err=True)
 
 
 @app.command()
@@ -366,6 +343,7 @@ def replay(tool: str, scope: str | None) -> None:
 app.add_command(brief_command)
 app.add_command(setup_command)
 app.add_command(upgrade_command)
+app.add_command(learn_command)
 
 
 def _port_in_use(port: int) -> bool:
@@ -553,7 +531,7 @@ def distill(source: Path, scope: str, backend: str | None, yes: bool) -> None:
 
     # Mirror to vault (best-effort, reuses PR #9 helper).
     for rec in result.written:
-        _mirror_to_vault_if_configured(rec, home)
+        mirror_if_configured(rec, home)
 
     # Summary.
     click.echo(

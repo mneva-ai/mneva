@@ -22,8 +22,10 @@ import logging
 from dataclasses import dataclass
 from pathlib import Path
 
+import click
 import frontmatter
 
+from mneva.config import ConfigError, load_config
 from mneva.store import (
     Record,
     record_from_frontmatter,
@@ -127,3 +129,26 @@ def sync_from_vault(vault: Path, home: Path) -> SyncResult:
         write_record(record, home=home, overwrite=True)
         imported += 1
     return SyncResult(imported=imported, skipped=skipped)
+
+
+def mirror_if_configured(record: Record, home: Path) -> None:
+    """Best-effort vault mirror after a store write. Never raises.
+
+    If the user has not run `mneva init` or has not set a vault, this is
+    a no-op. If the vault is configured but the write fails (missing
+    `.obsidian/`, permissions, iCloud lock), we print a warning to stderr
+    and continue. A store write must never fail because of the vault.
+    """
+    if not (home / "config.json").exists():
+        return
+    try:
+        cfg = load_config(home)
+    except ConfigError:
+        return
+    if not cfg.vault_path:
+        return
+    try:
+        target = write_to_vault(record, Path(cfg.vault_path))
+        click.echo(f"  -> vault: {target}", err=True)
+    except (VaultError, OSError) as exc:
+        click.echo(f"  warning: vault write failed: {exc}", err=True)
