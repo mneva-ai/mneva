@@ -120,8 +120,10 @@
     {
       "id": "p1-history-import",
       "priority": "P1",
-      "status": "pending",
+      "status": "in_progress",
       "title": "Import memories back from Claude Code history and official chat exports (ChatGPT first, then Claude)",
+      "phase_1_2026_10_18": "Founder chose 'every AI understands me better' over 'find old chats'. Phase 1 = `mneva learn`: Claude Code + Codex prompts -> proposed edits to the profile records, reviewed one by one. Spec: .claude/specs/p1-history-import.spec.md. Exports, auto trigger and extension recording are later phases.",
+      "phase_1_result_2026_10_19": "Release gate passed: founder ran it on real history (3778 prompts) and accepted both proposed edits, one phrase corrected by hand. Shipping as 0.5.0. Next phase: daily automatic run plus a pending-proposal notice in Claude Code.",
       "description": "Return path of 'switch all memory to any tool': memories formed inside other tools flow back by importing their official exports. Order: Claude Code local history, ChatGPT export ZIP (tree-structured JSON mapping), Claude export. Doubao and Gemini export formats are unverified.",
       "context": {
         "existing_pattern": "src/mneva/distill.py",
@@ -175,7 +177,8 @@
         "existing_pattern": "brief.render_brief for the text; setup.server_argv for install detection",
         "key_constraints": "Native host: binary stdio (msvcrt O_BINARY on Windows), import only mneva.brief, stdout carries frames only, exit on EOF. allowed_origins holds the dev ID and later the store ID. Selectors verified 2026-10-16 except Doubao (region-banned from the founder's network).",
         "progress_2026_10_16": "Merged in #28; setup copies the extension to ~/.mneva/extension (stable Load unpacked path). Founder dogfood started. Not yet exercised: Alt+Shift+M shortcut path, popup (status + toggles; toggle is read only on URL change), doubao.com.",
-        "release_gate": "Met 2026-10-16: founder installed the unpacked extension; new chats on ChatGPT, Claude and Gemini showed the profile once each (also after New chat from an existing chat, after the hidden-composer fix #30); founder confirmed popup status and Alt+Shift+M. Released as 0.4.0."
+        "release_gate": "Met 2026-10-16: founder installed the unpacked extension; new chats on ChatGPT, Claude and Gemini showed the profile once each (also after New chat from an existing chat, after the hidden-composer fix #30); founder confirmed popup status and Alt+Shift+M. Released as 0.4.0.",
+        "progress_2026_10_17": "Grok added (0.4.1). Self-reload built in PR #34 (0.4.2, extension 0.3.0): host replies carry extension_version, the extension reloads once per new version and re-injects into open tabs (host_permissions = the five content-script sites), `mneva upgrade` reruns setup. Verified in founder's real Chrome: disk copy set to 0.3.1, card showed 0.3.1 with no manual click. Chrome Web Store listing deferred by founder; when listed, add the store ID to native_host.STORE_EXTENSION_IDS."
       },
       "acceptance_criteria": [
         "Native host protocol tests through a real subprocess pipe, including malformed and oversized frames",

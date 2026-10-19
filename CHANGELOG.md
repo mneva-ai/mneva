@@ -2,6 +2,19 @@
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-10-19
+
+### Added
+- **`mneva learn` keeps your profile current from your own AI history.** It
+  reads the prompts you typed into Claude Code (`~/.claude/history.jsonl`) and
+  Codex (session files), leaves out text the tools inject, pasted documents and
+  obvious secrets, extracts dated facts about you, and proposes edits to your
+  profile records. Nothing is written until you accept an edit; an edit keeps
+  the record's id. Facts are extracted by your local Claude Code (`claude -p`,
+  no API key for mneva, run with tools, MCP servers, plugins and session
+  saving off); `--backend` picks an API provider instead. Later runs read only
+  new prompts.
+
 ## [0.4.2] - 2026-10-17
 
 ### Changed
