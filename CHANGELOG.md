@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-10-19
+
 ### Added
 - **`mneva learn` keeps your profile current from your own AI history.** It
   reads the prompts you typed into Claude Code (`~/.claude/history.jsonl`) and

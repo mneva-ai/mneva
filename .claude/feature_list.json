@@ -123,6 +123,7 @@
       "status": "in_progress",
       "title": "Import memories back from Claude Code history and official chat exports (ChatGPT first, then Claude)",
       "phase_1_2026_10_18": "Founder chose 'every AI understands me better' over 'find old chats'. Phase 1 = `mneva learn`: Claude Code + Codex prompts -> proposed edits to the profile records, reviewed one by one. Spec: .claude/specs/p1-history-import.spec.md. Exports, auto trigger and extension recording are later phases.",
+      "phase_1_result_2026_10_19": "Release gate passed: founder ran it on real history (3778 prompts) and accepted both proposed edits, one phrase corrected by hand. Shipping as 0.5.0. Next phase: daily automatic run plus a pending-proposal notice in Claude Code.",
       "description": "Return path of 'switch all memory to any tool': memories formed inside other tools flow back by importing their official exports. Order: Claude Code local history, ChatGPT export ZIP (tree-structured JSON mapping), Claude export. Doubao and Gemini export formats are unverified.",
       "context": {
         "existing_pattern": "src/mneva/distill.py",
