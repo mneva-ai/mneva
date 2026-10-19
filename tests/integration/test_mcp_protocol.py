@@ -34,6 +34,7 @@ def _server_params(home: Path, client_name: str = "pytest") -> StdioServerParame
         env={
             "MNEVA_HOME": str(home),
             "MNEVA_MCP_CLIENT": client_name,
+            "MNEVA_LEARN_AUTO": "0",
             # PATH needed so the subprocess Python can find anything it imports
             # via site-packages (no-op on most setups, defense in depth).
             "PATH": __import__("os").environ.get("PATH", ""),

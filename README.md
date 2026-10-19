@@ -433,7 +433,7 @@ The MCP path covers desktop AI clients. Browser-only AI chat UIs (claude.ai web,
 
 **Your profile in one paste:** save who you are and how you work as records with `--scope profile --lifespan permanent`, then run `uvx mneva brief --copy` and paste it into the tool's "about you" setting (for ChatGPT's custom instructions, add `--max-chars 1500`). mneva remembers every copy and tells you when your profile changes after it.
 
-**Keep the profile current from your own history:** `mneva learn` reads the prompts you typed into Claude Code and Codex, leaves out pasted documents and obvious secrets, and proposes edits to your profile records. It runs on your local Claude Code (`claude -p`), so mneva needs no API key; `--backend` picks an API provider instead. Nothing changes until you accept: `mneva learn --accept 1,2` (or `all`), or `mneva learn --discard`. Later runs read only prompts you typed since the last run.
+**Keep the profile current from your own history:** `mneva learn` reads the prompts you typed into Claude Code and Codex, leaves out pasted documents and obvious secrets, and proposes edits to your profile records. It runs on your local Claude Code (`claude -p`), so mneva needs no API key; `--backend` picks an API provider instead. Nothing changes until you accept: `mneva learn --accept 1,2` (or `all`), or `mneva learn --discard`. Later runs read only prompts you typed since the last run. Once you have a profile, this also happens by itself about once a day when a Claude Code or Codex session starts (login only, never an API key), and the next conversation mentions any edits waiting for you. `MNEVA_LEARN_AUTO=0` turns that off.
 
 ### Alternative installs
 

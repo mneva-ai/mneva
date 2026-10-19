@@ -7,6 +7,13 @@ from pathlib import Path
 import pytest
 
 
+@pytest.fixture(autouse=True)
+def _no_auto_learn(monkeypatch: pytest.MonkeyPatch) -> None:
+    # The MCP server launches a background `mneva learn`; with claude on a
+    # developer's PATH a test must never start a real one.
+    monkeypatch.setenv("MNEVA_LEARN_AUTO", "0")
+
+
 @pytest.fixture
 def tmp_mneva_home(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     """Isolated $MNEVA_HOME pointing at a tmp dir (`<tmp>/.mneva`)."""

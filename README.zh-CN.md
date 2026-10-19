@@ -285,7 +285,7 @@ MCP 这条路覆盖的是桌面 AI 客户端。纯网页版的 AI 聊天界面�
 
 **一次粘贴带上你的档案：** 把你是谁、怎么工作存成 `--scope profile --lifespan permanent` 的记录，然后运行 `uvx mneva brief --copy`，粘贴进工具的"关于你"设置（ChatGPT 的自定义指令加上 `--max-chars 1500`）。mneva 会记住每次复制，档案改了以后会提醒你重新粘贴。
 
-**用你自己的历史让档案保持最新：** `mneva learn` 读取你在 Claude Code 和 Codex 里打过的提问，去掉粘贴进去的文档和明显的密钥，然后对你的档案记录提出修改建议。它用你本机的 Claude Code（`claude -p`）来提炼，所以 mneva 不需要 API key；想改用 API 可以加 `--backend`。你接受之前什么都不会改：`mneva learn --accept 1,2`（或 `all`），不要就 `mneva learn --discard`。之后再跑只读上次以来的新提问。
+**用你自己的历史让档案保持最新：** `mneva learn` 读取你在 Claude Code 和 Codex 里打过的提问，去掉粘贴进去的文档和明显的密钥，然后对你的档案记录提出修改建议。它用你本机的 Claude Code（`claude -p`）来提炼，所以 mneva 不需要 API key；想改用 API 可以加 `--backend`。你接受之前什么都不会改：`mneva learn --accept 1,2`（或 `all`），不要就 `mneva learn --discard`。之后再跑只读上次以来的新提问。有了档案以后，它每天会在你打开 Claude Code 或 Codex 时自己跑一次（只用你的登录，不用 API key），有待确认的修改时，下一次对话会提一句。设置 `MNEVA_LEARN_AUTO=0` 可以关掉。
 
 ### 其他安装方式
 

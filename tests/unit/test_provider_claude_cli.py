@@ -62,6 +62,14 @@ def test_falls_back_to_the_api_key_when_no_login(calls, monkeypatch: pytest.Monk
     assert calls[2]["env"]["ANTHROPIC_API_KEY"] == "sk-test"
 
 
+def test_login_only_never_uses_the_key(calls, monkeypatch: pytest.MonkeyPatch) -> None:
+    replies = [_done("Not logged in · Please run /login", code=1)]
+    monkeypatch.setattr(claude_cli.subprocess, "run", _fake_run(calls, replies))
+    with pytest.raises(ProviderError, match="Not logged in"):
+        claude_cli.ClaudeCliProvider(model="sonnet", allow_api_key=False).complete("x", max_tokens=100)
+    assert len(calls) == 1
+
+
 def test_error_reply_raises(calls, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.delenv("ANTHROPIC_API_KEY")
     monkeypatch.setattr(claude_cli.subprocess, "run", _fake_run(calls, [_done(_reply("overloaded", is_error=True))]))

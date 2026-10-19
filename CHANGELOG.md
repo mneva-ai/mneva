@@ -2,6 +2,18 @@
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-10-19
+
+### Added
+- **`mneva learn` now runs by itself about once a day.** mneva's MCP server
+  starts with each Claude Code or Codex session; when the last run finished
+  more than 20 hours ago and you have a profile, it starts one learn run in the
+  background over your newest prompts (at least 20, at most about 120,000
+  characters). It uses only your Claude Code login, never an API key. When
+  edits are waiting, the next conversation's profile tells the AI to mention
+  them in one line; nothing changes until you run `mneva learn --accept`.
+  Set `MNEVA_LEARN_AUTO=0` to turn it off. The run logs to `~/.mneva/learn.log`.
+
 ## [0.5.0] - 2026-10-19
 
 ### Added

@@ -6,6 +6,8 @@ used when no login works. The call runs with tools, MCP servers, settings
 (hooks, plugins) and session persistence off, from an empty directory, so it
 is a plain completion. Persistence must stay off: otherwise every learn run
 would write a Claude Code session whose prompts the next run reads back.
+A run nobody started by hand (learn_auto.py) passes allow_api_key=False, so it
+can use the login's plan but never bill a key.
 """
 from __future__ import annotations
 
@@ -20,12 +22,15 @@ from mneva.providers.base import ProviderError
 _SYSTEM_PROMPT = "You extract and organize facts. Answer with the requested JSON only."
 _TIMEOUT_SECONDS = 900
 _KEY_VAR = "ANTHROPIC_API_KEY"
+# On Windows claude is a .CMD shim; launched from a background run with no
+# console, it would otherwise open a visible console window for each call.
+_NO_WINDOW = getattr(subprocess, "CREATE_NO_WINDOW", 0)
 
 
 class ClaudeCliProvider:
     name = "claude-code"
 
-    def __init__(self, *, model: str) -> None:
+    def __init__(self, *, model: str, allow_api_key: bool = True) -> None:
         executable = shutil.which("claude")
         if executable is None:
             raise ProviderError(
@@ -43,6 +48,7 @@ class ClaudeCliProvider:
             "--no-session-persistence",
             "--system-prompt", _SYSTEM_PROMPT,
         ]
+        self._allow_key = allow_api_key
         self._use_key = False
         self._last_failure = "no output"
         # Sum of Claude Code's own per-call estimate, so the user sees the bill.
@@ -54,7 +60,7 @@ class ClaudeCliProvider:
         if not self._use_key:
             env = {k: v for k, v in os.environ.items() if k != _KEY_VAR}
             reply = self._run(prompt, env)
-            if reply is not None or _KEY_VAR not in os.environ:
+            if reply is not None or not self._allow_key or _KEY_VAR not in os.environ:
                 return self._result(reply)
             self._use_key = True
         return self._result(self._run(prompt, dict(os.environ)))
@@ -71,6 +77,7 @@ class ClaudeCliProvider:
                     env=env,
                     cwd=cwd,
                     timeout=_TIMEOUT_SECONDS,
+                    creationflags=_NO_WINDOW,
                 )
             except (OSError, subprocess.TimeoutExpired) as exc:
                 raise ProviderError(f"claude -p failed: {exc}") from exc
