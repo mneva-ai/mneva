@@ -102,12 +102,15 @@ class Edit:
     reason: str
 
 
-def make_providers(backend: str) -> tuple[Provider, Provider]:
+def make_providers(backend: str, *, allow_api_key: bool = True) -> tuple[Provider, Provider]:
     """(extractor, merger). Claude Code needs no key; the others read theirs from the env."""
     if backend == "claude-code":
         from mneva.providers.claude_cli import ClaudeCliProvider
 
-        return ClaudeCliProvider(model=EXTRACT_MODEL), ClaudeCliProvider(model=MERGE_MODEL)
+        return (
+            ClaudeCliProvider(model=EXTRACT_MODEL, allow_api_key=allow_api_key),
+            ClaudeCliProvider(model=MERGE_MODEL, allow_api_key=allow_api_key),
+        )
     provider = get_provider(backend)
     return provider, provider
 
@@ -286,7 +289,7 @@ def learn_command(backend: str, from_start: bool, accept: str | None, discard: b
             click.echo("Proposal discarded.")
             return
     if proposal is None:
-        proposal = _new_proposal(home, backend=backend, from_start=from_start)
+        proposal = new_proposal(home, backend=backend, from_start=from_start)
         if proposal is None:
             return
     edits = [Edit(**e) for e in proposal.get("edits", [])]
@@ -311,12 +314,42 @@ def learn_command(backend: str, from_start: bool, accept: str | None, discard: b
     )
 
 
-def _new_proposal(home: Path, *, backend: str, from_start: bool) -> dict[str, Any] | None:
+def _newest(prompts: list[history.Prompt], max_chars: int) -> list[history.Prompt]:
+    kept: list[history.Prompt] = []
+    total = 0
+    for prompt in reversed(prompts):
+        total += len(prompt.text)
+        if total > max_chars and kept:
+            break
+        kept.append(prompt)
+    return kept[::-1]
+
+
+def new_proposal(
+    home: Path,
+    *,
+    backend: str,
+    from_start: bool,
+    max_chars: int | None = None,
+    min_prompts: int = 1,
+    allow_api_key: bool = True,
+) -> dict[str, Any] | None:
+    """Read new prompts, ask the models, save and return the proposal (None if no edits).
+
+    Below *min_prompts* nothing is sent and the watermark stays, so those
+    prompts count toward the next run. *max_chars* keeps only the newest
+    prompts; the older ones are passed over for good.
+    """
     state = {} if from_start else _load_state(home)
     prompts = history.collect(state)
     if not prompts:
         click.echo("Nothing new to learn from since the last run.")
         return None
+    if len(prompts) < min_prompts:
+        click.echo(f"Only {len(prompts)} new prompts; waiting for {min_prompts}.")
+        return None
+    if max_chars is not None:
+        prompts = _newest(prompts, max_chars)
     counts = {s: sum(p.source == s for p in prompts) for s in history.SOURCES}
     click.echo(
         "Read "
@@ -324,7 +357,7 @@ def _new_proposal(home: Path, *, backend: str, from_start: bool) -> dict[str, An
         + f". Sending them to {backend} to extract facts (this can take a while)."
     )
     try:
-        extractor, merger = make_providers(backend)
+        extractor, merger = make_providers(backend, allow_api_key=allow_api_key)
         facts = extract_facts(extractor, prompts, progress=lambda m: click.echo(m, err=True))
         records = [r for r in iter_records(home=home) if r.scope == PROFILE_SCOPE]
         edits = propose_edits(merger, records, facts) if facts else []

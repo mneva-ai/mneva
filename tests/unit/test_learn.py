@@ -65,7 +65,7 @@ def setup(tmp_mneva_home: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch)
         ensure_ascii=False,
     )
     fake = FakeProvider(merge_reply)
-    monkeypatch.setattr(learn_mod, "make_providers", lambda backend: (fake, fake))
+    monkeypatch.setattr(learn_mod, "make_providers", lambda backend, **kw: (fake, fake))
     return tmp_mneva_home, fake
 
 

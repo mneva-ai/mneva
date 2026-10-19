@@ -35,7 +35,7 @@ from typing import Any
 
 from mcp.server.fastmcp import FastMCP
 
-from mneva import gitctx
+from mneva import gitctx, learn_auto
 from mneva.brief import PROFILE_SCOPE, stale_notice
 from mneva.indexer import Indexer
 from mneva.paths import ensure_home, mneva_home
@@ -390,7 +390,11 @@ def replay_context(
         return f"replay_context error: unknown tool {tool!r}. Valid: {valid}."
     home = ensure_home()
     _log_attribution("replay")
-    return render_replay(tool, scope=scope, home=home)
+    out = render_replay(tool, scope=scope, home=home)
+    # The profile is read at the start of every conversation, so this is where
+    # the user hears about edits the daily learn run proposed.
+    notice = learn_auto.pending_notice(home) if scope == PROFILE_SCOPE else None
+    return f"{out}\n\n{notice}" if notice else out
 
 
 @mcp.tool()
@@ -464,6 +468,8 @@ def main() -> None:
             "name) to the MCP config block to enable per-client attribution.\n"
         )
 
+    # Every agent session starts this server, which makes it mneva's daily tick.
+    learn_auto.maybe_start(ensure_home())
     mcp.run()
 
 
