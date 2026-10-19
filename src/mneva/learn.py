@@ -304,7 +304,11 @@ def learn_command(backend: str, from_start: bool, accept: str | None, discard: b
         if choice is not None:
             _finish(proposal_path, edits, _pick(choice, len(edits)), home)
             return
-    click.echo("\nThe proposal is saved. To apply: mneva learn --accept 1,3 (or all). To drop: mneva learn --discard")
+    example = ",".join(str(n) for n in range(1, min(len(edits), 2) + 1))
+    click.echo(
+        f"\nThe proposal is saved. To apply: mneva learn --accept {example} (or all). "
+        "To drop: mneva learn --discard"
+    )
 
 
 def _new_proposal(home: Path, *, backend: str, from_start: bool) -> dict[str, Any] | None:
