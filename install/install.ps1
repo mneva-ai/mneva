@@ -19,7 +19,21 @@
 
     $cn = $env:MNEVA_MIRROR -eq 'cn'
     if ($cn) {
-        if (-not $env:UV_DEFAULT_INDEX) { $env:UV_DEFAULT_INDEX = 'https://pypi.tuna.tsinghua.edu.cn/simple' }
+        if (-not $env:UV_DEFAULT_INDEX) {
+            # A mirror can be down for hours; take the first that answers.
+            # uv records the chosen one, so `mneva upgrade` keeps using it.
+            foreach ($candidate in 'https://pypi.tuna.tsinghua.edu.cn/simple',
+                                   'https://mirrors.cloud.tencent.com/pypi/simple') {
+                try {
+                    Invoke-WebRequest -UseBasicParsing -TimeoutSec 20 "$candidate/mneva/" | Out-Null
+                    $env:UV_DEFAULT_INDEX = $candidate
+                    break
+                } catch {
+                    Write-Host "$candidate is not reachable, trying the next mirror."
+                }
+            }
+            if (-not $env:UV_DEFAULT_INDEX) { throw 'No PyPI mirror is reachable. Check the network and run this again.' }
+        }
         if (-not $env:UV_PYTHON_INSTALL_MIRROR) {
             $env:UV_PYTHON_INSTALL_MIRROR = 'https://registry.npmmirror.com/-/binary/python-build-standalone'
         }

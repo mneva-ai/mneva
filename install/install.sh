@@ -24,6 +24,14 @@ download() {
     fi
 }
 
+reachable() {
+    if command -v curl >/dev/null 2>&1; then
+        curl -sf --max-time 20 -o /dev/null "$1"
+    else
+        wget -q -T 20 -O /dev/null "$1"
+    fi
+}
+
 # Where the official installer puts uv, in its own order. A fresh install is
 # not on this shell's PATH yet.
 find_uv() {
@@ -97,7 +105,19 @@ main() {
     cn=0
     if [ "${MNEVA_MIRROR:-}" = cn ]; then
         cn=1
-        : "${UV_DEFAULT_INDEX:=https://pypi.tuna.tsinghua.edu.cn/simple}"
+        if [ -z "${UV_DEFAULT_INDEX:-}" ]; then
+            # A mirror can be down for hours; take the first that answers.
+            # uv records the chosen one, so `mneva upgrade` keeps using it.
+            for candidate in https://pypi.tuna.tsinghua.edu.cn/simple \
+                https://mirrors.cloud.tencent.com/pypi/simple; do
+                if reachable "$candidate/mneva/"; then
+                    UV_DEFAULT_INDEX=$candidate
+                    break
+                fi
+                say "$candidate is not reachable, trying the next mirror."
+            done
+            [ -n "${UV_DEFAULT_INDEX:-}" ] || fail "no PyPI mirror is reachable. Check the network and run this again."
+        fi
         : "${UV_PYTHON_INSTALL_MIRROR:=https://registry.npmmirror.com/-/binary/python-build-standalone}"
         export UV_DEFAULT_INDEX UV_PYTHON_INSTALL_MIRROR
     fi
