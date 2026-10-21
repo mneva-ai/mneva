@@ -51,6 +51,9 @@ def test_ping_and_get_brief_over_a_real_pipe(tmp_mneva_home: Path) -> None:
 
     assert code == 0
     assert replies[0]["ok"] is True and replies[0]["version"]
+    # A store-updated extension checks this before sending a newer message,
+    # so an old host gets "run mneva upgrade" instead of a bare bad_request.
+    assert replies[0]["supports"] == ["ping", "get_brief"]
     assert replies[1]["ok"] is True
     assert "我说中文。\nSecond line." in replies[1]["text"]
     assert replies[1]["records"] == 1

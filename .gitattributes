@@ -1,0 +1,2 @@
+# `curl | sh` breaks on CRLF line endings, whatever the committer's OS.
+*.sh text eol=lf

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import subprocess
 from pathlib import Path
 from typing import Any
@@ -50,15 +51,44 @@ class FakeAgents:
 
 
 @pytest.fixture
-def agents(monkeypatch: pytest.MonkeyPatch) -> FakeAgents:
+def claude_folder(tmp_path: Path) -> Path:
+    folder = tmp_path / "Claude"
+    folder.mkdir()
+    return folder
+
+
+@pytest.fixture
+def agents(monkeypatch: pytest.MonkeyPatch, claude_folder: Path) -> FakeAgents:
     fake = FakeAgents()
     monkeypatch.setattr(setup.shutil, "which", fake.which)
     monkeypatch.setattr(setup.subprocess, "run", fake.run)
-    # Never write the real browser registry from tests.
+    # Never write the real browser registry or Claude config from tests.
     monkeypatch.setattr(
         setup.native_host, "register", lambda argv, dry_run=False: "Browser bridge: registered"
     )
+    monkeypatch.setattr(setup.claude_desktop, "config_dir", lambda: claude_folder)
     return fake
+
+
+def test_setup_registers_claude_desktop(
+    tmp_mneva_home: Path, agents: FakeAgents, claude_folder: Path
+) -> None:
+    result = CliRunner().invoke(app, ["setup"])
+
+    assert result.exit_code == 0, result.output
+    config = json.loads((claude_folder / "claude_desktop_config.json").read_text(encoding="utf-8"))
+    assert config["mcpServers"]["mneva"]["env"] == {"MNEVA_MCP_CLIENT": "claude-desktop"}
+    assert "reopen it" in result.output
+
+
+def test_setup_names_both_browsers_and_all_five_sites(
+    tmp_mneva_home: Path, agents: FakeAgents
+) -> None:
+    result = CliRunner().invoke(app, ["setup"])
+
+    for name in ("Chrome", "Edge", "edge://extensions", "ChatGPT", "Claude", "Gemini", "Doubao",
+                 "Grok"):
+        assert name in result.output
 
 
 def test_setup_registers_the_browser_bridge_and_says_how_to_load_the_extension(

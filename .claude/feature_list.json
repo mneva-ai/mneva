@@ -1,7 +1,7 @@
 {
-  "updated_at": "2026-10-16",
+  "updated_at": "2026-10-20",
   "strategy_ref": "CLAUDE.md -> ## Current Strategy (2026-10-15 amendment); research + plan in docs/market-research-2026-10-15/",
-  "strategy_summary": "AMENDED 2026-10-15: one personal profile, owned as Markdown, carried across every AI tool a heavy AI user runs (Claude Code, Codex, chat apps, and via their MCPs, video/image tools). Target widened from developers to anyone who works through CLI agents daily. Founder is the target user; validation is dogfooding, not outreach. Markdown-as-truth, no account, reviewable, Obsidian all kept from the 2026-07-31 line.",
+  "strategy_summary": "AMENDED 2026-10-20: target also includes ordinary workers who mainly use web and phone AI apps, including mainland China; their profile must keep itself current with only an occasional accept click (p1-web-users, three releases). Desktop app, landing page and Reddit outreach still out. Validation: founder dogfooding plus one real ordinary user per release. AMENDED 2026-10-15: one personal profile, owned as Markdown, carried across every AI tool a heavy AI user runs (Claude Code, Codex, chat apps, and via their MCPs, video/image tools). Target widened from developers to anyone who works through CLI agents daily. Founder is the target user; validation is dogfooding, not outreach. Markdown-as-truth, no account, reviewable, Obsidian all kept from the 2026-07-31 line.",
   "roadmap_design_ref": "docs/user-research-hn-reddit-2026-05-25.md sections 7-8",
   "features": [
     {
@@ -165,6 +165,21 @@
         "Output respects a token budget",
         "Only approved records are returned",
         "MCP result carries a human-readable summary key"
+      ]
+    },
+    {
+      "id": "p1-web-users",
+      "priority": "P1",
+      "status": "in_progress",
+      "title": "Self-updating profile for web and phone users, in three releases",
+      "description": "Founder decided 2026-10-20 (grilling Q1 to Q22). Release 1: one-line install (uv, mainland mirror command in the Chinese README), Claude desktop registration, Chrome and Edge store listings. Release 2: opt-in recording of web chats (prompts, replies, file names), learning from it with Claude Code, Codex or a DeepSeek key, review in the extension. Release 3: write the accepted profile into each site's account settings (marked block only) so phone apps get it. Full design: .claude/specs/p1-web-users.spec.md.",
+      "context": {
+        "files": "install/ (new), src/mneva/setup.py, src/mneva/native_host.py, src/mneva/extension/, later web_history.py and providers/codex_cli.py, providers/deepseek.py",
+        "existing_pattern": "setup.AgentClient registration; native_host message handlers; learn_auto gates; providers/claude_cli.py for a login-only CLI engine",
+        "key_constraints": "Native host must still import neither mneva.cli nor mneva.mcp_server. Recording only after consent; facts only from the user's own words. Founder's Claude desktop is the Microsoft Store build, which may ignore %APPDATA% config: test first, fall back to .mcpb. Store accounts and fees are the founder's to do."
+      },
+      "acceptance_criteria": [
+        "See the spec's 19 numbered criteria (after the 2026-10-20 engineering review); each release also needs one real ordinary user installing alone from the README."
       ]
     },
     {

@@ -1,10 +1,12 @@
 """setup.py — the one command to run after `pip install mneva`.
 
 Registers mneva's MCP server with every agent CLI it finds (Claude Code,
-Codex), registers the native messaging host the browser extension reads the
-profile through, and writes a profile template. Each agent is registered
-through its own `mcp add` command rather than by editing its config file, so
-mneva never has to track those file formats.
+Codex) and with the Claude desktop app, registers the native messaging host
+the browser extension reads the profile through, and writes a profile
+template. Each agent CLI is registered through its own `mcp add` command
+rather than by editing its config file, so mneva never has to track those
+file formats; Claude desktop has no such command, so `claude_desktop` merges
+its config file instead.
 
 Safe to re-run: a client that already has an `mneva` server is left alone,
 and an existing template is never overwritten.
@@ -19,7 +21,7 @@ from pathlib import Path
 
 import click
 
-from mneva import native_host
+from mneva import claude_desktop, native_host
 from mneva.paths import ensure_home, mneva_home
 from mneva.upgrade import UVX, detect_install_method
 
@@ -181,13 +183,14 @@ Next steps:
      For tools without MCP: mneva brief --copy, then paste into that tool's
      "about you" setting (ChatGPT: add --max-chars 1500). mneva reminds you
      when your profile changes after a copy.
-  4. Restart Claude Code or Codex. mneva tells them to read your profile
-     at the start of each conversation; if one skips it, say "read my mneva profile".
-  5. Browser (ChatGPT, Claude, Gemini, Doubao on the web): open
-     chrome://extensions, turn on Developer mode, click "Load unpacked" and
-     pick {extension}
+  4. Restart Claude Code, Codex or the Claude desktop app. mneva tells them to
+     read your profile at the start of each conversation; if one skips it,
+     say "read my mneva profile".
+  5. Browser (ChatGPT, Claude, Gemini, Doubao and Grok on the web), in Chrome
+     or Edge: open chrome://extensions (Edge: edge://extensions), turn on
+     Developer mode, click "Load unpacked" and pick {extension}
      New chats then start with your profile. Needed once, until the extension
-     is in the Chrome Web Store.
+     is in the Chrome and Edge stores.
 """
 
 
@@ -200,6 +203,14 @@ def _register_browser_bridge(*, dry_run: bool) -> bool:
     return True
 
 
+def _register_claude_desktop(server: list[str], *, dry_run: bool) -> bool:
+    ok, message = claude_desktop.register(
+        server, dry_run=dry_run, folder=claude_desktop.config_dir()
+    )
+    click.echo(message)
+    return ok
+
+
 @click.command("setup")
 @click.option(
     "--dry-run", is_flag=True, help="Show what setup would do without changing anything."
@@ -208,11 +219,12 @@ def _register_browser_bridge(*, dry_run: bool) -> bool:
 # launcher; the first-run guide is noise at that point.
 @click.option("--after-upgrade", is_flag=True, hidden=True)
 def setup_command(dry_run: bool, after_upgrade: bool) -> None:
-    """Connect mneva to Claude Code, Codex and your browser, and create a profile template."""
+    """Connect mneva to Claude Code, Codex, Claude desktop and your browser."""
     server = server_argv()
     # Evaluate every client before failing, so one broken CLI does not hide
     # the state of the other.
     results = [_register(client, server, dry_run=dry_run) for client in CLIENTS]
+    results.append(_register_claude_desktop(server, dry_run=dry_run))
     results.append(_register_browser_bridge(dry_run=dry_run))
     extension = _install_extension(dry_run=dry_run)
     template = _write_template(dry_run=dry_run)

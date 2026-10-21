@@ -2,6 +2,30 @@
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-10-21
+
+### Added
+- **Install in one line, with no Python beforehand.** `install/install.ps1`
+  (Windows) and `install/install.sh` (macOS, Linux) install uv, then
+  `uv tool install mneva`, then run `mneva setup`, and put `mneva` on PATH for
+  new terminals. With `MNEVA_MIRROR=cn` every download comes from mirrors
+  reachable in mainland China (uv and packages from the Tsinghua PyPI mirror,
+  or Tencent's when Tsinghua does not answer; Python from npmmirror); later
+  `mneva upgrade` runs keep using the mirror. Both READMEs lead with the
+  command. CI runs both scripts on clean machines for every PR.
+- **`mneva setup` connects the Claude desktop app** by adding mneva to
+  `claude_desktop_config.json`. Other servers and settings are kept, an
+  existing entry is left alone, and a file that does not parse is never
+  rewritten; setup prints the entry to add by hand instead.
+- The native host's `ping` reply lists the message types it supports, so a
+  store-updated extension can tell an older mneva apart and ask for
+  `mneva upgrade`.
+- `store/build.py` builds the Chrome Web Store and Edge Add-ons upload without
+  the manifest `key`; `docs/privacy.md` is the extension's privacy policy.
+
+### Changed
+- `mneva setup`'s closing text names Chrome and Edge and all five sites.
+
 ## [0.6.0] - 2026-10-19
 
 ### Added
