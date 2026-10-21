@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+### Changed
+- README (English and Chinese) rewritten for people who use AI mainly in the
+  browser: one-line install first, then the three setup steps, a table of what
+  works where, and the developer material below. Removed the generated project
+  index, the badge row and dead links; the roadmap now covers 0.5 to 0.7 and
+  the next three releases.
+
 ## [0.7.0] - 2026-10-21
 
 ### Added
