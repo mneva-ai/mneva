@@ -154,7 +154,7 @@ Release 3:
 - Store review for an extension that reads page content and talks to a native program may take up to about 3 weeks and ask for changes.
 - Five sites' chat pages and settings pages change without notice. Recording and settings writes are per-site adapters with a fallback, and each release re-checks them in the browser.
 - Engine runs use the user's subscription quota or DeepSeek balance.
-- The Claude desktop Store build may ignore the config file (see release 1).
+- ~~The Claude desktop Store build may ignore the config file.~~ Resolved 2026-10-21: on the founder's Store install (1.1617) Claude read `%APPDATA%\Claude\claude_desktop_config.json`, started mneva and listed its tools, and kept the entry when it rewrote the file. No `.mcpb` needed.
 - The mainland download chain is only simulated in testing. A link that works from abroad with hosts blocking can still fail inside mainland China; the release's real user is the first real test.
 - Release 2 sends the recording consent and new disclosures through store review again, which can delay that release.
 
