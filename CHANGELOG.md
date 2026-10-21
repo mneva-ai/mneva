@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-10-21
+
 ### Added
 - **Install in one line, with no Python beforehand.** `install/install.ps1`
   (Windows) and `install/install.sh` (macOS, Linux) install uv, then
