@@ -141,6 +141,36 @@
 
 ## 快速开始
 
+### 一行命令安装
+
+事先不用装 Python。脚本会先装 [uv](https://docs.astral.sh/uv/)，由 uv 装好 mneva 和它要用的 Python，再运行 `mneva setup`，把 Claude Code、Codex、Claude 桌面版和浏览器都接上。重复运行不会改动任何东西。
+
+**中国大陆**（所有文件都从国内镜像下载：uv 和软件包走清华 PyPI 镜像，Python 走 npmmirror）：
+
+Windows，打开 PowerShell，粘贴：
+
+```powershell
+$env:MNEVA_MIRROR='cn'; irm https://cdn.jsdelivr.net/gh/mneva-ai/mneva@main/install/install.ps1 | iex
+```
+
+macOS / Linux，打开终端，粘贴：
+
+```bash
+curl -LsSf https://cdn.jsdelivr.net/gh/mneva-ai/mneva@main/install/install.sh | MNEVA_MIRROR=cn sh
+```
+
+**其他地区：**
+
+```powershell
+irm https://raw.githubusercontent.com/mneva-ai/mneva/main/install/install.ps1 | iex
+```
+
+```bash
+curl -LsSf https://raw.githubusercontent.com/mneva-ai/mneva/main/install/install.sh | sh
+```
+
+装完以后新开一个终端，就能直接用 `mneva` 命令。下面几节是手动安装的方法。
+
 ### 环境要求
 
 - **Python 3.11 或更新版本**

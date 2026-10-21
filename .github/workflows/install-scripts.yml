@@ -1,0 +1,111 @@
+name: Install scripts
+
+# The one-line installers in install/ are the main way ordinary users get
+# mneva, so every PR runs them on clean machines against the wheel it builds.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  wheel:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install build && python -m build --wheel
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wheel
+          path: dist/*.whl
+
+  shellcheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: shellcheck install/install.sh
+
+  install:
+    needs: wheel
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        # "cn" takes uv, Python and packages from the mainland mirrors. From
+        # a US runner this proves the mirror paths work, not their speed.
+        mirror: ["", "cn"]
+    env:
+      MNEVA_MIRROR: ${{ matrix.mirror }}
+      # Ignore the runner's own Pythons: users may have none.
+      UV_PYTHON_PREFERENCE: only-managed
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: wheel
+          path: dist
+
+      - name: Remove a preinstalled uv, so the script installs its own
+        shell: bash
+        run: |
+          while command -v uv >/dev/null 2>&1; do
+            path=$(command -v uv)
+            echo "removing $path"
+            rm -f "$path" 2>/dev/null || sudo rm -f "$path"
+            hash -r
+          done
+
+      - name: Run install.sh twice
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          MNEVA_PACKAGE=$(ls "$PWD"/dist/*.whl)
+          export MNEVA_PACKAGE
+          sh < install/install.sh
+          sh < install/install.sh 2>&1 | tee second-run.log
+          test "${PIPESTATUS[0]}" = 0
+
+      # Windows PowerShell 5.1 piped into iex, as users run it. Started from
+      # bash so the log is captured outside PowerShell: redirecting inside
+      # 5.1 turns uv's progress lines on stderr into errors.
+      - name: Run install.ps1 twice
+        if: runner.os == 'Windows'
+        shell: bash
+        run: |
+          MNEVA_PACKAGE=$(cygpath -w "$(ls "$PWD"/dist/*.whl)")
+          export MNEVA_PACKAGE
+          run='Get-Content -Raw install\install.ps1 | Invoke-Expression'
+          powershell -NoProfile -ExecutionPolicy ByPass -Command "$run"
+          powershell -NoProfile -ExecutionPolicy ByPass -Command "$run" 2>&1 | tee second-run.log
+          test "${PIPESTATUS[0]}" = 0
+
+      - name: Second run changed nothing
+        shell: bash
+        run: |
+          grep -i "already installed" second-run.log
+          grep "Browser bridge: already registered" second-run.log
+
+      - name: mneva runs, the browser bridge is registered, later shells find mneva
+        shell: bash
+        run: |
+          bin="$HOME/.local/bin"
+          "$bin/mneva" --version
+          case "$RUNNER_OS" in
+            Linux) manifest="$HOME/.config/google-chrome/NativeMessagingHosts/org.mneva.brief.json" ;;
+            macOS) manifest="$HOME/Library/Application Support/Google/Chrome/NativeMessagingHosts/org.mneva.brief.json" ;;
+            Windows)
+              manifest=$(powershell -NoProfile -Command \
+                "(Get-ItemProperty 'HKCU:\Software\Google\Chrome\NativeMessagingHosts\org.mneva.brief').'(default)'")
+              manifest=$(cygpath -u "$(echo "$manifest" | tr -d '\r')") ;;
+          esac
+          cat "$manifest"
+          if [ "$RUNNER_OS" = Windows ]; then
+            powershell -NoProfile -Command \
+              "[Environment]::GetEnvironmentVariable('Path','User')" | tr -d '\r' | tr ';' '\n' | grep -i '\.local\\bin'
+          else
+            grep -l '.local/bin' ~/.bashrc ~/.zshenv ~/.profile ~/.bash_profile 2>/dev/null
+          fi

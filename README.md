@@ -282,6 +282,24 @@ Records are plain Markdown with YAML frontmatter under `~/.mneva/store/`. You ca
 
 ## Getting Started
 
+### Install in one line
+
+No Python needed beforehand. The script installs [uv](https://docs.astral.sh/uv/), which installs mneva and the Python it runs on, then runs `mneva setup` to connect Claude Code, Codex, the Claude desktop app and your browser. Running it again changes nothing.
+
+**Windows:** open PowerShell and paste
+
+```powershell
+irm https://raw.githubusercontent.com/mneva-ai/mneva/main/install/install.ps1 | iex
+```
+
+**macOS / Linux:** open a terminal and paste
+
+```bash
+curl -LsSf https://raw.githubusercontent.com/mneva-ai/mneva/main/install/install.sh | sh
+```
+
+In mainland China, use the commands in [README.zh-CN.md](README.zh-CN.md#一行命令安装): they fetch everything from mirrors. The sections below are for installing by hand.
+
 ### Prerequisites
 
 - **Python 3.11 or newer**
