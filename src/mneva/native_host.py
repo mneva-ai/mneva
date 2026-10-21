@@ -58,6 +58,10 @@ _LINUX_PROFILE_DIRS = {
 # A real request is a few dozen bytes; anything near this is a broken stream.
 _MAX_REQUEST_BYTES = 64 * 1024
 _MAX_BRIEF_CHARS = 20_000
+# Reported by `ping`. A store install updates the extension but not this
+# host, so the extension checks this list before sending a newer message type
+# and asks the user to run `mneva upgrade` when it is missing.
+SUPPORTED_TYPES = ("ping", "get_brief")
 
 
 class _Unrecoverable(Exception):
@@ -124,7 +128,7 @@ def _answer(message: Any) -> dict[str, Any]:
         return _bad_request("expected a JSON object")
     kind = message.get("type")
     if kind == "ping":
-        return {"ok": True, "version": __version__}
+        return {"ok": True, "version": __version__, "supports": list(SUPPORTED_TYPES)}
     if kind == "get_brief":
         requested = message.get("max_chars", DEFAULT_MAX_CHARS)
         if not isinstance(requested, int):

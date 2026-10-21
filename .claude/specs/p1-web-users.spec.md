@@ -123,7 +123,7 @@ Release 1:
 5. After setup on the founder's machine, the Claude desktop app lists mneva's tools; if not, the `.mcpb` path is built and passes the same check.
 6. One real ordinary user installs from the README alone on their own machine, without help. (manual, recorded)
 7. `store/build.py` produces a zip whose manifest has no `key` and whose files match the extension folder. (pytest)
-8. `ping` returns `supports`; when it lacks a type the extension needs, the popup tells the user to run `mneva upgrade`. (pytest for the host; extension check with a faked old host)
+8. `ping` returns `supports`. (pytest) The extension side, telling the user to run `mneva upgrade` when a type it needs is missing, is built and checked in release 2 against a faked old host, because release 1's extension sends no new type yet.
 9. The extension is published on both stores, a store install reads the brief through the native host, and setup's text points to the store pages and says to remove a developer copy. (manual, plus pytest for the text)
 
 Release 2:
