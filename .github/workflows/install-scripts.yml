@@ -59,6 +59,18 @@ jobs:
             hash -r
           done
 
+      # On macOS and Linux setup registers the host only with browsers whose
+      # profile folder exists; a runner has never opened Chrome.
+      - name: Pretend Chrome has been opened once
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          if [ "$RUNNER_OS" = macOS ]; then
+            mkdir -p "$HOME/Library/Application Support/Google/Chrome"
+          else
+            mkdir -p "$HOME/.config/google-chrome"
+          fi
+
       - name: Run install.sh twice
         if: runner.os != 'Windows'
         shell: bash

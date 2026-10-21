@@ -7,8 +7,8 @@
   (Windows) and `install/install.sh` (macOS, Linux) install uv, then
   `uv tool install mneva`, then run `mneva setup`, and put `mneva` on PATH for
   new terminals. With `MNEVA_MIRROR=cn` every download comes from mirrors
-  reachable in mainland China (uv and packages from the Tsinghua PyPI mirror
-  on Windows, uv from USTC on macOS and Linux, Python from npmmirror); later
+  reachable in mainland China (uv and packages from the Tsinghua PyPI mirror,
+  Python from npmmirror); later
   `mneva upgrade` runs keep using the mirror. Both READMEs lead with the
   command. CI runs both scripts on clean machines for every PR.
 - **`mneva setup` connects the Claude desktop app** by adding mneva to

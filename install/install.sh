@@ -11,8 +11,6 @@
 # has read the whole script before any command can read from stdin.
 set -eu
 
-USTC_UV=https://mirrors.ustc.edu.cn/github-release/astral-sh/uv/LatestRelease
-
 say() { printf '%s\n' "$*"; }
 fail() { say "mneva install: $*" >&2; exit 1; }
 
@@ -43,22 +41,74 @@ find_uv() {
     return 1
 }
 
+unzip_to() {
+    if command -v unzip >/dev/null 2>&1; then
+        unzip -q "$1" -d "$2"
+    elif command -v python3 >/dev/null 2>&1; then
+        python3 -m zipfile -e "$1" "$2"
+    else
+        fail "needs unzip to unpack uv; install unzip, then run this again"
+    fi
+}
+
+# GitHub and astral.sh are slow or blocked in mainland China, and the USTC uv
+# mirror refuses some networks, so uv comes from the wheel astral publishes to
+# PyPI, through the PyPI mirror: the same route as install.ps1.
+install_uv_from_index() {
+    index="${1%/}/uv/"
+    case "$(uname -s)-$(uname -m)" in
+        Linux-x86_64) tag='manylinux[^"#]*x86_64' ;;
+        Linux-aarch64 | Linux-arm64) tag='manylinux[^"#]*aarch64' ;;
+        Darwin-arm64) tag='macosx_[0-9_]*arm64' ;;
+        Darwin-x86_64) tag='macosx_[0-9_]*x86_64' ;;
+        *) fail "no uv wheel for $(uname -s) $(uname -m); install uv yourself, then run this again" ;;
+    esac
+    # The index is not in version order (0.9.9 sorts after 0.13.4), so put
+    # the version in front and sort on its three numbers.
+    href=$(download "$index" |
+        grep -Eo 'href="[^"]*uv-[0-9.]+-py3-none-'"$tag"'\.whl#sha256=[0-9a-f]{64}"' |
+        sed 's|^\(.*/uv-\([0-9.]*\)-py3.*\)$|\2 \1|' |
+        sort -t. -k1,1n -k2,2n -k3,3n | tail -n 1 | cut -d' ' -f2)
+    [ -n "$href" ] || fail "no uv wheel found at $index"
+    url=${href#href=\"}
+    url=${url%\"}
+    sha=${url##*#sha256=}
+    url=${url%%#*}
+    # Links on the index are relative; curl and wget resolve the "../".
+    case "$url" in http*) ;; *) url="$index$url" ;; esac
+    version=$(say "$url" | sed 's|.*/uv-\([0-9.]*\)-py3.*|\1|')
+
+    tmp=$(mktemp -d)
+    say "Downloading uv $version from $index"
+    download "$url" >"$tmp/uv.whl"
+    actual=$( (sha256sum "$tmp/uv.whl" 2>/dev/null || shasum -a 256 "$tmp/uv.whl") | cut -d' ' -f1)
+    [ "$actual" = "$sha" ] || fail "uv download is corrupt (sha256 does not match the index)"
+    unzip_to "$tmp/uv.whl" "$tmp/wheel"
+    mkdir -p "$HOME/.local/bin"
+    for name in uv uvx; do
+        cp "$tmp/wheel/uv-$version.data/scripts/$name" "$HOME/.local/bin/$name"
+        chmod 755 "$HOME/.local/bin/$name"
+    done
+    rm -rf "$tmp"
+}
+
 main() {
     package="${MNEVA_PACKAGE:-mneva}"
-    uv_installer=https://astral.sh/uv/install.sh
+    cn=0
     if [ "${MNEVA_MIRROR:-}" = cn ]; then
+        cn=1
         : "${UV_DEFAULT_INDEX:=https://pypi.tuna.tsinghua.edu.cn/simple}"
         : "${UV_PYTHON_INSTALL_MIRROR:=https://registry.npmmirror.com/-/binary/python-build-standalone}"
-        # The installer carries checksums for its own uv version, so it and
-        # the binaries must come from the same mirror folder.
-        uv_installer="$USTC_UV/uv-installer.sh"
-        : "${UV_DOWNLOAD_URL:=$USTC_UV}"
-        export UV_DEFAULT_INDEX UV_PYTHON_INSTALL_MIRROR UV_DOWNLOAD_URL
+        export UV_DEFAULT_INDEX UV_PYTHON_INSTALL_MIRROR
     fi
 
     if ! uv=$(find_uv); then
         say "Installing uv, which installs mneva and the Python it needs..."
-        download "$uv_installer" | sh
+        if [ "$cn" = 1 ]; then
+            install_uv_from_index "$UV_DEFAULT_INDEX"
+        else
+            download https://astral.sh/uv/install.sh | sh
+        fi
         uv=$(find_uv) || fail "uv was installed but cannot be found. Open a new terminal and run this again."
     fi
 
