@@ -119,5 +119,10 @@ jobs:
             powershell -NoProfile -Command \
               "[Environment]::GetEnvironmentVariable('Path','User')" | tr -d '\r' | tr ';' '\n' | grep -i '\.local\\bin'
           else
-            grep -l '.local/bin' ~/.bashrc ~/.zshenv ~/.profile ~/.bash_profile 2>/dev/null
+            # grep exits 2 when any listed file is missing, so check one by one.
+            found=0
+            for rc in ~/.bashrc ~/.zshenv ~/.profile ~/.bash_profile; do
+              if [ -f "$rc" ] && grep -q '.local/bin' "$rc"; then echo "$rc"; found=1; fi
+            done
+            [ "$found" = 1 ]
           fi
