@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "mneva"
 dynamic = ["version"]
-description = "AI coding memory as plain Markdown. Follows your repo, lives in git, opens in Obsidian. No account, no cloud."
+description = "Your AI memory follows you. One memory as Markdown files on your computer, carried into ChatGPT, Claude, Gemini, Grok, Doubao, Claude Code and Codex. No account, no cloud."
 readme = "README.md"
 license = { file = "LICENSE" }
 requires-python = ">=3.11"
