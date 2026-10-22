@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### Added
+- `docs/format.md` describes the Markdown files mneva keeps (location,
+  frontmatter fields, the profile, the Obsidian mirror, how another tool can
+  read or write records), so other tools can use the same files without mneva.
+
 ### Changed
 - README (English and Chinese) rewritten for people who use AI mainly in the
   browser: one-line install first, then the three setup steps, a table of what
