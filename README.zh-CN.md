@@ -1,8 +1,8 @@
 # mneva
 
-**你的 AI 档案，存成你自己电脑上的 Markdown 文件。你用的每个 AI 都从它开始。**
+**你的 AI 记忆跟着你走。换了工具，每个 AI 照样认识你。**
 
-告诉 mneva 一次你是谁、喜欢怎么工作。之后在 Chrome 或 Edge 里打开 ChatGPT、Claude、Gemini、Grok、豆包开新对话，还有 Claude Code、Codex 和 Claude 桌面版，都会先带上这份档案，你不用再一遍遍重新介绍自己。档案就是你硬盘上的普通 Markdown 文件：不用注册账号，没有 mneva 云端，每一行你都能打开、修改、删除。
+每开一个新的 AI 对话都得从零说起，每个应用只在自己里面记得你，于是你一遍遍重新交代自己是谁、在做什么、喜欢什么样的回答。mneva 把你的记忆存成你自己电脑上的 Markdown 文件，只存一份，带进 ChatGPT、Claude、Gemini、Grok、豆包（在 Chrome 或 Edge 里），还有 Claude Code、Codex 和 Claude 桌面版。在这些工具之间来回切换，记忆一直跟着你。不用注册账号，没有 mneva 云端，每一行你都能打开、修改、删除。
 
 [English](https://github.com/mneva-ai/mneva/blob/main/README.md) | **中文**
 

@@ -1,8 +1,8 @@
 # mneva
 
-**Your AI profile, kept as Markdown files on your own computer. Every AI you use starts from it.**
+**Your AI memory follows you. Switch tools, and every AI still knows who you are.**
 
-Tell mneva once who you are and how you like to work. New chats on ChatGPT, Claude, Gemini, Grok and Doubao (in Chrome or Edge), plus Claude Code, Codex and the Claude desktop app, then start from that profile, so you stop re-explaining yourself. The profile is plain Markdown on your disk: no account, no mneva cloud, and you can open, edit or delete every line.
+Every new AI chat starts from zero, and each app remembers you only inside itself, so you keep re-explaining who you are, what you're working on and how you like answers. mneva keeps one memory as Markdown files on your own computer and carries it into ChatGPT, Claude, Gemini, Grok and Doubao (in Chrome or Edge), plus Claude Code, Codex and the Claude desktop app. Move between them and your memory comes with you. No account, no mneva cloud, and you can open, edit or delete every line.
 
 **English** | [中文](https://github.com/mneva-ai/mneva/blob/main/README.zh-CN.md)
 

@@ -8,6 +8,10 @@
   read or write records), so other tools can use the same files without mneva.
 
 ### Changed
+- README (English and Chinese) and the repository description now open with
+  the problem mneva solves: every AI chat starts from zero and each app keeps
+  its own memory of you; mneva keeps one memory you own and it follows you
+  across tools.
 - README (English and Chinese) rewritten for people who use AI mainly in the
   browser: one-line install first, then the three setup steps, a table of what
   works where, and the developer material below. Removed the generated project
