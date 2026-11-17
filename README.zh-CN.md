@@ -251,6 +251,6 @@ mneva 处于 **alpha 阶段**。
 
 ## 许可证
 
-Apache License 2.0，见 [LICENSE](https://github.com/mneva-ai/mneva/blob/main/LICENSE)。
+GNU Affero General Public License v3.0 only（AGPL-3.0-only），见 [LICENSE](https://github.com/mneva-ai/mneva/blob/main/LICENSE)。0.7.0 及更早的版本按 Apache License 2.0 发布，仍然适用 Apache License 2.0。[docs/format.md](https://github.com/mneva-ai/mneva/blob/main/docs/format.md) 里的文件格式，任何工具都可以读写，不限许可证。
 
 **链接：** [PyPI](https://pypi.org/project/mneva/) · [更新日志](https://github.com/mneva-ai/mneva/blob/main/CHANGELOG.md) · [Issues](https://github.com/mneva-ai/mneva/issues)

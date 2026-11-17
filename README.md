@@ -237,6 +237,6 @@ mneva is in **alpha**.
 
 ## License
 
-Apache License 2.0, see [LICENSE](https://github.com/mneva-ai/mneva/blob/main/LICENSE).
+GNU Affero General Public License v3.0 only (AGPL-3.0-only), see [LICENSE](https://github.com/mneva-ai/mneva/blob/main/LICENSE). Versions up to and including 0.7.0 were released under the Apache License 2.0 and stay under it. The file format in [docs/format.md](https://github.com/mneva-ai/mneva/blob/main/docs/format.md) is free for any tool to read and write, under any license.
 
 **Links:** [PyPI](https://pypi.org/project/mneva/) · [Changelog](https://github.com/mneva-ai/mneva/blob/main/CHANGELOG.md) · [Issues](https://github.com/mneva-ai/mneva/issues)
