@@ -2,12 +2,18 @@
 
 ## [Unreleased]
 
+## [0.7.1] - 2026-11-17
+
 ### Added
 - `docs/format.md` describes the Markdown files mneva keeps (location,
   frontmatter fields, the profile, the Obsidian mirror, how another tool can
   read or write records), so other tools can use the same files without mneva.
 
 ### Changed
+- **License is now AGPL-3.0-only** (was Apache-2.0). Anyone who runs a
+  modified mneva as a network service must publish their changes. Versions up
+  to and including 0.7.0 stay under Apache-2.0. The file format in
+  `docs/format.md` stays free for any tool to read and write.
 - README (English and Chinese), the repository description and the PyPI
   summary (`pyproject.toml` description) now open with
   the problem mneva solves: every AI chat starts from zero and each app keeps

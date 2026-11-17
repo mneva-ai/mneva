@@ -79,3 +79,7 @@ A vault note has the same frontmatter plus `mneva_id: <id>`. When syncing back, 
 - Markdown files stay the source of truth. Anything else mneva stores can be rebuilt from them.
 - New fields are added as optional fields. Existing fields keep their meaning.
 - No account, no encryption of the files, no proprietary container. The user can open, edit, copy, version in git or delete every record with ordinary tools.
+
+## Using this format
+
+Any software may read and write files that follow this page, under any license. mneva's own code is under the AGPL-3.0; that license does not extend to other tools that use this format.
