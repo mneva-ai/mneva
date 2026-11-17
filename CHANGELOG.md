@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.7.1] - 2026-11-17
+
 ### Added
 - `docs/format.md` describes the Markdown files mneva keeps (location,
   frontmatter fields, the profile, the Obsidian mirror, how another tool can
